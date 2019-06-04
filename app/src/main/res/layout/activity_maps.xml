@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" android:id="@+id/mapRoot">
+    <fragment
+            xmlns:map="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/map"
+            tools:context=".MapsActivity"
+            android:name="com.google.android.gms.maps.SupportMapFragment"/>
+    <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <android.support.constraint.Guideline
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/top"
+                app:layout_constraintGuide_percent=".05"/>
+        <android.support.constraint.Guideline
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/bottom" app:layout_constraintGuide_percent=".95"/>
+        <android.support.constraint.Guideline
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/leading"
+                app:layout_constraintGuide_percent=".05"/>
+        <android.support.constraint.Guideline
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/trailing"
+                app:layout_constraintGuide_percent=".95"/>
+        <android.support.design.widget.FloatingActionButton
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                app:srcCompat="@drawable/ic_icono__gps"
+                android:id="@+id/userPosition"
+                app:backgroundTint="@color/blancoRoto"
+                app:layout_constraintEnd_toStartOf="@+id/trailing"
+                app:layout_constraintTop_toTopOf="@+id/top"
+                android:layout_width="wrap_content" app:useCompatPadding="false"
+        />
+    </android.support.constraint.ConstraintLayout>
+
+</FrameLayout>
