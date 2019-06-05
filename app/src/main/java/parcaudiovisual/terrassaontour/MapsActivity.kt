@@ -21,22 +21,20 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.activity_maps.*
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.Network
-import com.google.android.gms.maps.model.BitmapDescriptor
+import android.net.Uri
+import com.google.android.gms.maps.model.*
 import java.lang.IllegalArgumentException
 import java.util.concurrent.Callable
 
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
+
 
     private lateinit var mMap: GoogleMap
     private val LOCATION_REQUEST_CODE = 101
@@ -45,6 +43,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var markerPosition: Marker? = null
     private var mapservice: MapServices? = null
     private var connectivityManager: ConnectivityManager? = null
+
+    private var noUbicationBounds = LatLngBounds.builder()
+    private  var mMarkerArray = ArrayList<Marker>()
 
     private var connectionUtils = ConnectionStateMonitor()
 
@@ -56,6 +57,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             return false
         }
+
+    private var markerImages: HashMap<String, Uri> = HashMap<String, Uri>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,35 +90,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapSettings.isMyLocationButtonEnabled = false
         mapSettings.isCompassEnabled = false
 
+        Log.i("IMAGES","$markerImages")
+        mMap.setOnInfoWindowClickListener(this)
+        mMap.setInfoWindowAdapter(InfoWindowAdapter(applicationContext,layoutInflater,markerImages,mMap))
+
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         locationListener = object :LocationListener{
+            private var lastLocation: Location? = null
+
             override fun onLocationChanged(location: Location?) {
-                if (location != null){
-                    Log.i("TAG","Location changed")
-                    val localizaConUsuario = LatLng(location.latitude,location.longitude)
-
-                    if (markerPosition != null){
-                        markerPosition!!.position = localizaConUsuario
-                    } else {
-                        markerPosition = mMap.addMarker(MarkerOptions().position(localizaConUsuario)
-                            .title("Tu posición")
-                            .icon(bitmapDescriptorFromVector(applicationContext, R.drawable.ic_pointer_usuario)))
-                    }
-
+                if (lastLocation == null) {
+                    moveToUserPosition()
                 }
+                lastLocation = location
             }
 
             override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-
+                Log.i("TAG","Estado cambiado de provider : $provider a estado ${status}")
             }
 
             override fun onProviderEnabled(provider: String?) {
-                showMessage("Localización activada")
+                showMessage("Ubicación activada")
+
             }
 
             override fun onProviderDisabled(provider: String?) {
-                showMessage("Localización desactivada")
+                showMessage("Ubicación desactivada")
             }
         }
 
@@ -200,19 +201,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
         if (permiso == PackageManager.PERMISSION_GRANTED){
             locationManager?.let { location ->
-                val currentLocation = location.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                val localizaConUsuario = LatLng(currentLocation.latitude ,currentLocation.longitude)
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(localizaConUsuario , 10f))
-
-                if (markerPosition != null){
-                    markerPosition!!.position = localizaConUsuario
+                if (location.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    val currentLocation = location.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                    if (currentLocation != null){
+                        val localizaConUsuario = LatLng(currentLocation.latitude ,currentLocation.longitude)
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(localizaConUsuario , 18f))
+                    }
                 } else {
-                    markerPosition = mMap.addMarker(
-                        MarkerOptions().position(localizaConUsuario)
-                            .title("Tu posición")
-                            .icon(bitmapDescriptorFromVector(applicationContext, R.drawable.ic_pointer_usuario))
-                    )
+                    showMessage("Ubicación desactivada")
                 }
+
+
             }
         } else {
             showMessage("No se ha permitido la ubicación")
@@ -237,32 +236,53 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             })
             it.taskListener = object : OnDownloadsCompleted {
                 override fun onPoisDonwloaded(arrayList: ArrayList<PuntoInteres?>?) {
+                    mMap.clear()
+                    mMarkerArray.clear()
+                    noUbicationBounds = LatLngBounds.builder()
                     arrayList?.forEach { puntoInteres ->
                         if (puntoInteres != null){
                             val posicionPunto = LatLng(puntoInteres.latitud, puntoInteres.longitud)
-
                             addCustomPoiMarker(puntoInteres,posicionPunto)
                         }
                     }
+                    moveCameraIfNoLocation()
                 }
             }
         }
     }
 
-    fun addCustomPoiMarker(puntoInteres: PuntoInteres, position: LatLng){
-        if (puntoInteres.exterior == true) {
-            mMap.addMarker(
-                MarkerOptions().position(position)
-                    .title(puntoInteres.title)
-                    .icon(bitmapDescriptorFromVector(applicationContext, R.drawable.ic_pointer_exterior))
-            )
-        } else {
-            mMap.addMarker(
-                MarkerOptions().position(position)
-                    .title(puntoInteres.title)
-                    .icon(bitmapDescriptorFromVector(applicationContext, R.drawable.ic_pointer_interior))
-            )
+    fun moveCameraIfNoLocation(){
+        locationManager?.let {
+            if (!it.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(noUbicationBounds.build(),0))
+            }
         }
+    }
+
+    fun addCustomPoiMarker(puntoInteres: PuntoInteres, position: LatLng){
+        var drawable = R.drawable.ic_pointer_interior
+        var locationText = "Int"
+
+        if (puntoInteres.exterior == true) {
+            drawable = R.drawable.ic_pointer_exterior
+            locationText = "Ext"
+        }
+
+       val marker = mMap.addMarker(
+            MarkerOptions().position(position)
+                .title(puntoInteres.title)
+                .snippet(locationText)
+                .icon(bitmapDescriptorFromVector(applicationContext, drawable))
+        )
+
+        marker.tag = puntoInteres.id
+
+        if (puntoInteres.id != null) {
+            markerImages.put(marker.id, Uri.parse(puntoInteres.img_url.toString()))
+        }
+
+        mMarkerArray.add(marker)
+        noUbicationBounds.include(marker.position)
     }
 
     fun trackConectivity() {
@@ -296,8 +316,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
-        trackConectivity()
+       trackConectivity()
     }
 
+    override fun onInfoWindowClick(p0: Marker?) {
+
+    }
 
 }
