@@ -34,36 +34,55 @@ import java.lang.IllegalArgumentException
 import java.util.concurrent.Callable
 
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, LocationListener {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
 
 
     private lateinit var mMap: GoogleMap
     private val LOCATION_REQUEST_CODE = 101
     private var locationManager: LocationManager? = null
+    private var MAX_RESTORE_LOCATION_TRYS = 5
+
+    private var booted: Boolean = false
+
+    private var currentRestoreLocationTrys = 0
 
     private var googleLocationManager: FusedLocationProviderClient? = null
     private var googleLocationRequest: LocationRequest? = null
     private var googleLocationCallback: LocationCallback = object : LocationCallback(){
-        private var lastLocation: Location? = null
-        private var lastStatus: Boolean = false
 
+        private var lastStatus: Boolean = false
         override fun onLocationResult(p0: LocationResult?) {
             super.onLocationResult(p0)
 
-            if (this.lastLocation == null) {
-                moveToUserPosition()
-            }
-            this.lastLocation = p0?.lastLocation
-
+            Log.i("Locacion","Nueva Locacion")
         }
 
         override fun onLocationAvailability(p0: LocationAvailability?) {
             super.onLocationAvailability(p0)
 
+            if (!booted) {
+                lastStatus = p0?.isLocationAvailable!!
+                booted = true
+                return
+            }
+
             if (p0?.isLocationAvailable!! && p0.isLocationAvailable != lastStatus) {
                 showMessage("Ubicación activada")
+                if (googleLocationManager != null) {
+                    val permiso = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
+                    if (permiso == PackageManager.PERMISSION_GRANTED) {
+                        mMap.isMyLocationEnabled = true
+                    }
+                    restoreUserPosition()
+                }
             } else if (!p0.isLocationAvailable && p0.isLocationAvailable != lastStatus){
                 showMessage("Ubicación desactivada")
+                if (googleLocationManager != null) {
+                    val permiso = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
+                    if (permiso == PackageManager.PERMISSION_GRANTED) {
+                        mMap.isMyLocationEnabled = false
+                    }
+                }
             }
 
             lastStatus = p0.isLocationAvailable
@@ -75,6 +94,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     private var connectivityManager: ConnectivityManager? = null
 
     private var lastLocation: Location? = null
+    private var isGoogleLocationsUpdatesActive = false
 
     private var noUbicationBounds = LatLngBounds.builder()
     private  var mMarkerArray = ArrayList<Marker>()
@@ -128,16 +148,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         mapSettings.isMyLocationButtonEnabled = false
         mapSettings.isCompassEnabled = false
 
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(41.510161,0.3189047), 12f))
+
         Log.i("IMAGES","$markerImages")
         mMap.setOnInfoWindowClickListener(this)
         mMap.setInfoWindowAdapter(InfoWindowAdapter(applicationContext,layoutInflater,markerImages,mMap))
 
-        //locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
         googleLocationManager = FusedLocationProviderClient(this)
         googleLocationRequest = LocationRequest()
         googleLocationRequest?.interval = 500
-        googleLocationRequest?.maxWaitTime = 1000
+        googleLocationRequest?.maxWaitTime = 0
         googleLocationRequest?.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         googleLocationRequest?.smallestDisplacement = 1f
 
@@ -149,10 +169,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         Log.i("Primero","Request permission")
         val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
         if (permiso == PackageManager.PERMISSION_GRANTED){
-            if (!mMap.isMyLocationEnabled) {
+            if (!isGoogleLocationsUpdatesActive) {
                 mMap.isMyLocationEnabled = true
                 //locationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 1f, this)
                 googleLocationManager!!.requestLocationUpdates(googleLocationRequest,googleLocationCallback, null)
+                isGoogleLocationsUpdatesActive= true
             }
             moveToUserPosition()
         } else {
@@ -200,27 +221,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
     }
 
-    /*fun moveToUserPosition(){
-        val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-        if (permiso == PackageManager.PERMISSION_GRANTED){
-            locationManager?.let { location ->
-                if (location.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    val currentLocation = location.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                    if (currentLocation != null){
-                        val localizaConUsuario = LatLng(currentLocation.latitude ,currentLocation.longitude)
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(localizaConUsuario , 18f))
-                    }
-                } else {
-                    showMessage("Ubicación desactivada")
-                }
-
-
-            }
-        } else {
-            showMessage("No se ha permitido la ubicación")
-        }
-    }*/
-
     fun moveToUserPosition(){
         val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
         if (permiso == PackageManager.PERMISSION_GRANTED){
@@ -233,16 +233,48 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                                 val localizacionUsuario = LatLng(currentLocation.latitude,currentLocation.longitude)
                                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(localizacionUsuario , 18f))
                             } else {
-                                showMessage("Ubicación desactivada o iniciandose...")
+                                showMessage("Ubicación desactivada")
                             }
                         }
                     } else {
-                        showMessage("Ubicación desactivada o iniciandose...")
+                        showMessage("Ubicación desactivada")
                     }
                 }
             }
         } else {
             showMessage("No se ha permitido la ubicación")
+        }
+    }
+
+    fun restoreUserPosition(){
+        currentRestoreLocationTrys += 1
+        if (currentRestoreLocationTrys == MAX_RESTORE_LOCATION_TRYS) {
+            currentRestoreLocationTrys = 0
+            return
+        }
+        val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        if (permiso == PackageManager.PERMISSION_GRANTED){
+            googleLocationManager?.let{ location ->
+                location.locationAvailability.addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        location.lastLocation.addOnCompleteListener { locationTask ->
+                            val currentLocation = locationTask.result
+                            if (currentLocation != null) {
+                                val localizacionUsuario = LatLng(currentLocation.latitude,currentLocation.longitude)
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(localizacionUsuario , 18f))
+                                currentRestoreLocationTrys = 0
+                            } else {
+                                restoreUserPosition()
+                            }
+                        }
+                    } else {
+                        restoreUserPosition()
+                    }
+                }
+            }
+        } else {
+            showMessage("No se ha permitido la ubicación")
+            currentRestoreLocationTrys = 0
         }
     }
 
@@ -291,21 +323,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
     }
 
-   /* fun moveCameraIfNoLocation(){
-        locationManager?.let {
-            if (!it.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(noUbicationBounds.build(),0))
-            }
-        }
-    }*/
-
     fun moveCameraIfNoLocation(){
         googleLocationManager?.let {
             val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             if (permiso == PackageManager.PERMISSION_GRANTED) {
                 it.locationAvailability.addOnSuccessListener { locationAvailability ->
                     if (!locationAvailability.isLocationAvailable){
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(noUbicationBounds.build(), 0))
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(noUbicationBounds.build(), 150))
                     }
                 }
 
@@ -369,61 +393,50 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     override fun onPause() {
         super.onPause()
         unTrackConectivity()
-       // unTrackGps()
+        unTrackGoogleLocation()
     }
 
     override fun onResume() {
         super.onResume()
         hideSystemUI()
        trackConectivity()
-        //trackGps()
+        trackGoogleLocation()
 
     }
 
-    fun unTrackGps(){
-        val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-        if (permiso == PackageManager.PERMISSION_GRANTED){
-            mMap.isMyLocationEnabled = false
+    fun unTrackGoogleLocation(){
+        val markers = mMarkerArray.filter { it.isInfoWindowShown }
+        if (markers.count() > 0) {
+            lastMarkerInfo = markers.first().tag as PuntoInteres
         }
-        locationManager?.removeUpdates(this)
+        if (isGoogleLocationsUpdatesActive && googleLocationManager != null) {
+
+            val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            if (permiso == PackageManager.PERMISSION_GRANTED) {
+                mMap.isMyLocationEnabled = false
+                googleLocationManager?.removeLocationUpdates(googleLocationCallback)
+                isGoogleLocationsUpdatesActive = false
+            }
+        }
     }
 
-    fun trackGps(){
-      locationManager?.let{
-          val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-          if (permiso == PackageManager.PERMISSION_GRANTED){
-                  it.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 1f, this)
-                  mMap.isMyLocationEnabled = true
-              }
+    fun trackGoogleLocation(){
+        if (!isGoogleLocationsUpdatesActive && googleLocationManager != null) {
+            val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            if (permiso == PackageManager.PERMISSION_GRANTED) {
+                mMap.isMyLocationEnabled = true
+                googleLocationManager!!.requestLocationUpdates(googleLocationRequest,googleLocationCallback, null)
+                isGoogleLocationsUpdatesActive = true
+            }
         }
     }
 
     override fun onInfoWindowClick(p0: Marker?) {
         Log.i("Marker","Imagen a mostrar: ${markerImages[p0?.id]?.get(1)}")
 
-        lastMarkerInfo = p0?.tag as PuntoInteres
-
         val intent = Intent(this,InfoWindowDetail::class.java)
-        intent.putExtra("dayString",markerImages[p0.id]?.get(1).toString())
+        intent.putExtra("dayString",markerImages[p0?.id]?.get(1).toString())
         startActivity(intent)
     }
 
-    override fun onLocationChanged(location: Location?) {
-        if (lastLocation == null) {
-            moveToUserPosition()
-        }
-        lastLocation = location
-    }
-
-    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-        Log.i("TAG","Estado cambiado de provider : $provider a estado ${status}")
-    }
-
-    override fun onProviderEnabled(provider: String?) {
-        showMessage("Ubicación activada")
-    }
-
-    override fun onProviderDisabled(provider: String?) {
-        showMessage("Ubicación desactivada")
-    }
 }
