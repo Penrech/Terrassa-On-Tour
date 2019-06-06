@@ -14,7 +14,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:cardCornerRadius="10dp"
+            app:cardCornerRadius="@dimen/infoWindowCornerRadius"
             android:padding="10dp"
             android:layout_margin="10dp"
             android:layout_marginBottom="8dp"
@@ -27,7 +27,8 @@
 
         <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:id="@+id/mainConstraintLayout">
 
             <android.support.constraint.Guideline
                     android:orientation="horizontal"
@@ -39,36 +40,80 @@
                     android:orientation="vertical"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:layout_constraintGuide_begin="0dp"
                     android:id="@+id/guideline2"
                     app:layout_constraintGuide_percent=".25"/>
+            <android.support.constraint.Guideline
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/locationLabelLeading" app:layout_constraintGuide_percent="0.05"/>
+            <android.support.constraint.Guideline
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/locationLabelTrailing" app:layout_constraintGuide_percent="0.2"/>
+            <android.support.constraint.Guideline
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/locationLabelTop"
+                    app:layout_constraintGuide_percent="0.04"/>
+            <android.support.constraint.Guideline
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/locationLabelBottom"
+                    app:layout_constraintGuide_percent="0.21"/>
+            <android.support.constraint.Guideline
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/titleLabelLeading" app:layout_constraintGuide_percent="0.3"/>
+            <android.support.constraint.Guideline
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/titleLabelTrailing" app:layout_constraintGuide_percent="0.95"/>
+            <android.support.constraint.Guideline
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/titleLabelTop"
+                    app:layout_constraintGuide_percent="0.04"/>
+            <android.support.constraint.Guideline
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/titleLabelBottom"
+                    app:layout_constraintGuide_percent="0.21"/>
             <TextView
                     android:text="Ext"
                     app:autoSizeTextType="uniform"
-                    app:autoSizeMaxTextSize="20sp"
+                    app:autoSizeStepGranularity="2sp"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/locationLabelLeading"
                     android:id="@+id/locationLabel"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toTopOf="@+id/guideline"
-                    app:layout_constraintEnd_toStartOf="@+id/guideline2"
+                    app:layout_constraintTop_toTopOf="@+id/locationLabelTop"
+                    app:layout_constraintBottom_toTopOf="@+id/locationLabelBottom"
+                    app:layout_constraintEnd_toStartOf="@+id/locationLabelTrailing"
                     android:textAlignment="center"
                     android:gravity="center"
                     android:fontFamily="@font/roboto_condensed_bold"
                     android:textSize="20sp"
                     android:textColor="@color/negroRoto"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp"/>
+            />
             <View
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     app:layout_constraintStart_toStartOf="@+id/guideline2"
                     app:layout_constraintEnd_toEndOf="parent"
-                    android:id="@+id/view"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="@id/guideline"
-                    android:background="@color/exteriorBlue"/>
+                    android:id="@+id/locationColor"
+                    android:backgroundTint="@color/exteriorBlue"
+                    android:background="@drawable/corner_infowindow_image">
+            </View>
             <TextView
                     android:text="Cúpula estación de autobuses"
                     app:autoSizeStepGranularity="2sp"
@@ -76,15 +121,17 @@
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:id="@+id/poiTitle"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/guideline2"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toTopOf="@+id/guideline"
+                    app:layout_constraintTop_toTopOf="@+id/titleLabelTop"
                     android:textAlignment="textStart"
-                    android:gravity="center"
                     android:fontFamily="@font/roboto_medium"
-                    android:textSize="22sp" android:textColor="@color/blancoRoto" android:padding="0dp"
-                    android:layout_marginStart="8dp" android:layout_marginEnd="10dp"/>
+                    android:textSize="22sp"
+                    android:textColor="@color/blancoRoto"
+                    android:gravity="center"
+                    android:layout_gravity="fill_vertical"
+                    app:layout_constraintStart_toStartOf="@+id/titleLabelLeading"
+                    app:layout_constraintBottom_toTopOf="@+id/titleLabelBottom"
+                    app:layout_constraintEnd_toStartOf="@+id/titleLabelTrailing"/>
+
             <View
                     android:id="@+id/divider"
                     android:layout_width="0dp"

@@ -4,9 +4,14 @@ import com.google.android.gms.maps.model.Marker
 import com.squareup.picasso.Picasso
 import  com.squareup.picasso.Callback
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.Point
 import android.net.Uri
+import android.support.constraint.ConstraintLayout
+import android.support.constraint.ConstraintSet
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,11 +25,12 @@ import java.lang.Exception
 import android.view.Display
 import android.view.WindowManager
 import kotlin.math.round
+import kotlin.math.roundToInt
 
 
 class InfoWindowAdapter(
     val ctxt: Context, val inflater: LayoutInflater,
-    val images: HashMap<String, Uri>, val map: GoogleMap
+    val images: HashMap<String,  ArrayList<Uri>>, val map: GoogleMap
 ) : InfoWindowAdapter {
 
     private var popup: View? = null
@@ -74,7 +80,7 @@ class InfoWindowAdapter(
         val markerPoint = projection.toScreenLocation(markerPosition)
         val targetPoint = Point(markerPoint.x,markerPoint.y - size.y / 4)
         val targetPosition = projection.fromScreenLocation(targetPoint)
-        map.animateCamera(CameraUpdateFactory.newLatLng(targetPosition),200, null)
+        map.animateCamera(CameraUpdateFactory.newLatLng(targetPosition),300, null)
     }
 
     fun setInfoData(marker: Marker){
@@ -91,7 +97,12 @@ class InfoWindowAdapter(
             tv = popup!!.locationLabel
             tv.text = marker.snippet
 
-            val image = images[marker.id]
+            val allMarkerInfo = marker.tag as PuntoInteres
+
+            if (!allMarkerInfo.exterior!!) popup!!.locationColor.backgroundTintList = ColorStateList.valueOf(ctxt.getColor(R.color.interiorYellow))
+            else popup!!.locationColor.backgroundTintList = ColorStateList.valueOf(ctxt.getColor(R.color.exteriorBlue))
+
+            val image = images[marker.id]?.first()
             Log.i("Success","Imagen = $image")
             val icon = popup!!.poiImage
 
