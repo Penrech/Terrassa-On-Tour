@@ -2,8 +2,6 @@ package parcaudiovisual.terrassaontour
 
 import android.content.Context
 import android.net.Network
-import android.content.Context.CONNECTIVITY_SERVICE
-import android.support.v4.content.ContextCompat.getSystemService
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
@@ -14,13 +12,9 @@ import java.lang.IllegalArgumentException
 
 class ConnectionStateMonitor : NetworkCallback() {
 
-    internal val networkRequest: NetworkRequest
+    internal val networkRequest: NetworkRequest = NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build()
     var conectionListener : OnConnectionChange? = null
-
-    init {
-        networkRequest = NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build()
-    }
 
     fun enable(context: Context) {
         Log.i("NETWORKSTATE","Enabled")

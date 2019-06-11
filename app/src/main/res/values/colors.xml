@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimaryDark">#00574b</color>
+    <color name="colorAccent">#d81b60</color>
     <color name="blancoRoto">#fafafa</color>
     <color name="negroRoto">#333333</color>
     <color name="exteriorBlue">#29b6f6</color>
     <color name="interiorYellow">#ffca28</color>
+    <color name="googleBlueLight">#B0BEC5</color>
+    <color name="googleBlueDark">#90a4ae</color>
 </resources>

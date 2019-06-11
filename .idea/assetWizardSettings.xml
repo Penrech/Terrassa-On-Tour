@@ -14,8 +14,11 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_icono_cerrar" />
-                            <entry key="sourceFile" value="C:\Users\PcCom\Desktop\ParcDocumentos\Icono_Cerrar.svg" />
+                            <entry key="height" value="100" />
+                            <entry key="outputName" value="ic_loading_card_mesa_de_trabajo_1" />
+                            <entry key="overrideSize" value="true" />
+                            <entry key="sourceFile" value="C:\Users\PcCom\Desktop\ParcDocumentos\loading_card_Mesa de trabajo 1.svg" />
+                            <entry key="width" value="100" />
                           </map>
                         </option>
                       </PersistentState>

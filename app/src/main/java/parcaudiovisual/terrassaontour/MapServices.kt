@@ -10,13 +10,12 @@ import java.lang.Exception
 import java.lang.StringBuilder
 import java.net.URL
 
-
-class MapServices(var context: Context, var rootView: View) {
+class MapServices(var context: Context, private var rootView: View) {
 
     companion object {
-        val poiURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getMarkers.php"
-        val rutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutes.php"
-        val pointsOfRutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutePoints.php?ruta="
+        const val poiURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getMarkers.php"
+        const val rutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutes.php"
+        const val pointsOfRutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutePoints.php?ruta="
     }
 
     fun getPOIS(): ArrayList<PuntoInteres?> {
@@ -34,6 +33,25 @@ class MapServices(var context: Context, var rootView: View) {
             e.printStackTrace()
         }
         return arrayPois
+    }
+
+    fun getRoutes(): ArrayList<Ruta?> {
+        val arrayRutes = ArrayList<Ruta?>()
+
+        try {
+            val json = JSONObject(getJson(rutesURL))
+            val array = json.getJSONArray("rutas")
+
+            for (i: Int in 0 until array.length()) {
+                val ruta = Ruta.jsonAReferencia(array.get(i) as JSONObject)
+                arrayRutes.add(ruta)
+            }
+
+        } catch (e: Exception){
+            e.printStackTrace()
+        }
+
+        return arrayRutes
     }
 
     private fun getJson(url: String): String {
@@ -54,7 +72,7 @@ class MapServices(var context: Context, var rootView: View) {
         return contenidoRespuesta.toString()
     }
 
-    fun printError() {
+    private fun printError() {
         val snackbar = Snackbar.make(rootView,"No se han podido recuperar los puntos de interés",Snackbar.LENGTH_LONG)
         snackbar.show()
     }

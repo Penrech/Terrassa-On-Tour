@@ -4,33 +4,25 @@ import com.google.android.gms.maps.model.Marker
 import com.squareup.picasso.Picasso
 import  com.squareup.picasso.Callback
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.graphics.Point
 import android.net.Uri
-import android.support.constraint.ConstraintLayout
-import android.support.constraint.ConstraintSet
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter
-import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.custom_info_window.view.*
 import java.lang.Exception
-import android.view.Display
 import android.view.WindowManager
 import kotlin.math.round
-import kotlin.math.roundToInt
 
 
 class InfoWindowAdapter(
-    val ctxt: Context, val inflater: LayoutInflater,
-    val images: HashMap<String,  ArrayList<Uri>>, val map: GoogleMap
+    private val ctxt: Context, val inflater: LayoutInflater,
+    private val images: HashMap<String,  ArrayList<Uri>>, val map: GoogleMap
 ) : InfoWindowAdapter {
 
     private var popup: View? = null
@@ -66,7 +58,7 @@ class InfoWindowAdapter(
         return popup!!
     }
 
-    fun centerProperly(marker: Marker){
+    private fun centerProperly(marker: Marker){
 
        val windowManager = ctxt.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val display = windowManager.defaultDisplay
@@ -83,7 +75,7 @@ class InfoWindowAdapter(
         map.animateCamera(CameraUpdateFactory.newLatLng(targetPosition),300, null)
     }
 
-    fun setInfoData(marker: Marker){
+    private fun setInfoData(marker: Marker){
         if (lastMarker == null || lastMarker!!.id != marker.id) {
             Log.i("Success","Nuevo marker")
             lastMarker = marker

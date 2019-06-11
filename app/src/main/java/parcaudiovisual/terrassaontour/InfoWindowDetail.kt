@@ -10,7 +10,6 @@ import android.util.Log
 import android.view.View
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_info_window_detail.*
-import kotlinx.android.synthetic.main.activity_maps.*
 
 class InfoWindowDetail : AppCompatActivity() {
 
@@ -35,7 +34,7 @@ class InfoWindowDetail : AppCompatActivity() {
         loadData()
     }
 
-    fun loadData(){
+    private fun loadData(){
         val intent = intent
         val dayUriString = intent.getStringExtra("dayString")
 
@@ -54,19 +53,19 @@ class InfoWindowDetail : AppCompatActivity() {
 
     }
 
-    fun setCloseFabButton(){
+    private fun setCloseFabButton(){
         closeDetailInfoWindowBtn.setOnClickListener {
             finish()
         }
     }
 
     fun showMessage(message: String) {
-        val snack = Snackbar.make(mapRoot ,message, Snackbar.LENGTH_LONG)
+        val snack = Snackbar.make(rootInfoWindow ,message, Snackbar.LENGTH_LONG)
 
         snack.show()
     }
 
-    fun trackConectivity() {
+    private fun trackConectivity() {
         connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         if (!isNetworkAvailable) showMessage("No hay conexión a internet")
@@ -97,7 +96,7 @@ class InfoWindowDetail : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_FULLSCREEN)
     }
 
-    fun unTrackConectivity(){
+    private fun unTrackConectivity(){
         connectionUtils.disable(this)
     }
 
