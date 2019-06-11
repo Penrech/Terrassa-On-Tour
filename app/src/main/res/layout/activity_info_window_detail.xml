@@ -33,10 +33,16 @@
             android:id="@+id/closeDetailInfoWindowBtn"
             app:layout_constraintTop_toTopOf="@+id/top" app:layout_constraintEnd_toStartOf="@+id/trailing"
             app:backgroundTint="@color/blancoRoto"/>
-    <ImageView
-            android:layout_width="0dp"
-            android:layout_height="0dp" app:srcCompat="@drawable/target_cupula_pequeno"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
-            android:id="@+id/infoWindowImageDetail" android:scaleType="fitCenter"/>
+    <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true" app:srcCompat="@drawable/ic_icono_dia" android:id="@+id/switchInfoPhoto"
+            app:layout_constraintEnd_toStartOf="@+id/trailing"
+            app:layout_constraintBottom_toTopOf="@+id/bottom" app:backgroundTint="@color/exteriorBlue"
+            android:tint="@color/blancoRoto"/>
+    <android.support.v4.view.ViewPager
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" android:id="@+id/detailImagePager"/>
 </android.support.constraint.ConstraintLayout>

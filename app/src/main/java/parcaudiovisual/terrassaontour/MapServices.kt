@@ -1,8 +1,12 @@
 package parcaudiovisual.terrassaontour
 
 import android.content.Context
+import android.content.res.Resources
 import android.support.design.widget.Snackbar
+import android.util.Log
 import android.view.View
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.PolyUtil
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -12,11 +16,12 @@ import java.net.URL
 
 class MapServices(var context: Context, private var rootView: View) {
 
-    companion object {
-        const val poiURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getMarkers.php"
-        const val rutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutes.php"
-        const val pointsOfRutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutePoints.php?ruta="
-    }
+
+    private val poiURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getMarkers.php"
+    private val rutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutes.php"
+    private val pointsOfRutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutePoints.php?ruta="
+    private val directionsURL = "https://maps.googleapis.com/maps/api/directions/json?origin=41.525286,0.347285&destination=41.524210,0.343122&key=${context.getString(R.string.google_maps_key)}"
+
 
     fun getPOIS(): ArrayList<PuntoInteres?> {
         val arrayPois = ArrayList<PuntoInteres?>()
@@ -52,6 +57,30 @@ class MapServices(var context: Context, private var rootView: View) {
         }
 
         return arrayRutes
+    }
+
+    fun getRoutePath(rutePoints: ArrayList<Ruta.pointLocation>): ArrayList<List<LatLng>> {
+        val path:ArrayList<List<LatLng>> = arrayListOf()
+
+        val normalizedArray = rutePoints.take(10)
+
+        try {
+            val json = JSONObject(getJson(directionsURL))
+            Log.i("ServerResponse","${json.toString()}")
+            val routes = json.getJSONArray("routes")
+            val legs = routes.getJSONObject(0).getJSONArray("legs")
+            val steps = legs.getJSONObject(0).getJSONArray("steps")
+
+            for (i: Int in 0 until steps.length()) {
+                val points = steps.getJSONObject(i).getJSONObject("polyline").getString("points")
+                path.add(PolyUtil.decode(points))
+            }
+
+        } catch (e: Exception){
+            e.printStackTrace()
+        }
+
+        return path
     }
 
     private fun getJson(url: String): String {

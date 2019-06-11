@@ -18,6 +18,8 @@ import com.google.android.gms.maps.SupportMapFragment
 import kotlinx.android.synthetic.main.activity_maps.*
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.support.v7.widget.LinearLayoutManager
@@ -92,6 +94,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     private var noUbicationBounds = LatLngBounds.builder()
     private  var mMarkerArray = ArrayList<Marker>()
+    private var currentRoutePolyline: Polyline? = null
 
     private var connectionUtils = ConnectionStateMonitor()
 
@@ -117,6 +120,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         setContentView(R.layout.drawer_menu)
 
         setPositionButton()
+        setRutesButton()
         setUpRoutesRecyclerView()
 
         mapservice = MapServices(this,mapRoot)
@@ -126,16 +130,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         mapFragment.getMapAsync(this)
 
     }
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
 
     private fun setUpRoutesRecyclerView(){
         rutesLayoutManager = LinearLayoutManager(this)
@@ -225,11 +219,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     private fun setPositionButton() {
 
         userPosition.setOnClickListener {
-            //requestPermission()
+            requestPermission()
+        }
+    }
+
+
+    private fun setRutesButton(){
+        rutesButton.setOnClickListener {
            openRutesMenu()
         }
-
     }
+
 
     private fun moveToUserPosition(){
         val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -353,6 +353,54 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
     }
 
+    fun printDirectionsRoute(currentRoute: Ruta){
+        AsyncDirections().let {
+            it.execute(Callable {
+                mapservice!!.getRoutePath(currentRoute.puntos)
+            })
+            it.taskListener = object : OnDirectionsDownloadedCompleted {
+                override fun onPoisDonwloaded(arrayList: ArrayList<List<LatLng>>?) {
+                    if (currentRoutePolyline != null) {
+                        currentRoutePolyline!!.remove()
+                        currentRoutePolyline = null
+                    }
+
+                    if (arrayList?.first() != null) {
+                        val color = if (currentRoute.color == null) Color.GRAY else currentRoute.color!!
+                        currentRoutePolyline =
+                                mMap.addPolyline(PolylineOptions().addAll(arrayList.first()).color(color))
+                        setRouteBounds(arrayList.first())
+                    }
+
+                }
+            }
+        }
+    }
+
+    fun setRouteBounds(listOfLocations: List<LatLng>){
+        val bounds = LatLngBounds.builder()
+        listOfLocations.forEach {
+            bounds.include(it)
+        }
+        if (googleLocationManager != null){
+            val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            if (permiso == PackageManager.PERMISSION_GRANTED) {
+                googleLocationManager!!.lastLocation.addOnSuccessListener {
+                    if (it != null){
+                        bounds.include(LatLng(it.latitude,it.longitude))
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 150))
+                    } else {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 150))
+                    }
+                }
+            } else {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 150))
+            }
+        } else {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 150))
+        }
+    }
+
     fun moveCameraIfNoLocation(){
         googleLocationManager?.let {
             val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -419,6 +467,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     private fun unTrackConectivity(){
+        connectionUtils.conectionListener = null
         connectionUtils.disable(this)
     }
 
@@ -466,10 +515,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     override fun onInfoWindowClick(p0: Marker?) {
         Log.i("Marker","Imagen a mostrar: ${markerImages[p0?.id]?.get(1)}")
 
-        val markerInfo = markerImages[p0?.id]?.get(1)
+        val puntoInteres = p0?.tag as PuntoInteres
+        val imagesToDetail = DetailInfoImages(puntoInteres.img_url_big.toString(),puntoInteres.img_url_big_secundary.toString(),if (puntoInteres.deDia!!) 1 else 0)
 
         val intent = Intent(this,InfoWindowDetail::class.java)
-        intent.putExtra("dayString",markerInfo.toString())
+        intent.putExtra("imagesToDetail",imagesToDetail)
         startActivity(intent)
 
     }
@@ -482,7 +532,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         drawer_menu.openDrawer(Gravity.START)
     }
 
-    override fun loadRuteWithPoints(points: ArrayList<Ruta.pointLocation>) {
-        Log.i("Puntos","puntos: $points")
+    override fun loadRuteWithPoints(ruta: Ruta) {
+       printDirectionsRoute(ruta)
     }
 }

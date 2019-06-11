@@ -28,7 +28,7 @@ class RutasListAdapter(private val context: Context, private val list: ArrayList
     }
 
     interface LoadRuteUtils{
-        fun loadRuteWithPoints(points: ArrayList<Ruta.pointLocation>)
+        fun loadRuteWithPoints(ruta: Ruta)
     }
 
     override fun getItemCount(): Int {
@@ -76,8 +76,8 @@ class RutasListAdapter(private val context: Context, private val list: ArrayList
 
             rutePoints = ruta.puntos
 
-            itemView.setOnClickListener {
-                listener.loadRuteWithPoints(rutePoints)
+            itemView.ruteCellRoot.setOnClickListener {
+                listener.loadRuteWithPoints(ruta)
             }
         }
     }

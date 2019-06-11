@@ -12,7 +12,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintDimensionRatio="W,1:2.5"
-            android:id="@+id/ruteCellRoot">
+            android:id="@+id/ruteCellLoadingRoot">
 
         <android.support.constraint.Guideline
                 android:orientation="horizontal"

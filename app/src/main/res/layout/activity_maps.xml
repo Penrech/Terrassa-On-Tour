@@ -44,6 +44,14 @@
                 app:layout_constraintTop_toTopOf="@+id/top"
                 android:layout_width="wrap_content" app:useCompatPadding="false"
         />
+        <android.support.design.widget.FloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true" app:srcCompat="@drawable/ic_icono_rutas"
+                android:id="@+id/rutesButton"
+                app:backgroundTint="@color/blancoRoto"
+                app:layout_constraintTop_toTopOf="@+id/top"
+                app:layout_constraintStart_toStartOf="@+id/leading"/>
     </android.support.constraint.ConstraintLayout>
 
 </FrameLayout>
