@@ -20,8 +20,8 @@ class MapServices(var context: Context, private var rootView: View) {
     private val poiURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getMarkers.php"
     private val rutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutes.php"
     private val pointsOfRutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutePoints.php?ruta="
-    private val directionsURL = "https://maps.googleapis.com/maps/api/directions/json?origin=41.525286,0.347285&destination=41.524210,0.343122&key=${context.getString(R.string.google_maps_key)}"
-
+    //private val directionsURL = "https://maps.googleapis.com/maps/api/directions/json?origin=41.525286,0.347285&destination=41.524210,0.343122&key=${context.getString(R.string.google_maps_key)}"
+    private val directionsURL = "https://maps.googleapis.com/maps/api/directions/json?"
 
     fun getPOIS(): ArrayList<PuntoInteres?> {
         val arrayPois = ArrayList<PuntoInteres?>()
@@ -62,10 +62,10 @@ class MapServices(var context: Context, private var rootView: View) {
     fun getRoutePath(rutePoints: ArrayList<Ruta.pointLocation>): ArrayList<List<LatLng>> {
         val path:ArrayList<List<LatLng>> = arrayListOf()
 
-        val normalizedArray = rutePoints.take(10)
+        val normalizedArray = rutePoints.take(10) as ArrayList<Ruta.pointLocation>
 
         try {
-            val json = JSONObject(getJson(directionsURL))
+            val json = JSONObject(getJson(createDirectionsURL(normalizedArray)))
             Log.i("ServerResponse","${json.toString()}")
             val routes = json.getJSONArray("routes")
             val legs = routes.getJSONObject(0).getJSONArray("legs")
@@ -81,6 +81,32 @@ class MapServices(var context: Context, private var rootView: View) {
         }
 
         return path
+    }
+
+    private fun createDirectionsURL(pointsArray : ArrayList<Ruta.pointLocation> ): String {
+        var resultUrl = directionsURL
+        val init = pointsArray.first()
+        val end = pointsArray.last()
+
+        resultUrl += "origin=${init.lat},${init.lon}&destination=${end.lat},${end.lon}&mode=walking"
+
+        val waypoints = pointsArray
+        waypoints.removeAt(0)
+        waypoints.removeAt(waypoints.size - 1)
+
+        if (waypoints.isNotEmpty()) {
+            var formatedWaypoints = "&waypoints="
+            waypoints.forEachIndexed { index, waypoint ->
+                formatedWaypoints += "via:${waypoint.lat}%2C${waypoint.lon}"
+                if (waypoints.size - 1 != index ) formatedWaypoints += "%7C"
+            }
+
+            resultUrl += formatedWaypoints
+        }
+
+        resultUrl += "&key=${context.getString(R.string.google_maps_key)}"
+
+        return resultUrl
     }
 
     private fun getJson(url: String): String {
@@ -102,7 +128,7 @@ class MapServices(var context: Context, private var rootView: View) {
     }
 
     private fun printError() {
-        val snackbar = Snackbar.make(rootView,"No se han podido recuperar los puntos de interés",Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(rootView,"No hay conexión a internet para realizar la acción",Snackbar.LENGTH_LONG)
         snackbar.show()
     }
 

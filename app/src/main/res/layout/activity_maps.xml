@@ -52,6 +52,14 @@
                 app:backgroundTint="@color/blancoRoto"
                 app:layout_constraintTop_toTopOf="@+id/top"
                 app:layout_constraintStart_toStartOf="@+id/leading"/>
+        <android.support.design.widget.FloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true" app:srcCompat="@drawable/ic_icono_cerrar"
+                android:id="@+id/closeRuteFab"
+                app:layout_constraintTop_toTopOf="@+id/top"
+                app:layout_constraintStart_toEndOf="@+id/rutesButton" android:layout_marginStart="24dp"
+                app:backgroundTint="@color/blancoRoto"/>
     </android.support.constraint.ConstraintLayout>
 
 </FrameLayout>

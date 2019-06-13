@@ -26,6 +26,8 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.Gravity
 import android.view.WindowManager
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.*
 import kotlinx.android.synthetic.main.drawer_menu.*
@@ -115,12 +117,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     private var rutesAdapter: RutasListAdapter? = null
     private var rutesList = ArrayList<Ruta>()
 
+    private var popupAnimation: Animation? = null
+    private var popOutAnimation: Animation? = null
+
+    private var popOutAnimationListener = object : Animation.AnimationListener{
+        override fun onAnimationRepeat(animation: Animation?) {}
+
+        override fun onAnimationEnd(animation: Animation?) {
+            closeRuteFab.hide()
+        }
+
+        override fun onAnimationStart(animation: Animation?) {}
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.drawer_menu)
 
+        setUpAnimations()
         setPositionButton()
         setRutesButton()
+        setCloseRuteButton()
         setUpRoutesRecyclerView()
 
         mapservice = MapServices(this,mapRoot)
@@ -131,6 +148,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     }
 
+    private fun setUpAnimations(){
+        popupAnimation = AnimationUtils.loadAnimation(this, R.anim.popup)
+        popOutAnimation = AnimationUtils.loadAnimation(this, R.anim.popout)
+        popOutAnimation?.setAnimationListener(popOutAnimationListener)
+    }
+
     private fun setUpRoutesRecyclerView(){
         rutesLayoutManager = LinearLayoutManager(this)
         rutesAdapter = RutasListAdapter(this,rutesList,this)
@@ -138,7 +161,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         rutes_RV.adapter = rutesAdapter
         rutes_RV.layoutManager = rutesLayoutManager
     }
-
 
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -212,7 +234,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     fun showMessage(message: String) {
         val snack = Snackbar.make(mapRoot ,message, Snackbar.LENGTH_LONG)
-
         snack.show()
     }
 
@@ -227,6 +248,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     private fun setRutesButton(){
         rutesButton.setOnClickListener {
            openRutesMenu()
+        }
+    }
+
+    private fun setCloseRuteButton(){
+        closeRuteFab.hide()
+        closeRuteFab.setOnClickListener {
+            turnCloseRuteButton(false)
+            if (currentRoutePolyline != null){
+                currentRoutePolyline!!.remove()
+            }
         }
     }
 
@@ -364,12 +395,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                         currentRoutePolyline!!.remove()
                         currentRoutePolyline = null
                     }
+                    Log.i("Directions","$arrayList")
 
-                    if (arrayList?.first() != null) {
+                    if (arrayList != null && arrayList.isNotEmpty() ) {
                         val color = if (currentRoute.color == null) Color.GRAY else currentRoute.color!!
-                        currentRoutePolyline =
-                                mMap.addPolyline(PolylineOptions().addAll(arrayList.first()).color(color))
-                        setRouteBounds(arrayList.first())
+                        val polylineOptions = PolylineOptions()
+                        var mergedList = listOf<LatLng>()
+                        arrayList.forEach { list ->
+                            polylineOptions.addAll(list)
+                            mergedList += list
+                        }
+
+                        currentRoutePolyline = mMap.addPolyline(polylineOptions.color(color))
+                        turnCloseRuteButton(true)
+                        setRouteBounds(mergedList)
+
                     }
 
                 }
@@ -447,7 +487,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     fun trackConectivity() {
         connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        if (!isNetworkAvailable) showMessage("No hay conexión a internet")
+        //if (!isNetworkAvailable) showMessage("No hay conexión a internet")
 
         connectionUtils.enable(this)
 
@@ -460,7 +500,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
                 } else {
                     Log.i("CONECTION","Conexion perdida")
-                    showMessage("No hay conexión a internet")
+                    //showMessage("No hay conexión a internet")
                 }
             }
         }
@@ -532,7 +572,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         drawer_menu.openDrawer(Gravity.START)
     }
 
+    private fun turnCloseRuteButton(On: Boolean){
+        if (On) {
+            closeRuteFab.show()
+            closeRuteFab.startAnimation(popupAnimation)
+        } else {
+            closeRuteFab.startAnimation(popOutAnimation)
+        }
+    }
+
     override fun loadRuteWithPoints(ruta: Ruta) {
        printDirectionsRoute(ruta)
+       drawer_menu.closeDrawers()
     }
 }
