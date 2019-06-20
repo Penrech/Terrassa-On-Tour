@@ -22,7 +22,7 @@ import kotlin.math.round
 
 class InfoWindowAdapter(
     private val ctxt: Context, val inflater: LayoutInflater,
-    private val images: HashMap<String,  ArrayList<Uri>>, val map: GoogleMap
+    private val marcadores: HashMap<String,  Pair<Marker,PuntoInteres>>
 ) : InfoWindowAdapter {
 
     private var popup: View? = null
@@ -30,18 +30,6 @@ class InfoWindowAdapter(
 
     init {
         popup = inflater.inflate(R.layout.custom_info_window, null)
-
-        map.setOnMarkerClickListener {
-            Log.i("Success","last marker: $lastMarker")
-
-            if (!it.isInfoWindowShown) {
-                centerProperly(it)
-                it.showInfoWindow()
-            }
-
-            true
-        }
-
     }
 
     override fun getInfoWindow(marker: Marker): View? {
@@ -58,26 +46,9 @@ class InfoWindowAdapter(
         return popup!!
     }
 
-    private fun centerProperly(marker: Marker){
-
-       val windowManager = ctxt.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val display = windowManager.defaultDisplay
-
-        val size = Point()
-
-        display.getRealSize(size)
-
-        val projection = map.projection
-        val markerPosition = marker.position
-        val markerPoint = projection.toScreenLocation(markerPosition)
-        val targetPoint = Point(markerPoint.x,markerPoint.y - size.y / 4)
-        val targetPosition = projection.fromScreenLocation(targetPoint)
-        map.animateCamera(CameraUpdateFactory.newLatLng(targetPosition),300, null)
-    }
 
     private fun setInfoData(marker: Marker){
         if (lastMarker == null || lastMarker!!.id != marker.id) {
-            Log.i("Success","Nuevo marker")
             lastMarker = marker
 
             val deviceHeight = ctxt.resources.displayMetrics.heightPixels
@@ -89,13 +60,13 @@ class InfoWindowAdapter(
             tv = popup!!.locationLabel
             tv.text = marker.snippet
 
-            val allMarkerInfo = marker.tag as PuntoInteres
+            val allMarkerInfo = marcadores[marker.id]?.second
 
-            if (!allMarkerInfo.exterior!!) popup!!.locationColor.backgroundTintList = ColorStateList.valueOf(ctxt.getColor(R.color.interiorYellow))
+            if (!allMarkerInfo?.exterior!!) popup!!.locationColor.backgroundTintList = ColorStateList.valueOf(ctxt.getColor(R.color.interiorYellow))
             else popup!!.locationColor.backgroundTintList = ColorStateList.valueOf(ctxt.getColor(R.color.exteriorBlue))
 
-            val image = images[marker.id]?.first()
-            Log.i("Success","Imagen = $image")
+            val image = allMarkerInfo.img_url
+
             val icon = popup!!.poiImage
 
             if (image == null) {

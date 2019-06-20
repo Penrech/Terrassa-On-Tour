@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
+import io.realm.RealmList
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -59,10 +60,10 @@ class MapServices(var context: Context, private var rootView: View) {
         return arrayRutes
     }
 
-    fun getRoutePath(rutePoints: ArrayList<Ruta.pointLocation>): ArrayList<List<LatLng>> {
+    fun getRoutePath(rutePoints: RealmList<pointLocation>): ArrayList<List<LatLng>> {
         val path:ArrayList<List<LatLng>> = arrayListOf()
 
-        val normalizedArray = rutePoints.take(10) as ArrayList<Ruta.pointLocation>
+        val normalizedArray = rutePoints.take(10) as ArrayList<pointLocation>
 
         try {
             val json = JSONObject(getJson(createDirectionsURL(normalizedArray)))
@@ -83,7 +84,7 @@ class MapServices(var context: Context, private var rootView: View) {
         return path
     }
 
-    private fun createDirectionsURL(pointsArray : ArrayList<Ruta.pointLocation> ): String {
+    private fun createDirectionsURL(pointsArray : ArrayList<pointLocation> ): String {
         var resultUrl = directionsURL
         val init = pointsArray.first()
         val end = pointsArray.last()

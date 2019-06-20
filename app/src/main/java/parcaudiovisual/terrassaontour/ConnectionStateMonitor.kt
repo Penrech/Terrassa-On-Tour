@@ -32,6 +32,12 @@ class ConnectionStateMonitor : NetworkCallback() {
         }
     }
 
+    fun checkConection(context: Context): Boolean{
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected
+    }
+
     override fun onAvailable(network: Network) {
         // Do what you need to do here
         Log.i("NETWORKSTATE","Availabled")

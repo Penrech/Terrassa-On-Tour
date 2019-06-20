@@ -1,19 +1,23 @@
 package parcaudiovisual.terrassaontour
 
+import io.realm.RealmObject
+import io.realm.annotations.PrimaryKey
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URL
 
-class PuntoInteres {
+open class PuntoInteres: RealmObject() {
 
     //Propiedades
-    var id: String? = null
+    @PrimaryKey var id: String? = null
+    var id_target_dia: String? = null
+    var id_target_noche: String? = null
     var title: String? = null
     var latitud: Double = 0.0
     var longitud: Double = 0.0
-    var img_url: URL? = null
-    var img_url_big: URL? = null
-    var img_url_big_secundary: URL? = null
+    var img_url: String? = null
+    var img_url_big: String? = null
+    var img_url_big_secundary: String? = null
     var exterior: Boolean? = null
     var deDia: Boolean? = null
 
@@ -21,28 +25,18 @@ class PuntoInteres {
         fun jsonAReferencia(referencia: JSONObject) : PuntoInteres? {
             try {
                 val resultado = PuntoInteres()
-                val id = referencia.getString("id")
-                val title = referencia.getString("title")
 
-                val latitud = referencia.getString("lat").toDouble()
-                val longitud = referencia.getString("lon").toDouble()
-
-                val smallURL = URL(referencia.getString("img_url"))
-                val bigURL = URL(referencia.getString("img_url_big"))
-                val bigURLSecundary = URL(referencia.getString("img_url_big_secundary"))
-
-                val exterior = referencia.getString("exterior") == "1"
-                val deDia = referencia.getBoolean("dia")
-
-                resultado.id = id
-                resultado.title = title
-                resultado.latitud = latitud
-                resultado.longitud = longitud
-                resultado.img_url = smallURL
-                resultado.img_url_big = bigURL
-                resultado.img_url_big_secundary = bigURLSecundary
-                resultado.exterior = exterior
-                resultado.deDia = deDia
+                resultado.id = referencia.getString("id")
+                resultado.id_target_dia = referencia.getString("id_target_dia")
+                resultado.id_target_noche = referencia.getString("id_target_noche")
+                resultado.title = referencia.getString("title")
+                resultado.latitud = referencia.getString("lat").toDouble()
+                resultado.longitud = referencia.getString("lon").toDouble()
+                resultado.img_url = referencia.getString("img_url")
+                resultado.img_url_big = referencia.getString("img_url_big")
+                resultado.img_url_big_secundary = referencia.getString("img_url_big_secundary")
+                resultado.exterior = referencia.getString("exterior") == "1"
+                resultado.deDia = referencia.getBoolean("dia")
 
                 return resultado
             } catch (e: JSONException) {

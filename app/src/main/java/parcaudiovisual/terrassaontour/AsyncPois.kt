@@ -3,12 +3,12 @@ package parcaudiovisual.terrassaontour
 import android.os.AsyncTask
 import java.util.concurrent.Callable
 
-class AsyncPois(): AsyncTask<Callable<ArrayList<PuntoInteres?>>, Void, Void>(){
+class AsyncPois(): AsyncTask<Callable<Pair<Boolean,ArrayList<PuntoInteres>>>, Void, Void>(){
 
-    var puntosDeInteres: ArrayList<PuntoInteres?>? = null
+    var puntosDeInteres: Pair<Boolean, ArrayList<PuntoInteres>>? = null
     var taskListener: OnDownloadsCompleted? = null
 
-    override fun doInBackground(vararg params: Callable<ArrayList<PuntoInteres?>>?): Void? {
+    override fun doInBackground(vararg params: Callable<Pair<Boolean, ArrayList<PuntoInteres>>>?): Void? {
         puntosDeInteres =  params.first()?.call()
         return null
     }
@@ -19,5 +19,5 @@ class AsyncPois(): AsyncTask<Callable<ArrayList<PuntoInteres?>>, Void, Void>(){
     }
 }
 interface OnDownloadsCompleted{
-    fun onPoisDonwloaded(arrayList: ArrayList<PuntoInteres?>?)
+    fun onPoisDonwloaded(result: Pair<Boolean, ArrayList<PuntoInteres>>?)
 }

@@ -9,10 +9,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import io.realm.RealmList
 import kotlinx.android.synthetic.main.ruta_cell.view.*
 import kotlinx.android.synthetic.main.rute_cell_loading.view.*
 
-class RutasListAdapter(private val context: Context, private val list: ArrayList<Ruta>, private var listener: LoadRuteUtils): RecyclerView.Adapter<RutasListAdapter.ViewHolder>() {
+class RutasListAdapter(private val context: Context, private var list: List<Ruta>, private var listener: LoadRuteUtils): RecyclerView.Adapter<RutasListAdapter.ViewHolder>() {
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ViewHolder {
         Log.i("Lista","Size: ${list.isEmpty()} ${list.size}")
         return if (list.isEmpty()) {
@@ -25,6 +26,12 @@ class RutasListAdapter(private val context: Context, private val list: ArrayList
             ViewHolder(vistaCelda)
         }
 
+    }
+
+    fun update(data: List<Ruta>) {
+        list = listOf()
+        list = data
+        notifyDataSetChanged()
     }
 
     interface LoadRuteUtils{
@@ -66,7 +73,7 @@ class RutasListAdapter(private val context: Context, private val list: ArrayList
         var titleView = itemView.ruteTitle
         var colorView = itemView.ruteColor
         var caracteristicas = itemView.ruteCaracteristicas
-        var rutePoints = ArrayList<Ruta.pointLocation>()
+        var rutePoints = RealmList<pointLocation>()
 
         fun setRuteData(ruta: Ruta){
             titleView.text = ruta.title
