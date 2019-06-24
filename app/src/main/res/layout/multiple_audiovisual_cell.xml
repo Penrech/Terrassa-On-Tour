@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:background="@android:color/transparent">
+
+
+    <android.support.v7.widget.CardView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:foreground="?selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:cardCornerRadius="@dimen/infoWindowCornerRadius"
+            android:padding="10dp"
+            android:layout_margin="10dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:cardBackgroundColor="@android:color/background_light"
+            android:clipChildren="true"
+            android:clipToPadding="true" android:id="@+id/MARoot" app:cardElevation="5dp"
+            app:layout_constraintDimensionRatio="w,1:1">
+
+        <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/mainConstraintLayout">
+
+            <android.support.constraint.Guideline
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/guideline"
+                    app:layout_constraintGuide_percent="0.70"/>
+            <android.support.constraint.Guideline
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/guideline2"
+                    app:layout_constraintGuide_percent=".25"/>
+            <android.support.constraint.Guideline
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/locationLabelLeading" app:layout_constraintGuide_percent="0.05"/>
+            <android.support.constraint.Guideline
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/locationLabelTrailing" app:layout_constraintGuide_percent="0.2"/>
+            <android.support.constraint.Guideline
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/locationLabelTop"
+                    app:layout_constraintGuide_percent="0.79"/>
+            <android.support.constraint.Guideline
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/locationLabelBottom"
+                    app:layout_constraintGuide_percent="0.96"/>
+            <android.support.constraint.Guideline
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/titleLabelLeading" app:layout_constraintGuide_percent="0.3"/>
+            <android.support.constraint.Guideline
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/titleLabelTrailing" app:layout_constraintGuide_percent="0.95"/>
+            <android.support.constraint.Guideline
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/titleLabelTop"
+                    app:layout_constraintGuide_percent="0.74"/>
+            <android.support.constraint.Guideline
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/titleLabelBottom"
+                    app:layout_constraintGuide_percent="0.88"/>
+
+            <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:srcCompat="@drawable/target_cupula_pequeno"
+                    android:id="@+id/MaImage"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@+id/guideline"/>
+            <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/guideline"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:id="@+id/MaLabelBackground"
+                    android:backgroundTint="@color/exteriorBlue"
+                    android:background="@color/exteriorBlue">
+            </View>
+            <TextView
+                    android:text="Titulo Audiovisual 1"
+                    app:autoSizeStepGranularity="2sp"
+                    app:autoSizeTextType="uniform"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:id="@+id/MaAudiovisualTitleLabel"
+                    app:layout_constraintTop_toTopOf="@+id/titleLabelTop"
+                    android:textAlignment="textStart"
+                    android:fontFamily="@font/roboto_medium"
+                    android:textSize="22sp"
+                    android:textColor="@color/blancoRoto"
+                    android:gravity="center"
+                    android:layout_gravity="fill_vertical"
+                    app:layout_constraintStart_toStartOf="@+id/locationLabelLeading"
+                    app:layout_constraintEnd_toStartOf="@+id/titleLabelTrailing"
+                    app:layout_constraintBottom_toTopOf="@+id/titleLabelBottom"/>
+            <TextView
+                    android:text="Ruta 1, 2"
+                    app:autoSizeStepGranularity="2sp"
+                    app:autoSizeTextType="uniform"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:id="@+id/MaAudiovisualRutesLabel"
+                    app:layout_constraintTop_toTopOf="@+id/titleLabelBottom"
+                    android:textAlignment="textStart"
+                    android:fontFamily="@font/roboto_medium"
+                    android:textSize="22sp"
+                    android:textColor="@color/blancoRoto"
+                    android:gravity="center"
+                    android:layout_gravity="fill_vertical"
+                    app:layout_constraintStart_toStartOf="@+id/locationLabelLeading"
+                    app:layout_constraintEnd_toStartOf="@+id/titleLabelTrailing"
+                    app:layout_constraintBottom_toTopOf="@+id/locationLabelBottom" android:layout_marginTop="4dp"/>
+        </android.support.constraint.ConstraintLayout>
+    </android.support.v7.widget.CardView>
+
+</android.support.constraint.ConstraintLayout>

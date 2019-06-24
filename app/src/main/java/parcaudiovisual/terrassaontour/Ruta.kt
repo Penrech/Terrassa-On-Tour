@@ -17,6 +17,15 @@ open class Ruta: RealmObject() {
     var puntos = RealmList<pointLocation>()
     var idAudiovisuales = RealmList<String>()
 
+    fun getPointsInNotRealmClass(): ArrayList<pointLocationNotRealm>{
+        val result = ArrayList<pointLocationNotRealm>()
+        puntos.forEach{ pointLocation ->
+            result.add(pointLocationNotRealm(pointLocation.lat!!,pointLocation.lon!!))
+        }
+
+        return result
+    }
+
     companion object {
         fun jsonAReferencia(referencia: JSONObject) : Ruta? {
             try {
@@ -60,3 +69,4 @@ open class pointLocation: RealmObject() {
     var lat: Double? = null
     var lon: Double? = null
 }
+class pointLocationNotRealm(val lat: Double, val lon: Double)

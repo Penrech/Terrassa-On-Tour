@@ -17,53 +17,12 @@ import java.net.URL
 
 class MapServices(var context: Context, private var rootView: View) {
 
-
-    private val poiURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getMarkers.php"
-    private val rutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutes.php"
-    private val pointsOfRutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutePoints.php?ruta="
-    //private val directionsURL = "https://maps.googleapis.com/maps/api/directions/json?origin=41.525286,0.347285&destination=41.524210,0.343122&key=${context.getString(R.string.google_maps_key)}"
     private val directionsURL = "https://maps.googleapis.com/maps/api/directions/json?"
 
-    fun getPOIS(): ArrayList<PuntoInteres?> {
-        val arrayPois = ArrayList<PuntoInteres?>()
-
-        try {
-            val json = JSONObject(getJson(poiURL))
-            val array = json.getJSONArray("puntos")
-
-            for (i:Int in 0 until array.length()) {
-                val puntoInteres = PuntoInteres.jsonAReferencia(array.get(i) as JSONObject)
-                arrayPois.add(puntoInteres)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return arrayPois
-    }
-
-    fun getRoutes(): ArrayList<Ruta?> {
-        val arrayRutes = ArrayList<Ruta?>()
-
-        try {
-            val json = JSONObject(getJson(rutesURL))
-            val array = json.getJSONArray("rutas")
-
-            for (i: Int in 0 until array.length()) {
-                val ruta = Ruta.jsonAReferencia(array.get(i) as JSONObject)
-                arrayRutes.add(ruta)
-            }
-
-        } catch (e: Exception){
-            e.printStackTrace()
-        }
-
-        return arrayRutes
-    }
-
-    fun getRoutePath(rutePoints: RealmList<pointLocation>): ArrayList<List<LatLng>> {
+    fun getRoutePath(rutePoints: ArrayList<pointLocationNotRealm>): ArrayList<List<LatLng>> {
         val path:ArrayList<List<LatLng>> = arrayListOf()
 
-        val normalizedArray = rutePoints.take(10) as ArrayList<pointLocation>
+        val normalizedArray = rutePoints.take(10) as ArrayList<pointLocationNotRealm>
 
         try {
             val json = JSONObject(getJson(createDirectionsURL(normalizedArray)))
@@ -84,7 +43,7 @@ class MapServices(var context: Context, private var rootView: View) {
         return path
     }
 
-    private fun createDirectionsURL(pointsArray : ArrayList<pointLocation> ): String {
+    private fun createDirectionsURL(pointsArray : ArrayList<pointLocationNotRealm> ): String {
         var resultUrl = directionsURL
         val init = pointsArray.first()
         val end = pointsArray.last()

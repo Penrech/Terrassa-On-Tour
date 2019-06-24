@@ -4,7 +4,9 @@ import android.os.Build
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
+import java.time.Instant
 import java.util.*
+import kotlin.collections.ArrayList
 
 open class Statics: RealmObject() {
 
@@ -13,34 +15,73 @@ open class Statics: RealmObject() {
     var name = Build.DEVICE
     var product = Build.PRODUCT
     var savedOnRemoteServer = false
-    private var visitedPoints = RealmList<String>()
-    private var visitedAudiovisuals = RealmList<String>()
-    private var visitedRoutes = RealmList<String>()
+    var dayTime = true
+    private var visitedPoints = RealmList<visitHistory>()
+    private var visitedAudiovisuals = RealmList<visitHistory>()
+    private var visitedRoutes = RealmList<visitHistory>()
     private var currentRoute: String? = null
     private var visitedRouteAudiovisuals = RealmList<AudiovisualFromRouteVisited>()
+
+    fun getVisitedPoints(): List<visitHistory> {
+        return visitedPoints
+    }
+
+    fun getVisitedAudiovisuals(): List<visitHistory>{
+        return visitedAudiovisuals
+    }
+
+    fun getVisitedRoutes(): List<visitHistory> {
+        return visitedRoutes
+    }
 
     fun getCurrentRoute(): String?{
         return currentRoute
     }
 
-    fun cleanPoints(){
-        visitedPoints.clear()
+    fun cleanPoints(list: List<String>){
+        val pointsToRemove = RealmList<visitHistory>()
+        list.forEach { id->
+            val filter = visitedPoints.filter { it.id == id }.first()
+            if (filter != null) pointsToRemove.add(filter)
+        }
+
+        visitedPoints.removeAll(pointsToRemove)
     }
 
-    fun cleanAudiovisuals(){
-        visitedAudiovisuals.clear()
+    fun cleanAudiovisuals(list: List<String>){
+        val audiovisualsToRemove = RealmList<visitHistory>()
+        list.forEach { id->
+            val filter = visitedAudiovisuals.filter { it.id == id }.first()
+            if (filter != null) audiovisualsToRemove.add(filter)
+        }
+
+        visitedAudiovisuals.removeAll(audiovisualsToRemove)
     }
 
-    fun cleanRoutes(){
-        visitedRoutes.clear()
+    fun cleanRoutes(list: List<String>){
+        val routesToRemove = RealmList<visitHistory>()
+        list.forEach { id->
+            val filter = visitedRoutes.filter { it.id == id }.first()
+            if (filter != null) routesToRemove.add(filter)
+        }
+
+        visitedRoutes.removeAll(routesToRemove)
     }
 
     fun addPointVisit(pointID: String){
-        visitedPoints.add(pointID)
+        val newPoint = visitHistory()
+        newPoint.id = pointID
+        val rightNow = Calendar.getInstance()
+        newPoint.date = rightNow.timeInMillis
+        visitedPoints.add(newPoint)
     }
 
     fun addAudiovisualVisit(AudiovisualID: String){
-        visitedAudiovisuals.add(AudiovisualID)
+        val newAud = visitHistory()
+        newAud.id = AudiovisualID
+        val rightNow = Calendar.getInstance()
+        newAud.date = rightNow.timeInMillis
+        visitedAudiovisuals.add(newAud)
 
         if (currentRoute != null){
             checkIfAudiovisualIsInCurrentRoute(AudiovisualID)
@@ -110,7 +151,12 @@ open class Statics: RealmObject() {
             if (!it.visited) return
         }
 
-        visitedRoutes.add(currentRoute)
+        val newRute = visitHistory()
+        newRute.id = currentRoute
+        val rightNow = Calendar.getInstance()
+        newRute.date = rightNow.timeInMillis
+        visitedRoutes.add(newRute)
+
         currentRoute = null
         visitedRouteAudiovisuals.clear()
     }
@@ -120,4 +166,19 @@ open class Statics: RealmObject() {
 open class AudiovisualFromRouteVisited: RealmObject(){
     var idAudiovisual: String? = null
     var visited: Boolean = false
+}
+open class visitHistory: RealmObject(){
+    var id: String? = null
+    var date: Long? = null
+}
+class InsertStaticsResponse {
+
+    var appStateError = true
+    var appActive = true
+    var message: String? = null
+    var isDayTime = true
+
+    var audiovisualsToDelete = ArrayList<String>()
+    var pointsToDelete = arrayListOf<String>()
+    var rutesToDelete = arrayListOf<String>()
 }

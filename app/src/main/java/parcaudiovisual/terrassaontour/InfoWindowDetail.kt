@@ -1,11 +1,8 @@
 package parcaudiovisual.terrassaontour
 
-import android.content.Context
-import android.net.ConnectivityManager
+
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager
 import android.util.Log
 import android.view.View
@@ -23,20 +20,6 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
     private val NightDrawable = R.drawable.ic_icono_noche
 
     private var fragmentsList: MutableList<BigImageInfoWindow> = mutableListOf()
-
-    private var connectivityManager: ConnectivityManager? = null
-    private var connectionUtils = ConnectionStateMonitor()
-
-    //private var mainPhoto = true
-
-    private val isNetworkAvailable: Boolean
-        get() {
-            connectivityManager?.let {
-                val activeNetworkInfo = it.activeNetworkInfo
-                return activeNetworkInfo != null && activeNetworkInfo.isConnected
-            }
-            return false
-        }
 
     enum class Icon {
         DAY, NIGHT
@@ -80,10 +63,11 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
         Log.i("Time","Time init onCreate: ${Date()}")
         mPager = detailImagePager
 
-        trackConectivity()
         listeningPagerEvents()
         setCloseFabButton()
         setSwitchFabButton()
+
+        loadData()
     }
 
 
@@ -129,52 +113,6 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
         }
     }
 
-    fun showMessage(message: String) {
-        val snack = Snackbar.make(rootInfoWindow ,message, Snackbar.LENGTH_LONG)
-
-        snack.show()
-    }
-
-    private fun trackConectivity() {
-        connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        if (!isNetworkAvailable){
-            loadData()
-            showMessage("No hay conexión a internet")
-        }
-
-        connectionUtils.enable(this)
-
-        connectionUtils.conectionListener = object : OnConnectionChange {
-            override fun conectionEnabled(enabled: Boolean) {
-                if (enabled){
-                    loadData()
-                    Log.i("CONECTION","Conexion restablecida en InfoWindowDetail")
-                } else {
-                    Log.i("CONECTION","Conexion perdida en InfoWindowDetail")
-                    showMessage("No hay conexión a internet")
-                }
-
-            }
-        }
-    }
-
-    private fun hideSystemUI() {
-
-        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-
-                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_FULLSCREEN)
-    }
-
-    private fun unTrackConectivity(){
-        connectionUtils.disable(this)
-    }
-
     private fun listeningPagerEvents(){
         if (!pagerIsListening) {
             mPager.addOnPageChangeListener(this)
@@ -191,17 +129,12 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
 
     override fun onPause() {
         super.onPause()
-        unTrackConectivity()
         deleteListeningPagerEvents()
     }
 
     override fun onResume() {
         super.onResume()
         Log.i("Time","Time init Resume: ${Date()}")
-        hideSystemUI()
-        if (connectionUtils.conectionListener == null) {
-            trackConectivity()
-        }
         listeningPagerEvents()
     }
 

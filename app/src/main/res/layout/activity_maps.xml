@@ -60,6 +60,13 @@
                 app:layout_constraintTop_toTopOf="@+id/top"
                 app:layout_constraintStart_toEndOf="@+id/rutesButton" android:layout_marginStart="24dp"
                 app:backgroundTint="@color/blancoRoto"/>
+        <android.support.design.widget.FloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true" app:srcCompat="@drawable/ic_icono_ar"
+                android:id="@+id/ARButton"
+                app:layout_constraintEnd_toStartOf="@+id/trailing" app:layout_constraintBottom_toTopOf="@+id/bottom"
+                app:backgroundTint="@color/googleRed300"/>
     </android.support.constraint.ConstraintLayout>
 
 </FrameLayout>
