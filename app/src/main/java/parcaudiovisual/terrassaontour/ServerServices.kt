@@ -1,5 +1,6 @@
 package parcaudiovisual.terrassaontour
 
+import android.app.job.JobInfo
 import android.net.Uri
 import android.util.Log
 import org.json.JSONObject
@@ -37,9 +38,12 @@ class ServerServices {
         try {
             val json = JSONObject(getJsonPOST(insertAllStatics,postData))
             val appState = json.getJSONObject("appState")
+            Log.i("JSONPOST","appState: $appState")
             val audiovisuals = json.getJSONObject("audiovisuals")
+            Log.i("JSONPOST","audiovisuals: $audiovisuals")
             val successAudiovisuals = audiovisuals.getJSONArray("success")
             val points = json.getJSONObject("points")
+            Log.i("JSONPOST","points: $points")
             val successPoints = points.getJSONArray("success")
             val rutes = json.getJSONObject("rutes")
             val successRutes = rutes.getJSONArray("success")
@@ -48,6 +52,7 @@ class ServerServices {
             response.appActive = appState.getBoolean("appActive")
             response.message = appState.getString("message")
             response.isDayTime = json.getBoolean("isDayTime")
+            Log.i("JSONPOST","isDayTime: ${response.isDayTime}")
 
             for (i: Int in 0 until successAudiovisuals.length()){
                 response.audiovisualsToDelete.add(successAudiovisuals.getString(i))
@@ -62,8 +67,12 @@ class ServerServices {
             }
 
 
+
+
+
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.i("JSONPOST","Crash!")
         }
 
         return response
@@ -144,27 +153,34 @@ class ServerServices {
     private fun getJsonPOST(url: String, postData: JSONObject): String {
         val contenidoRespuesta = StringBuilder()
         try {
+            val boundary = "===" + System.currentTimeMillis() + "==="
+            val urlConnection = URL(url).openConnection()
 
-            val builder = Uri.Builder()
-            builder.encodedPath(url)
-            builder.appendQueryParameter("id",postData.getString("id"))
+            urlConnection.useCaches = false
+            urlConnection.doInput = true
+            urlConnection.doOutput = true
+            urlConnection.setRequestProperty("Content-Type",
+                "multipart/form-data; boundary=" + boundary)
+            val outputStream = urlConnection.getOutputStream()
+            val writer = PrintWriter(OutputStreamWriter(outputStream,"UTF-8"))
 
+            addFormField("id",postData.getString("id"),writer, boundary)
 
             if (postData.has("points")) {
-                builder.appendQueryParameter("points",postData.getJSONArray("points").toString())
+                addFormField("points",postData.getJSONArray("points").toString(),writer,boundary)
             }
 
             if (postData.has("audiovisuals")) {
-                builder.appendQueryParameter("audiovisuals",postData.getJSONArray("audiovisuals").toString())
+                addFormField("audiovisuals",postData.getJSONArray("audiovisuals").toString(),writer, boundary)
             }
 
             if (postData.has("rutes")) {
-                builder.appendQueryParameter("rutes",postData.getJSONArray("rutes").toString())
+                addFormField("rutes",postData.getJSONArray("rutes").toString(),writer, boundary)
             }
 
-            val query = builder.build().toString()
-            Log.i("Statics","$query")
-            val urlConnection = URL(query).openConnection()
+            writer.close()
+            outputStream.close()
+
             val bufferedReader = BufferedReader(InputStreamReader(urlConnection.getInputStream()))
             var line: String?
             do {
@@ -177,9 +193,22 @@ class ServerServices {
             e.printStackTrace()
         }
 
+        Log.i("Respuesta", "$contenidoRespuesta")
         return contenidoRespuesta.toString()
     }
 
+    private fun addFormField(name: String, value: String, writer: PrintWriter, boundary: String) {
+        val LINE_FEED = "\r\n"
+
+        writer.append("--" + boundary).append(LINE_FEED)
+        writer.append("Content-Disposition: form-data; name=\"" + name + "\"")
+            .append(LINE_FEED)
+        writer.append("Content-Type: text/plain; charset=UTF-8").append(
+            LINE_FEED)
+        writer.append(LINE_FEED)
+        writer.append(value).append(LINE_FEED)
+        writer.flush()
+    }
 
 }
 

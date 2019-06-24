@@ -69,6 +69,18 @@
                     android:id="@+id/locationLabelBottom"
                     app:layout_constraintGuide_percent="0.96"/>
             <android.support.constraint.Guideline
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/locationLabelRutasTop"
+                    app:layout_constraintGuide_percent="0.04"/>
+            <android.support.constraint.Guideline
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/locationLabelRutasBottom"
+                    app:layout_constraintGuide_percent="0.15"/>
+            <android.support.constraint.Guideline
                     android:orientation="vertical"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -116,6 +128,7 @@
                     android:text="Titulo Audiovisual 1"
                     app:autoSizeStepGranularity="2sp"
                     app:autoSizeTextType="uniform"
+                    android:maxLines="2"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:id="@+id/MaAudiovisualTitleLabel"
@@ -124,28 +137,30 @@
                     android:fontFamily="@font/roboto_medium"
                     android:textSize="22sp"
                     android:textColor="@color/blancoRoto"
-                    android:gravity="center"
-                    android:layout_gravity="fill_vertical"
                     app:layout_constraintStart_toStartOf="@+id/locationLabelLeading"
                     app:layout_constraintEnd_toStartOf="@+id/titleLabelTrailing"
-                    app:layout_constraintBottom_toTopOf="@+id/titleLabelBottom"/>
+                    app:layout_constraintBottom_toTopOf="@+id/locationLabelBottom" android:gravity="center_vertical"
+            />
             <TextView
                     android:text="Ruta 1, 2"
                     app:autoSizeStepGranularity="2sp"
                     app:autoSizeTextType="uniform"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
+                    android:shadowDx="2"
+                    android:shadowDy="2"
+                    android:shadowRadius="4"
+                    android:shadowColor="@android:color/background_dark"
                     android:id="@+id/MaAudiovisualRutesLabel"
-                    app:layout_constraintTop_toTopOf="@+id/titleLabelBottom"
-                    android:textAlignment="textStart"
+                    app:layout_constraintTop_toTopOf="@+id/locationLabelRutasTop"
+                    android:textAlignment="textEnd"
                     android:fontFamily="@font/roboto_medium"
                     android:textSize="22sp"
-                    android:textColor="@color/blancoRoto"
-                    android:gravity="center"
-                    android:layout_gravity="fill_vertical"
+                    android:textColor="@android:color/background_light"
                     app:layout_constraintStart_toStartOf="@+id/locationLabelLeading"
                     app:layout_constraintEnd_toStartOf="@+id/titleLabelTrailing"
-                    app:layout_constraintBottom_toTopOf="@+id/locationLabelBottom" android:layout_marginTop="4dp"/>
+                    app:layout_constraintBottom_toTopOf="@+id/locationLabelRutasBottom"
+                    android:gravity="center_vertical"/>
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>
 

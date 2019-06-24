@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_multiple_audiovisual.*
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
+import kotlin.math.roundToInt
 
 class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter.OnMaClickListener {
 
@@ -64,6 +65,8 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
         val numOfColumns = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) NUM_OF_COLUMN_LANDSCAPE else NUM_OF_COLUMN_PORTRAIT
         audiovisualsLayoutManager = GridLayoutManager(this, numOfColumns)
         multipleAudiovisualRV.layoutManager = audiovisualsLayoutManager
+        val padding = 8 * resources.displayMetrics.density
+        multipleAudiovisualRV.addItemDecoration(MaRecyclerViewItemDecoration(padding.roundToInt(),audiovisualList.size,numOfColumns))
 
         audiovisualsAdapter = AudiovisualsListAdapter(this,audiovisualList, this)
         multipleAudiovisualRV.adapter = audiovisualsAdapter

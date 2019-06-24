@@ -179,6 +179,7 @@ class DBRealmHelper {
             staticsObj.cleanPoints(data.pointsToDelete)
             staticsObj.cleanRoutes(data.rutesToDelete)
             realm.commitTransaction()
+            Log.i("StaticsAfterUpdate","$staticsObj")
         } catch (e: Exception){
             e.printStackTrace()
         }
@@ -240,21 +241,21 @@ class DBRealmHelper {
             currentStatics.getVisitedPoints().forEach { pointsVisited->
                 val pointsVisitedJsonObject = JSONObject()
                 pointsVisitedJsonObject.put("id",pointsVisited.id)
-                pointsVisitedJsonObject.put("date",pointsVisited.date)
+                pointsVisitedJsonObject.put("date",pointsVisited.date.toString())
                 pointsArray.put(pointsVisitedJsonObject)
             }
 
             currentStatics.getVisitedAudiovisuals().forEach { audiovisualVisited ->
                 val audiovisualVisitedJsonObject = JSONObject()
                 audiovisualVisitedJsonObject.put("id",audiovisualVisited.id)
-                audiovisualVisitedJsonObject.put("date",audiovisualVisited.date)
+                audiovisualVisitedJsonObject.put("date",audiovisualVisited.date.toString())
                 audiovisualsArray.put(audiovisualVisitedJsonObject)
             }
 
             currentStatics.getVisitedRoutes().forEach { ruteVisited->
                 val ruteVisitedJsonObject = JSONObject()
                 ruteVisitedJsonObject.put("id",ruteVisited.id)
-                ruteVisitedJsonObject.put("date",ruteVisited.date)
+                ruteVisitedJsonObject.put("date",ruteVisited.date.toString())
                 rutesArray.put(ruteVisitedJsonObject)
             }
 
