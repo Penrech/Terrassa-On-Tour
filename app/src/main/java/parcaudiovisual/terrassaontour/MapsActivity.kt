@@ -694,11 +694,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     fun loadRandomPoint(){
         val idPuntoAleatorio = dbHelper.getRandomPoint() ?: return
+        val audiovisualesRutaActual = dbHelper.getAudiovisualsFromCurrentRoute().toTypedArray()
 
         dbHelper.updateStaticsAddPointVisit(idPuntoAleatorio)
 
+        val audiovisualesPunto = dbHelper.getParcelableAudiovisualsFromPoint(idPuntoAleatorio)
+
         val intent = Intent(this, MultipleAudiovisualActivity::class.java)
         intent.putExtra("IDPOINT", idPuntoAleatorio)
+        intent.putExtra("AUDIOVISUALES",audiovisualesPunto)
+        intent.putExtra("RUTEAUD",audiovisualesRutaActual)
         startActivity(intent)
     }
 

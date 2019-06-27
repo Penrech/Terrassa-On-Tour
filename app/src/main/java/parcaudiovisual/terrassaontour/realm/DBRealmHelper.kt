@@ -139,12 +139,55 @@ class DBRealmHelper {
         return true
     }
 
+    fun getAudiovisualsFromCurrentRoute() : List<String> {
+        val realm = Realm.getDefaultInstance()
+        val currentStatics = getCurrentStatics() ?: return listOf()
+        if (currentStatics.getCurrentRoute() == null) return listOf()
+
+        val routeDetails = realm.where(Ruta::class.java).equalTo("id",currentStatics.getCurrentRoute()).findFirst() ?: return listOf()
+
+        return  routeDetails.idAudiovisuales
+    }
+
     fun getAudiovisualsFromPoint(pointID: String): List<Audiovisual>? {
         val realm = Realm.getDefaultInstance()
         val audiovisuales = realm.where(Audiovisual::class.java).equalTo("id_punto_audiovisual",pointID).findAll()
 
         return if (audiovisuales != null) audiovisuales
         else null
+    }
+
+   fun getParcelableAudiovisualsFromPoint(pointID: String): ArrayList<AudiovisualParcelable>{
+        val realm = Realm.getDefaultInstance()
+        val audiovisuales = realm.where(Audiovisual::class.java).equalTo("id_punto_audiovisual",pointID).findAll()
+        val resultado = ArrayList<AudiovisualParcelable>()
+
+        audiovisuales.forEach{
+            val productoras = ArrayList<ClienteProductoraParcelable>()
+            val clientes = ArrayList<ClienteProductoraParcelable>()
+            val actores = ArrayList(it.actores)
+            val directores = ArrayList(it.directores)
+            it.productoras.forEach { productora ->
+                productoras.add(ClienteProductoraParcelable(productora.nombre!!,productora.link!!))
+            }
+            it.clientes.forEach { cliente ->
+                clientes.add(ClienteProductoraParcelable(cliente.nombre!!,cliente.link!!))
+            }
+            resultado.add(
+                AudiovisualParcelable(it.id,it.id_punto_audiovisual,it.title,it.description,it.img_cabecera,
+                it.img_cabecera_thumbnail,it.src,it.year,it.tipo_medio,it.formato,actores,directores,productoras,clientes,it.rutas_audiovisual)
+            )
+        }
+
+       return resultado
+    }
+
+
+    fun getAudiovisualById(audiovisualID: String) : Audiovisual? {
+        val realm = Realm.getDefaultInstance()
+        val audiovisual = realm.where(Audiovisual::class.java).equalTo("id",audiovisualID).findFirst()
+
+        return audiovisual
     }
 
 

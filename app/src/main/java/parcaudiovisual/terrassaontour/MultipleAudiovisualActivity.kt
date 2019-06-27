@@ -37,6 +37,7 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
         }
 
         val pointAudiovisuals = loadAudiovisuals(idPoint)
+
         if (pointAudiovisuals == null) {
             errorLoadingAudiovisuals()
         } else {
@@ -68,7 +69,8 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
         val padding = 8 * resources.displayMetrics.density
         multipleAudiovisualRV.addItemDecoration(MaRecyclerViewItemDecoration(padding.roundToInt(),audiovisualList.size,numOfColumns))
 
-        audiovisualsAdapter = AudiovisualsListAdapter(this,audiovisualList, this)
+        val routeAudiovisuals = intent.getStringArrayExtra("RUTEAUD")
+        audiovisualsAdapter = AudiovisualsListAdapter(this,audiovisualList, routeAudiovisuals,this)
         multipleAudiovisualRV.adapter = audiovisualsAdapter
     }
 

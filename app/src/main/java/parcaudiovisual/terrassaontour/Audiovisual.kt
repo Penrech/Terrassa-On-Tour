@@ -1,5 +1,8 @@
 package parcaudiovisual.terrassaontour
 
+import android.os.Parcel
+import android.os.Parcelable
+import android.util.Log
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
@@ -95,5 +98,104 @@ open class ClienteProductora() : RealmObject() {
     constructor( nombre: String, link: String): this() {
         this.nombre = nombre
         this.link = link
+    }
+}
+class ClienteProductoraParcelable constructor(val nombre: String, val link: String): Parcelable{
+
+    constructor(source: Parcel): this (
+        source.readString(),
+        source.readString()
+    )
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(nombre)
+        dest.writeString(link)
+    }
+
+    override fun describeContents(): Int {
+       return 0
+    }
+
+    companion object CREATOR: Parcelable.Creator<ClienteProductoraParcelable>{
+        override fun createFromParcel(source: Parcel?): ClienteProductoraParcelable {
+            return ClienteProductoraParcelable(source!!)
+        }
+
+        override fun newArray(size: Int): Array<ClienteProductoraParcelable?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
+class AudiovisualParcelable constructor(
+    val id: String?,
+    val id_punto_audiovisual: String?,
+    val title: String?,
+    val description: String?,
+    val img_cabecera: String?,
+    val img_cabecera_thumbnail: String?,
+    val src: String?,
+    val year: String?,
+    val tipo_medio: String?,
+    val formato: String?,
+    val actores : ArrayList<String>,
+    val directores : ArrayList<String>,
+    val productoras : ArrayList<ClienteProductoraParcelable>,
+    val clientes : ArrayList<ClienteProductoraParcelable>,
+    val rutas_audiovisual: List<String>
+    ): Parcelable {
+
+    constructor(source: Parcel): this (
+        source.readString(),
+        source.readString(),
+        source.readString(),
+        source.readString(),
+        source.readString(),
+        source.readString(),
+        source.readString(),
+        source.readString(),
+        source.readString(),
+        source.readString(),
+        source.createStringArrayList(),
+        source.createStringArrayList(),
+        arrayListOf<ClienteProductoraParcelable>().apply {
+            source.readList(this, ClienteProductoraParcelable::class.java.classLoader)
+        },
+        arrayListOf<ClienteProductoraParcelable>().apply {
+            source.readList(this, ClienteProductoraParcelable::class.java.classLoader)
+        },
+        source.createStringArrayList()
+    )
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(id)
+        dest.writeString(id_punto_audiovisual)
+        dest.writeString(title)
+        dest.writeString(description)
+        dest.writeString(img_cabecera)
+        dest.writeString(img_cabecera_thumbnail)
+        dest.writeString(src)
+        dest.writeString(year)
+        dest.writeString(tipo_medio)
+        dest.writeString(formato)
+        dest.writeStringList(actores)
+        dest.writeStringList(directores)
+        dest.writeList(productoras)
+        dest.writeList(clientes)
+        dest.writeStringList(rutas_audiovisual)
+
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR: Parcelable.Creator<AudiovisualParcelable>{
+        override fun createFromParcel(source: Parcel?): AudiovisualParcelable {
+            return createFromParcel(source)
+        }
+
+        override fun newArray(size: Int): Array<AudiovisualParcelable?> {
+           return arrayOfNulls(size)
+        }
     }
 }

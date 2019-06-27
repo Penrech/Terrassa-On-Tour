@@ -54,6 +54,8 @@
         </activity>
         <activity android:name=".MultipleAudiovisualActivity">
         </activity>
+        <activity android:name=".AudiovisualDetailActivity">
+        </activity>
     </application>
 
 </manifest>

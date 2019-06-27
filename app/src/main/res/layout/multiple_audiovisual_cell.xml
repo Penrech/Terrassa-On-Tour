@@ -142,7 +142,6 @@
                     app:layout_constraintBottom_toTopOf="@+id/locationLabelBottom" android:gravity="center_vertical"
             />
             <TextView
-                    android:text="Ruta 1, 2"
                     app:autoSizeStepGranularity="2sp"
                     app:autoSizeTextType="uniform"
                     android:layout_width="0dp"

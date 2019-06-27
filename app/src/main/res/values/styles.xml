@@ -18,4 +18,8 @@
         <item name="android:shadowRadius">2.0</item>
     </style>
 
+    <style name="tab_text" parent="@android:style/TextAppearance.Widget.TabWidget">
+        <item name="android:fontFamily">@font/roboto_medium</item>
+    </style>
+
 </resources>

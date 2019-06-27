@@ -76,7 +76,7 @@ class RutasListAdapter(private val context: Context, private var list: List<Ruta
         var rutePoints = RealmList<pointLocation>()
 
         fun setRuteData(ruta: Ruta){
-            titleView.text = ruta.title
+            titleView.text = ruta.id + ". " + ruta.title
             val color: Int = if (ruta.color != null) ruta.color!! else Color.DKGRAY
             colorView.background = ColorDrawable(color)
             caracteristicas.text = ruta.caracteristicas.joinToString()

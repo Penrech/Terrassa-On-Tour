@@ -15,9 +15,9 @@
                           <map>
                             <entry key="assetSourceType" value="FILE" />
                             <entry key="height" value="200" />
-                            <entry key="outputName" value="ic_icono_ar" />
+                            <entry key="outputName" value="ic_icono_info" />
                             <entry key="overrideSize" value="true" />
-                            <entry key="sourceFile" value="C:\Users\PcCom\Desktop\ParcDocumentos\Icono_AR.svg" />
+                            <entry key="sourceFile" value="C:\Users\PcCom\Desktop\ParcDocumentos\Icono_Info.svg" />
                             <entry key="width" value="200" />
                           </map>
                         </option>
