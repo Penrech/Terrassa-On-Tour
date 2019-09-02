@@ -22,4 +22,12 @@
         <item name="android:fontFamily">@font/roboto_medium</item>
     </style>
 
+    <style name="custom_action_bar" parent="@style/ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:fontFamily">@font/roboto_bold</item>
+        <item name="android:color">@color/negroRoto</item>
+    </style>
+    <style name="custom_action_bar_year" parent="@style/ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:fontFamily">@font/roboto_bold</item>
+        <item name="android:color">@color/negroMasRoto</item>
+    </style>
 </resources>

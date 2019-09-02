@@ -13,7 +13,9 @@ import parcaudiovisual.terrassaontour.interfaces.DataLoaded
 import parcaudiovisual.terrassaontour.interfaces.StaticsUpdateFromServer
 import java.lang.Exception
 import java.security.spec.ECField
+import java.util.*
 import java.util.concurrent.Callable
+import kotlin.collections.ArrayList
 
 class DBRealmHelper {
 
@@ -41,7 +43,9 @@ class DBRealmHelper {
         val realm = Realm.getDefaultInstance()
         val puntosDeInteres = realm.where(PuntoInteres::class.java).findAll()
 
-        return puntosDeInteres
+        val copyOfPuntos = realm.copyFromRealm(puntosDeInteres)
+        realm.close()
+        return copyOfPuntos
     }
 
     fun getRandomPoint(): String? {
@@ -51,29 +55,37 @@ class DBRealmHelper {
         val puntosArray = realm.copyFromRealm(puntos)
         puntosArray.shuffle()
 
-        return puntosArray.first().id
+        val randomId = puntosArray.first().id
+
+        realm.close()
+        return randomId
     }
 
     fun initStatics(): Statics?{
         val realm = Realm.getDefaultInstance()
-        val staticsObj = realm.where(Statics::class.java).findFirst()
+        Log.i("LifeCycle","Realm is : $realm")
+        var staticsObj = realm.where(Statics::class.java).findFirst()
 
         Log.i("DatosRealm","Iniciado en server: ${staticsObj?.savedOnRemoteServer}")
+        Log.i("DatosRealm","Statics obj iniciado? = $staticsObj")
 
         if (staticsObj == null) {
-            val startStatics = Statics()
             try {
                 realm.beginTransaction()
+                val startStatics = realm.createObject(Statics::class.java, UUID.randomUUID().toString())
                 realm.insertOrUpdate(startStatics)
                 realm.commitTransaction()
-                return startStatics
+                staticsObj = startStatics
             } catch (e: Exception) {
                 e.printStackTrace()
                 return null
             }
         }
 
-        return staticsObj
+        Log.i("LifeCycle","Statics to be copied are: $staticsObj")
+        val copyStaticsObj = realm.copyFromRealm(staticsObj)
+        realm.close()
+        return copyStaticsObj
 
     }
 
@@ -88,13 +100,23 @@ class DBRealmHelper {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        realm.close()
     }
 
     fun getCurrentStatics(): Statics? {
         val realm = Realm.getDefaultInstance()
         val staticsObj = realm.where(Statics::class.java).findFirst()
 
-        return staticsObj
+        if (staticsObj == null) {
+            realm.close()
+            return null
+        }
+
+        val copyOfStatics = realm.copyFromRealm(staticsObj)
+
+        realm.close()
+        return copyOfStatics
     }
 
     fun udpateStaticsInsertion() {
@@ -107,53 +129,94 @@ class DBRealmHelper {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        realm.close()
     }
 
     fun updateStaticsAddPointVisit(pointID: String){
         val realm = Realm.getDefaultInstance()
-        try {
-            realm.beginTransaction()
-            val statics = realm.where(Statics::class.java).findFirst()
+
+        realm.executeTransactionAsync({
+            val statics = it.where(Statics::class.java).findFirst()
             statics?.addPointVisit(pointID)
-            realm.commitTransaction()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+            Log.i("Insertar","Statics inserción iniciada: id: $pointID , statics ${statics?.getVisitedPoints()}")
+        }, {
+            Log.i("Insertar","Statics inserción success")
+            realm.close()
+
+        }, {
+            Log.i("Insertar","Statics inserción Fail")
+            realm.close()
+        })
+    }
+
+    fun updateStaticsAddAudiovisualVisit(audiovisualID: String) {
+        val realm = Realm.getDefaultInstance()
+
+        realm.executeTransactionAsync({
+            val statics = it.where(Statics::class.java).findFirst()
+            statics?.addAudiovisualVisit(audiovisualID)
+        }, {
+            realm.close()
+
+        }, {
+            realm.close()
+        })
+
+
     }
 
     fun updateStaticsAddCurrentRoute(RutaID: String): Boolean {
         val realm = Realm.getDefaultInstance()
         val ruta = realm.where(Ruta::class.java).equalTo("id",RutaID).findFirst()
-        val statics = getCurrentStatics() ?: return false
-        if (ruta == null) return false
+        var success = true
 
-        try {
-            realm.beginTransaction()
-            statics.setCurrentRoute(RutaID,ruta.idAudiovisuales)
-            realm.commitTransaction()
-        } catch (e: Exception) {
-            e.printStackTrace()
+        if (ruta == null) {
+            realm.close()
             return false
         }
 
-        return true
+        try {
+            realm.beginTransaction()
+            val statics = realm.where(Statics::class.java).findFirst()
+            if (statics == null) success = false
+            statics?.setCurrentRoute(RutaID,ruta.idAudiovisuales)
+            realm.commitTransaction()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            success = false
+        }
+
+        realm.close()
+        return success
     }
 
     fun getAudiovisualsFromCurrentRoute() : List<String> {
         val realm = Realm.getDefaultInstance()
+        Log.i("AudiovisualesEnRuta","------------------------------------------")
         val currentStatics = getCurrentStatics() ?: return listOf()
-        if (currentStatics.getCurrentRoute() == null) return listOf()
-
-        val routeDetails = realm.where(Ruta::class.java).equalTo("id",currentStatics.getCurrentRoute()).findFirst() ?: return listOf()
-
-        return  routeDetails.idAudiovisuales
+        Log.i("AudiovisualesEnRuta","CurrentStatics: $currentStatics")
+        val currentRoute = currentStatics.getCurrentRoute()
+        Log.i("AudiovisualesEnRuta","CurrentRoute Before: ${currentRoute}")
+        if (currentRoute == null) return listOf()
+        Log.i("AudiovisualesEnRuta","CurrentRoute After: ${currentRoute}")
+        val routeDetails = realm.where(Ruta::class.java).equalTo("id",currentRoute).findFirst() ?: return listOf()
+        Log.i("AudiovisualesEnRuta","RouteDetails: ${routeDetails}")
+        val copyOfRouteDetails = realm.copyFromRealm(routeDetails)
+        val audiovisualList = copyOfRouteDetails.idAudiovisuales
+        Log.i("AudiovisualesEnRuta","CoyList: ${audiovisualList}")
+        Log.i("AudiovisualesEnRuta","------------------------------------------")
+        realm.close()
+        return  audiovisualList
     }
 
     fun getAudiovisualsFromPoint(pointID: String): List<Audiovisual>? {
         val realm = Realm.getDefaultInstance()
         val audiovisuales = realm.where(Audiovisual::class.java).equalTo("id_punto_audiovisual",pointID).findAll()
 
-        return if (audiovisuales != null) audiovisuales
+        val copyOfAudiovisuales = realm.copyFromRealm(audiovisuales)
+        realm.close()
+        return if (copyOfAudiovisuales != null) copyOfAudiovisuales
         else null
     }
 
@@ -163,22 +226,24 @@ class DBRealmHelper {
         val resultado = ArrayList<AudiovisualParcelable>()
 
         audiovisuales.forEach{
+            val audiovisualCopy = realm.copyFromRealm(it)
             val productoras = ArrayList<ClienteProductoraParcelable>()
             val clientes = ArrayList<ClienteProductoraParcelable>()
-            val actores = ArrayList(it.actores)
-            val directores = ArrayList(it.directores)
-            it.productoras.forEach { productora ->
+            val actores = ArrayList(audiovisualCopy.actores)
+            val directores = ArrayList(audiovisualCopy.directores)
+            audiovisualCopy.productoras.forEach { productora ->
                 productoras.add(ClienteProductoraParcelable(productora.nombre!!,productora.link!!))
             }
-            it.clientes.forEach { cliente ->
+            audiovisualCopy.clientes.forEach { cliente ->
                 clientes.add(ClienteProductoraParcelable(cliente.nombre!!,cliente.link!!))
             }
             resultado.add(
-                AudiovisualParcelable(it.id,it.id_punto_audiovisual,it.title,it.description,it.img_cabecera,
-                it.img_cabecera_thumbnail,it.src,it.year,it.tipo_medio,it.formato,actores,directores,productoras,clientes,it.rutas_audiovisual)
+                AudiovisualParcelable(audiovisualCopy.id,audiovisualCopy.id_punto_audiovisual,audiovisualCopy.title,audiovisualCopy.description,audiovisualCopy.img_cabecera,
+                    audiovisualCopy.img_cabecera_thumbnail,audiovisualCopy.src,audiovisualCopy.year,audiovisualCopy.tipo_medio,audiovisualCopy.formato,actores,directores,productoras,clientes,audiovisualCopy.rutas_audiovisual)
             )
         }
 
+       realm.close()
        return resultado
     }
 
@@ -187,7 +252,9 @@ class DBRealmHelper {
         val realm = Realm.getDefaultInstance()
         val audiovisual = realm.where(Audiovisual::class.java).equalTo("id",audiovisualID).findFirst()
 
-        return audiovisual
+        val copyOfAudiovisual = realm.copyFromRealm(audiovisual)
+        realm.close()
+        return copyOfAudiovisual
     }
 
 
@@ -202,13 +269,17 @@ class DBRealmHelper {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        realm.close()
     }
 
     fun getRutesFromDB(): List<Ruta> {
         val realm = Realm.getDefaultInstance()
         val rutas = realm.where(Ruta::class.java).findAll()
 
-        return rutas
+        val copyOfRutas = realm.copyFromRealm(rutas)
+        realm.close()
+        return copyOfRutas
     }
 
     fun updateStaticsAfterInsertion(data: InsertStaticsResponse){
@@ -216,6 +287,9 @@ class DBRealmHelper {
         val staticsObj = realm.where(Statics::class.java).findFirst() ?: return
 
         try {
+            Log.i("Insertion","----------------")
+            Log.i("Insertion","data: ${data.rutesToDelete}")
+            Log.i("Insertion","----------------")
             realm.beginTransaction()
             staticsObj.dayTime = data.isDayTime
             staticsObj.cleanAudiovisuals(data.audiovisualsToDelete)
@@ -226,6 +300,8 @@ class DBRealmHelper {
         } catch (e: Exception){
             e.printStackTrace()
         }
+
+        realm.close()
 
     }
 
@@ -240,6 +316,8 @@ class DBRealmHelper {
         } catch (e: Exception){
             e.printStackTrace()
         }
+
+        realm.close()
     }
 
     fun deleteAudiovisualsFromDB(){
@@ -253,6 +331,8 @@ class DBRealmHelper {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        realm.close()
     }
 
     fun insertUserOnServerDB(userID: String, userDeviceMode: String, userDeviceName: String, userDeviceType: String){
@@ -306,12 +386,13 @@ class DBRealmHelper {
             if (audiovisualsArray.length() > 0) postData.put("audiovisuals",audiovisualsArray)
             if (rutesArray.length() > 0) postData.put("rutes", rutesArray)
 
-
+            Log.i("Insertion","PostData: $postData")
             it.execute(Callable {
                 serverServices.insertPeriodicallyStatics(postData)
             })
             it.taskListener = object : OnServerResponseFromStaticsQuery {
                 override fun onServerResponseFromStaticsQuery(result: InsertStaticsResponse?) {
+                    Log.i("Insertion","$result")
                     if (result == null || result.appStateError) return
 
                     appStateInterface?.appStateChange(result.appActive,result.message)
@@ -388,7 +469,10 @@ class DBRealmHelper {
 
         deleteAudiovisualsFromDB()
 
-        if (audiovisualList.isEmpty()) return true
+        if (audiovisualList.isEmpty()) {
+            realm.close()
+            return true
+        }
 
         var success = true
 
@@ -405,6 +489,7 @@ class DBRealmHelper {
         actualVersion ++
         updateVersion ++
 
+        realm.close()
         return  success
     }
 
@@ -413,7 +498,10 @@ class DBRealmHelper {
 
         deletePoisFromDB()
 
-        if (poisList.isEmpty()) return true
+        if (poisList.isEmpty()) {
+            realm.close()
+            return true
+        }
 
         var success = true
 
@@ -432,6 +520,7 @@ class DBRealmHelper {
         actualVersion ++
         updateVersion ++
 
+        realm.close()
         return success
     }
 
@@ -440,7 +529,10 @@ class DBRealmHelper {
 
         deleteRoutesFromDB()
 
-        if (rutesList.isEmpty()) return true
+        if (rutesList.isEmpty()) {
+            realm.close()
+            return true
+        }
 
         var success = true
 
@@ -458,6 +550,7 @@ class DBRealmHelper {
         actualVersion ++
         updateVersion ++
 
+        realm.close()
         return success
     }
 

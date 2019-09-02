@@ -27,20 +27,32 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/ADTrailing" app:layout_constraintGuide_percent="0.95"/>
+
     <android.support.design.widget.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true" app:srcCompat="@drawable/ic_icono_info"
             android:id="@+id/ChangeToInfoFAB"
-            app:layout_constraintTop_toTopOf="@+id/ADTop" app:layout_constraintEnd_toStartOf="@+id/ADTrailing"
-            app:backgroundTint="@color/blancoRoto"/>
-    <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:clickable="true" app:srcCompat="@drawable/ic_icono_back"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:backgroundTint="@color/blancoRoto"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_icono_info" />
+
+    <android.support.design.widget.FloatingActionButton
             android:id="@+id/BackToCameraFAB"
-            app:layout_constraintTop_toTopOf="@+id/ADTop" app:layout_constraintStart_toStartOf="@+id/ADLeading"
-            app:backgroundTint="@color/blancoRoto"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:clickable="true"
+            app:backgroundTint="@color/blancoRoto"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_icono_back" />
+
     <android.support.v4.view.ViewPager
             android:layout_width="0dp"
             android:layout_height="0dp"

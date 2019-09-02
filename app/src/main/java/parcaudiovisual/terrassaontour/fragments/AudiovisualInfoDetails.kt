@@ -1,36 +1,70 @@
 package parcaudiovisual.terrassaontour.fragments
 
 
-import android.accounts.AuthenticatorDescription
+import android.content.res.Resources
 import android.os.Bundle
-import android.support.design.widget.TabLayout
+import android.support.design.widget.AppBarLayout
 import android.support.v4.app.Fragment
+import android.support.v4.view.ViewCompat
+import android.support.v7.widget.AppCompatTextView
+import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_audiovisual_info_details.view.*
-import parcaudiovisual.terrassaontour.Audiovisual
+import parcaudiovisual.terrassaontour.AudiovisualParcelable
 import parcaudiovisual.terrassaontour.ClienteProductoraParcelable
 
 import parcaudiovisual.terrassaontour.R
-import parcaudiovisual.terrassaontour.adapters.InfoElementsPagerAdapter
-import parcaudiovisual.terrassaontour.adapters.InfoWindowImageViewPager
-import parcaudiovisual.terrassaontour.realm.DBRealmHelper
+import parcaudiovisual.terrassaontour.adapters.ElementsLikeActorsRecyclerAdapter
+import parcaudiovisual.terrassaontour.layoutManagers.NoScrollLinearLayoutManager
+import kotlin.math.roundToInt
 
-private const val TITLE = "title"
-private const val YEAR = "year"
-private const val DESCRIPTION = "description"
-private const val IMG = "image"
-private const val ACTOR = "actores"
-private const val DIRECTOR = "directores"
-private const val PRODUCTOR = "productores"
-private const val CLIENT = "clientes"
+private const val AUDIOVISUAL = "audiovisual"
 
 class AudiovisualInfoDetails : Fragment() {
     private var rootView: View? = null
-    private var mInfoElementsPagerAdapter: InfoElementsPagerAdapter? = null
+
+    private var linearLayoutManager: LinearLayoutManager? = null
+    private var adapter: ElementsLikeActorsRecyclerAdapter? = null
+
+    private var onOffsetChangeToolbarListener =
+
+        AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+            val screenHeight = Resources.getSystem().displayMetrics.heightPixels
+            val screenWidth = Resources.getSystem().displayMetrics.widthPixels
+            val textToolbar = rootView!!.AudiovisualTitleToolbar
+            val titleTextView = if (textToolbar.getChildAt(0) is AppCompatTextView) textToolbar.getChildAt(0) as AppCompatTextView else null
+            val yearTextView = if (textToolbar.getChildAt(0) is AppCompatTextView) textToolbar.getChildAt(1) as AppCompatTextView else null
+            Log.i("TextParams","Param1: ${titleTextView?.width}, Param2: ${titleTextView?.translationX}")
+            val marginMax = (screenWidth * 0.15).roundToInt()
+            val maximum = screenHeight * 0.4
+            val maxCenter = ((textToolbar.width ) / 2)
+            Log.i("Offset","Textoolbar Inset: ${textToolbar.contentInsetLeft}")
+            val offset = Math.abs(verticalOffset)
+            val percentage = (offset * 100) / maximum
+            val marginNormalized = ((percentage * marginMax) / 100).roundToInt()
+            val centerNormalized = (percentage * maxCenter / 100).toFloat()
+            if (offset >= 0 && offset <= maximum) {
+                textToolbar.setPadding(marginNormalized ,textToolbar.paddingTop,marginNormalized,textToolbar.paddingBottom)
+                titleTextView?.translationX = centerNormalized - 2 * marginNormalized
+                yearTextView?.translationX = centerNormalized - 2 * marginNormalized
+
+                if (offset == maximum.toInt()) {
+
+                }
+            }
+           /*if (Math.abs(verticalOffset) >= (screenHeight * 0.4)) {
+                  Log.i("Offset","TOP")
+                  textToolbar.setPadding(margin,textToolbar.paddingTop,margin,textToolbar.paddingBottom)
+           } else {
+
+           }*/
+        }
+
+    private var appbarListenerOffsetOn = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,50 +78,76 @@ class AudiovisualInfoDetails : Fragment() {
     }
 
     private fun loadData(){
-        rootView!!.AudiovisualInfoTitleLabel.text = arguments?.getString(TITLE)
-        rootView!!.AudiovisualInfoYearLabel.text = arguments?.getString(YEAR)
-
-        val actoresList = (arguments?.getStringArray(ACTOR) ?: emptyArray()).toList()
-        val directoresList = (arguments?.getStringArray(DIRECTOR) ?: emptyArray()).toList()
-        @Suppress("UNCHECKED_CAST")
-        val productorasArray: Array<ClienteProductoraParcelable> = arguments?.getParcelableArray(PRODUCTOR) as Array<ClienteProductoraParcelable>
-        @Suppress("UNCHECKED_CAST")
-        val clienteList: Array<ClienteProductoraParcelable> = arguments?.getParcelableArray(CLIENT) as Array<ClienteProductoraParcelable>
-
-        mInfoElementsPagerAdapter = InfoElementsPagerAdapter(fragmentManager!!,actoresList,directoresList,productorasArray.toList(),clienteList.toList())
-
-        rootView!!.ElementsInfoViewPager.adapter = mInfoElementsPagerAdapter
-
-        rootView!!.ElementsInfoViewPager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(rootView!!.ElementsInfoTabs))
-        rootView!!.ElementsInfoTabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(rootView!!.ElementsInfoViewPager))
+        val audiovisual = arguments?.getParcelable<AudiovisualParcelable>(AUDIOVISUAL)
+        val screenSize = Resources.getSystem().displayMetrics.heightPixels
+        rootView!!.AudiovisualImageView.layoutParams.height = (screenSize * 0.4).roundToInt()
 
         Picasso.get()
-            .load(arguments?.getString(IMG))
+            .load(audiovisual?.img_cabecera)
             .noFade()
             .placeholder(R.drawable.placeholder_loading_big)
-            .into(rootView!!.headerInfoImageView)
+            .into(rootView!!.AudiovisualImageView)
+
+        rootView!!.AudiovisualTitleToolbar.layoutParams.height = (screenSize * 0.15).roundToInt()
+        rootView!!.AudiovisualTitleToolbar.title = audiovisual?.title
+        rootView!!.AudiovisualTitleToolbar.subtitle = audiovisual?.year
+
+       /* rootView!!.AudiovisualInfoTitleLabel.text = audiovisual?.title
+        rootView!!.AudiovisualInfoYearLabel.text = audiovisual?.year
+
+        val screenSize = Resources.getSystem().displayMetrics.heightPixels
+        rootView!!.TheMostImportantGuide.setGuidelineBegin(screenSize / 2)
+        rootView!!.TheMostImportantGuide.
+
+        val actoresList = audiovisual?.actores ?: ArrayList()
+        val directoresList = audiovisual?.directores ?: ArrayList()
+        val productorasArray: ArrayList<ClienteProductoraParcelable> = audiovisual?.productoras ?: ArrayList()
+        val clienteList: ArrayList<ClienteProductoraParcelable> = audiovisual?.clientes ?: ArrayList()
+
+        val elements = ArrayList<Pair<String, List<Any>>>()
+        if (actoresList.isNotEmpty()) elements.add(Pair("Actores",actoresList))
+        if (directoresList.isNotEmpty()) elements.add(Pair("Directores",directoresList))
+        if (productorasArray.isNotEmpty()) elements.add(Pair("Productoras",productorasArray))
+        if (clienteList.isNotEmpty()) elements.add(Pair("Clientes",clienteList))
+        if (!audiovisual?.description.isNullOrEmpty()) elements.add(Pair("Descripción", listOf(audiovisual!!.description!!)))
+
+        linearLayoutManager = NoScrollLinearLayoutManager(context!!)
+        adapter = ElementsLikeActorsRecyclerAdapter(context!!,elements)
+        rootView!!.ElementsLikeActorsRV.layoutManager = linearLayoutManager
+        rootView!!.ElementsLikeActorsRV.adapter =  adapter*/
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setOffsetListener()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        deleteOffsetListener()
+    }
+
+    fun setOffsetListener(){
+        if (!appbarListenerOffsetOn) {
+            rootView!!.appbar.addOnOffsetChangedListener(onOffsetChangeToolbarListener)
+            appbarListenerOffsetOn = true
+        }
+    }
+
+    fun deleteOffsetListener(){
+        if (appbarListenerOffsetOn) {
+            rootView!!.appbar.removeOnOffsetChangedListener(onOffsetChangeToolbarListener)
+            appbarListenerOffsetOn = false
+        }
     }
 
     companion object {
-        fun newInstance(title: String?,
-                        year: String?,
-                        description: String?,
-                        img: String?,
-                        actores: List<String>,
-                        directores: List<String>,
-                        productoras: List<ClienteProductoraParcelable>,
-                        clientes: List<ClienteProductoraParcelable>): AudiovisualInfoDetails {
+        fun newInstance(audiovisualInfo: AudiovisualParcelable?): AudiovisualInfoDetails {
             val fragment = AudiovisualInfoDetails()
             val args = Bundle()
 
-            args.putString(TITLE,title)
-            args.putString(YEAR,year)
-            args.putString(DESCRIPTION,description)
-            args.putString(IMG,img)
-            args.putStringArray(ACTOR,actores.toTypedArray())
-            args.putStringArray(DIRECTOR,directores.toTypedArray())
-            args.putParcelableArray(PRODUCTOR,productoras.toTypedArray())
-            args.putParcelableArray(CLIENT,clientes.toTypedArray())
+            args.putParcelable(AUDIOVISUAL,audiovisualInfo)
             fragment.arguments = args
             return fragment
         }

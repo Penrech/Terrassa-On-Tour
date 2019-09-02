@@ -32,7 +32,7 @@ class StaticAudiovisualResource : Fragment() {
 
 
     companion object {
-        fun newInstance(imageURL: String): StaticAudiovisualResource{
+        fun newInstance(imageURL: String?): StaticAudiovisualResource{
             val fragment = StaticAudiovisualResource()
             val args = Bundle()
 

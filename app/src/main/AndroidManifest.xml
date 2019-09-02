@@ -39,11 +39,10 @@
         <activity
                 android:name=".MapsActivity"
                 android:label="@string/title_activity_maps"
-                android:screenOrientation="landscape">
+                android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
         <activity
-                android:name=".InfoWindowDetail"
-                android:screenOrientation="landscape">
+                android:name=".InfoWindowDetail">
         </activity>
         <activity android:name=".LoadingActivity">
             <intent-filter>

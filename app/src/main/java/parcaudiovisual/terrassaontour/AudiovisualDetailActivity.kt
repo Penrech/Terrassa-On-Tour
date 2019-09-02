@@ -5,14 +5,18 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.view.ViewPager
 import android.util.Log
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_audiovisual_detail.*
+import parcaudiovisual.terrassaontour.adapters.InfoElementsLinkRecyclerAdapter
 import parcaudiovisual.terrassaontour.adapters.InfoWindowImageViewPager
 import parcaudiovisual.terrassaontour.fragments.AudiovisualInfoDetails
+import parcaudiovisual.terrassaontour.fragments.InfoElementFragment
 import parcaudiovisual.terrassaontour.fragments.StaticAudiovisualResource
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
+import java.net.URL
 import java.util.*
 
-class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeListener {
+class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeListener, InfoElementsLinkRecyclerAdapter.OnClickLink {
 
     private lateinit var mPager: ViewPager
     private var pagerAdapter: InfoWindowImageViewPager? = null
@@ -20,22 +24,44 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
     private var fragmentStaticImage: StaticAudiovisualResource? = null
     private var fragmentInfoAudiovisual: AudiovisualInfoDetails? = null
 
+    private val InfoDrawable = R.drawable.ic_icono_info
+    private val CloseDrawable = R.drawable.ic_icono_cerrar
+
     private var fragmentsList: MutableList<Fragment> = mutableListOf()
 
     private var pagerIsListening = false
 
-    private lateinit var id: String
-    private lateinit var src: String
-    private lateinit var title: String
-
-
+    private var audiovisual: AudiovisualParcelable? = null
 
     override fun onPageScrollStateChanged(p0: Int) {}
 
     override fun onPageScrolled(p0: Int, p1: Float, p2: Int) {}
 
+    enum class Icon {
+        MULTIMEDIA, INFO
+    }
+    private var changeToIcon: Icon? = null
+        set(value) {
+            typeIcon = when(value) {
+                Icon.MULTIMEDIA -> {
+                    runOnUiThread {ChangeToInfoFAB.setImageDrawable(getDrawable(InfoDrawable))}
+                    Icon.MULTIMEDIA
+                } else -> {
+                    runOnUiThread {ChangeToInfoFAB.setImageDrawable(getDrawable(CloseDrawable)) }
+                    Icon.INFO
+                }
+            }
+        }
+
+    private var typeIcon: Icon? = null
+
     override fun onPageSelected(p0: Int) {
-        //Pagina cambiada
+        if (typeIcon != null) {
+            changeToIcon = when (typeIcon) {
+                Icon.MULTIMEDIA -> Icon.INFO
+                else -> Icon.MULTIMEDIA
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,29 +73,41 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
         setCloseOpenInfo()
         setCloseAudiovisualDetails()
 
+        loadData()
     }
 
     private fun loadData(){
         val dbHelper = DBRealmHelper()
 
-        id = intent.getStringExtra("ID")
-        val src = intent.getStringExtra("SRC")
-        val title = intent.getStringExtra("TITLE")
-        val year = intent.getStringExtra("YEAR")
-        val description = intent.getStringExtra("DESC")
-        val actor = intent.getParcelableArrayExtra("ACTOR")
-        val director = intent.getParcelableArrayExtra("DIRECTOR")
-        val productor = intent.getParcelableArrayExtra("PRODUCTOR")
-        val client = intent.getParcelableArrayExtra("CLIENT")
+        audiovisual = intent.getParcelableExtra("AUDIOVISUAL")
+
+        changeToIcon = Icon.MULTIMEDIA
+
+        if (audiovisual == null) {
+            errorLoadingAudiovisual()
+        }
+
+        dbHelper.updateStaticsAddAudiovisualVisit(audiovisual!!.id!!)
+
+        fragmentStaticImage = StaticAudiovisualResource.newInstance(audiovisual?.src)
+        fragmentInfoAudiovisual = AudiovisualInfoDetails.newInstance(audiovisual)
+
+        fragmentsList.add(fragmentStaticImage!!)
+        fragmentsList.add(fragmentInfoAudiovisual!!)
+
+        pagerAdapter = InfoWindowImageViewPager(supportFragmentManager,fragmentsList)
+        mPager.adapter = pagerAdapter
 
     }
 
     private fun setCloseOpenInfo(){
         ChangeToInfoFAB.setOnClickListener {
+            if (mPager.childCount < 2) return@setOnClickListener
+
             if (mPager.currentItem == 0) {
-                //mover a pager 1
+                mPager.currentItem = 1
             } else {
-                //Mover a pager 0
+                mPager.currentItem = 0
             }
         }
     }
@@ -102,6 +140,16 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
     override fun onResume() {
         super.onResume()
         listeningPagerEvents()
+    }
+
+    override fun onClickLink(urlString: String) {
+        Log.i("Clicked","URl Clicked $urlString")
+    }
+
+    fun errorLoadingAudiovisual(){
+        val toast = Toast.makeText(this,"No se han podido recuperar la información del audiovisual", Toast.LENGTH_LONG)
+        toast.show()
+        finish()
     }
 
 }

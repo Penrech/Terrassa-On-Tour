@@ -50,6 +50,7 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
     override fun onCreate() {
         super.onCreate()
 
+        Log.i("Lifecycle","On app created")
         dbHelper = DBRealmHelper()
         dbHelper.downloadInterface = this
         dbHelper.appStateInterface = this

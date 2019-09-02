@@ -22,7 +22,7 @@ private const val ARG_TYPE = "type"
 
 class InfoElementFragment : Fragment(), InfoElementsLinkRecyclerAdapter.OnClickLink {
 
-    private var listener: OnLinkClicked? = null
+    var listener: OnLinkClicked? = null
     private var rootView: View? = null
 
     private var layoutManager: RecyclerView.LayoutManager? = null
@@ -62,6 +62,8 @@ class InfoElementFragment : Fragment(), InfoElementsLinkRecyclerAdapter.OnClickL
 
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(rootView!!.InfoElementRV)
+
+        rootView!!.InfoElementRV.layoutManager = layoutManager
 
         when (listType!!) {
             ListType.NOLINK -> {

@@ -22,27 +22,37 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:id="@+id/MATopHorizontal"
             app:layout_constraintGuide_percent="0.05"/>
+
     <android.support.design.widget.FloatingActionButton
+            android:id="@+id/closeMultipleAudiovisual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:clickable="true" app:srcCompat="@drawable/ic_icono_back"
-            android:id="@+id/closeMultipleAudiovisual"
-            app:layout_constraintTop_toTopOf="@+id/MATopHorizontal"
-            app:layout_constraintStart_toStartOf="@+id/MALeadingVertical" app:backgroundTint="@color/blancoRoto"/>
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:clickable="true"
+            app:backgroundTint="@color/blancoRoto"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_icono_back" />
+
     <TextView
-            android:text="Audiovisuales en este punto de interés"
+            android:id="@+id/multipleAudiovisualLabel"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto_medium"
+            android:gravity="center"
+            android:text="Audiovisuales en este punto de interés"
+            android:textAlignment="textStart"
+            android:textColor="@color/negroRoto"
+            android:textSize="36sp"
             app:autoSizeStepGranularity="2sp"
             app:autoSizeTextType="uniform"
-            android:id="@+id/multipleAudiovisualLabel"
+            app:layout_constraintBottom_toBottomOf="@+id/closeMultipleAudiovisual"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/closeMultipleAudiovisual"
-            android:layout_marginStart="32dp"
-            app:layout_constraintTop_toTopOf="@+id/MATopHorizontal"
-            app:layout_constraintEnd_toStartOf="@+id/MATrailingVertical"
-            android:textColor="@color/negroRoto" android:fontFamily="@font/roboto_medium" android:textSize="36sp"
-            app:layout_constraintBottom_toBottomOf="@+id/closeMultipleAudiovisual" android:textAlignment="textStart"
-            android:gravity="center"/>
+            app:layout_constraintTop_toTopOf="@+id/closeMultipleAudiovisual" />
     <android.support.v7.widget.RecyclerView
             android:layout_width="0dp"
             android:layout_height="0dp"

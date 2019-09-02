@@ -103,8 +103,8 @@ open class ClienteProductora() : RealmObject() {
 class ClienteProductoraParcelable constructor(val nombre: String, val link: String): Parcelable{
 
     constructor(source: Parcel): this (
-        source.readString(),
-        source.readString()
+        source.readString()!!,
+        source.readString()!!
     )
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
@@ -138,7 +138,7 @@ class AudiovisualParcelable constructor(
     val tipo_medio: String?,
     val formato: String?,
     val actores : ArrayList<String>,
-    val directores : ArrayList<String>,
+    val directores : ArrayList<String> ,
     val productoras : ArrayList<ClienteProductoraParcelable>,
     val clientes : ArrayList<ClienteProductoraParcelable>,
     val rutas_audiovisual: List<String>
@@ -157,12 +157,8 @@ class AudiovisualParcelable constructor(
         source.readString(),
         source.createStringArrayList(),
         source.createStringArrayList(),
-        arrayListOf<ClienteProductoraParcelable>().apply {
-            source.readList(this, ClienteProductoraParcelable::class.java.classLoader)
-        },
-        arrayListOf<ClienteProductoraParcelable>().apply {
-            source.readList(this, ClienteProductoraParcelable::class.java.classLoader)
-        },
+        source.createTypedArrayList(ClienteProductoraParcelable.CREATOR),
+        source.createTypedArrayList(ClienteProductoraParcelable.CREATOR),
         source.createStringArrayList()
     )
 
@@ -179,8 +175,8 @@ class AudiovisualParcelable constructor(
         dest.writeString(formato)
         dest.writeStringList(actores)
         dest.writeStringList(directores)
-        dest.writeList(productoras)
-        dest.writeList(clientes)
+        dest.writeTypedList(productoras)
+        dest.writeTypedList(clientes)
         dest.writeStringList(rutas_audiovisual)
 
     }
@@ -191,7 +187,7 @@ class AudiovisualParcelable constructor(
 
     companion object CREATOR: Parcelable.Creator<AudiovisualParcelable>{
         override fun createFromParcel(source: Parcel?): AudiovisualParcelable {
-            return createFromParcel(source)
+            return AudiovisualParcelable(source!!)
         }
 
         override fun newArray(size: Int): Array<AudiovisualParcelable?> {

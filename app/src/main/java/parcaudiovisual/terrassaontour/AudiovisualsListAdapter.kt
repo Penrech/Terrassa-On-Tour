@@ -12,10 +12,10 @@ import android.view.ViewGroup
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.multiple_audiovisual_cell.view.*
 
-class AudiovisualsListAdapter(val context: Context, var audiovisualList: List<Audiovisual>, var ruteAudiovisualList: Array<String>, val listener: OnMaClickListener): RecyclerView.Adapter<AudiovisualsListAdapter.AudiovisualVH>() {
+class AudiovisualsListAdapter(val context: Context, var audiovisualList: ArrayList<AudiovisualParcelable>, private var ruteAudiovisualList: Array<String>, val listener: OnMaClickListener): RecyclerView.Adapter<AudiovisualsListAdapter.AudiovisualVH>() {
 
     interface OnMaClickListener{
-        fun onMaClickListener(idAudiovisual: String)
+        fun onMaClickListener(audiovisual: AudiovisualParcelable)
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): AudiovisualVH {
@@ -60,7 +60,7 @@ class AudiovisualsListAdapter(val context: Context, var audiovisualList: List<Au
         val background = itemView.MaLabelBackground
         var position: Int? = null
 
-        fun setAudiovisualData(audiovisual: Audiovisual, position: Int) {
+        fun setAudiovisualData(audiovisual: AudiovisualParcelable, position: Int) {
             title.text = audiovisual.title
             Log.i("AudiovisualesMA","$audiovisual")
             if (audiovisual.rutas_audiovisual.isNotEmpty()) {
@@ -72,7 +72,7 @@ class AudiovisualsListAdapter(val context: Context, var audiovisualList: List<Au
             setBackgroundToGray(audiovisualID = audiovisual.id!!,background = background)
 
             itemView.MARoot.setOnClickListener {
-                listener.onMaClickListener(audiovisual.id!!)
+                listener.onMaClickListener(audiovisual)
             }
 
 

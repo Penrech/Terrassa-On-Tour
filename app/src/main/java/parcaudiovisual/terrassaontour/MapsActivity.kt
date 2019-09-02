@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -40,6 +41,7 @@ import io.realm.RealmChangeListener
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.drawer_menu.*
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
+import java.lang.Exception
 import java.util.concurrent.Callable
 
 
@@ -155,6 +157,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         super.onPause()
         disableDBHelperListener()
         unTrackGoogleLocation()
+        Log.i("LIFE","Entro en pause")
     }
 
     override fun onResume() {
@@ -269,6 +272,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        try {
+            mMap.setInfoWindowAdapter(InfoWindowAdapter(applicationContext,layoutInflater,marcadores))
+            manageInfoWindowChangeSizeOnScreenRotate()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     //Funciones Google map
 
@@ -309,6 +321,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             }
 
             true
+        }
+    }
+
+    private fun manageInfoWindowChangeSizeOnScreenRotate() {
+        var markerInfoWindowShown : Marker? = null
+        for ((key, marker) in marcadores) {
+            if (marker.first.isInfoWindowShown) {
+                markerInfoWindowShown = marker.first
+                break
+            }
+        }
+        if (markerInfoWindowShown != null){
+            centerProperly(markerInfoWindowShown)
+            markerInfoWindowShown.hideInfoWindow()
+            markerInfoWindowShown.showInfoWindow()
         }
     }
 
@@ -695,8 +722,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     fun loadRandomPoint(){
         val idPuntoAleatorio = dbHelper.getRandomPoint() ?: return
         val audiovisualesRutaActual = dbHelper.getAudiovisualsFromCurrentRoute().toTypedArray()
-
-        dbHelper.updateStaticsAddPointVisit(idPuntoAleatorio)
+        Log.i("AudiovisualesEnRuta","${audiovisualesRutaActual.size}")
 
         val audiovisualesPunto = dbHelper.getParcelableAudiovisualsFromPoint(idPuntoAleatorio)
 

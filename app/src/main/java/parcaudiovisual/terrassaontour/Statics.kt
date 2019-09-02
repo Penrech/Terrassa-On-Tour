@@ -157,8 +157,9 @@ open class Statics: RealmObject() {
         newRute.date = rightNow.timeInMillis
         visitedRoutes.add(newRute)
 
-        currentRoute = null
-        visitedRouteAudiovisuals.clear()
+        visitedRouteAudiovisuals.forEach {
+            it.visited = false
+        }
     }
 
 

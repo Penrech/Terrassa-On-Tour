@@ -9,6 +9,7 @@ import parcaudiovisual.terrassaontour.ClienteProductoraParcelable
 import parcaudiovisual.terrassaontour.fragments.InfoElementFragment
 
 class InfoElementsPagerAdapter(fm : FragmentManager,
+                               val listener: InfoElementFragment.OnLinkClicked,
                                val actorList: List<String>,
                                val directorList: List<String>,
                                val productorList: List<ClienteProductoraParcelable>,
@@ -18,7 +19,9 @@ class InfoElementsPagerAdapter(fm : FragmentManager,
     private val elementsMatch = HashMap<Int,List<Any>>()
 
     override fun getItem(p0: Int): Fragment {
-        return InfoElementFragment.newInstance(elementsMatch[p0]!!)
+        val fragment = InfoElementFragment.newInstance(elementsMatch[p0]!!)
+        fragment.listener = listener
+        return fragment
     }
 
     override fun getCount(): Int {

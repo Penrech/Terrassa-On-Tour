@@ -36,7 +36,9 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
             return
         }
 
-        val pointAudiovisuals = loadAudiovisuals(idPoint)
+        dbHelper?.updateStaticsAddPointVisit(idPoint)
+
+        val pointAudiovisuals = intent.getParcelableArrayListExtra<AudiovisualParcelable>("AUDIOVISUALES")
 
         if (pointAudiovisuals == null) {
             errorLoadingAudiovisuals()
@@ -51,18 +53,13 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
         }
     }
 
-    fun loadAudiovisuals(idPoint: String): List<Audiovisual>? {
-        val audiovisuals = dbHelper?.getAudiovisualsFromPoint(idPoint)
-        return audiovisuals
-    }
-
     fun errorLoadingAudiovisuals(){
         val toast = Toast.makeText(this,"No se han podido recuperar los audiovisuales del punto de interés", Toast.LENGTH_LONG)
         toast.show()
         finish()
     }
 
-    fun initReyclerView(audiovisualList : List<Audiovisual>){
+    fun initReyclerView(audiovisualList : ArrayList<AudiovisualParcelable>){
         val numOfColumns = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) NUM_OF_COLUMN_LANDSCAPE else NUM_OF_COLUMN_PORTRAIT
         audiovisualsLayoutManager = GridLayoutManager(this, numOfColumns)
         multipleAudiovisualRV.layoutManager = audiovisualsLayoutManager
@@ -78,7 +75,10 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
         super.onResume()
     }
 
-    override fun onMaClickListener(idAudiovisual: String) {
-        Log.i("AudiovisualClick","Audiovisual clicked: $idAudiovisual")
+    override fun onMaClickListener(audiovisual: AudiovisualParcelable) {
+
+        val intent = Intent(this,AudiovisualDetailActivity::class.java)
+        intent.putExtra("AUDIOVISUAL",audiovisual)
+        startActivity(intent)
     }
 }
