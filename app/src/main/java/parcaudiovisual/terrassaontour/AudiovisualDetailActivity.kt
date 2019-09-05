@@ -2,6 +2,7 @@ package parcaudiovisual.terrassaontour
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.support.v4.app.Fragment
 import android.support.v4.view.ViewPager
 import android.util.Log
@@ -45,12 +46,17 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
             typeIcon = when(value) {
                 Icon.MULTIMEDIA -> {
                     runOnUiThread {ChangeToInfoFAB.setImageDrawable(getDrawable(InfoDrawable))}
+                    runOnUiThread{BackToCameraFAB.show()}
+                    //runOnUiThread { ChangeToInfoFAB.show() }
                     Icon.MULTIMEDIA
                 } else -> {
                     runOnUiThread {ChangeToInfoFAB.setImageDrawable(getDrawable(CloseDrawable)) }
+                    runOnUiThread{BackToCameraFAB.hide()}
+                    //runOnUiThread { ChangeToInfoFAB.hide() }
                     Icon.INFO
                 }
             }
+            field = value
         }
 
     private var typeIcon: Icon? = null
@@ -64,30 +70,58 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.putInt("PageNumber",mPager.currentItem)
+        outState?.putParcelable("audiovisual",audiovisual)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_audiovisual_detail)
 
         mPager = AudiovisualInfoPager
 
+        Log.i("Pruebas","Entro en onCreate")
+
+        val pageNumber = savedInstanceState?.getInt("PageNumber")
+        val bundleAudiovisual: AudiovisualParcelable? = savedInstanceState?.getParcelable("audiovisual")
+
         setCloseOpenInfo()
         setCloseAudiovisualDetails()
 
-        loadData()
+        managePage(pageNumber)
+
+        loadData(bundleAudiovisual)
+
     }
 
-    private fun loadData(){
-        val dbHelper = DBRealmHelper()
+    private fun managePage(previousPageNumber: Int?) {
+        if (previousPageNumber == null) return
 
-        audiovisual = intent.getParcelableExtra("AUDIOVISUAL")
+        if (previousPageNumber == 0) changeToIcon = Icon.MULTIMEDIA
+        else changeToIcon = Icon.INFO
+    }
 
-        changeToIcon = Icon.MULTIMEDIA
+    private fun loadData(previousData: AudiovisualParcelable?){
 
-        if (audiovisual == null) {
-            errorLoadingAudiovisual()
+        if (previousData == null) {
+
+            val dbHelper = DBRealmHelper()
+
+            audiovisual = intent.getParcelableExtra("AUDIOVISUAL")
+
+            changeToIcon = Icon.MULTIMEDIA
+
+            if (audiovisual == null) {
+                errorLoadingAudiovisual()
+            }
+
+            dbHelper.updateStaticsAddAudiovisualVisit(audiovisual!!.id!!)
+
+        } else {
+            audiovisual = previousData
         }
-
-        dbHelper.updateStaticsAddAudiovisualVisit(audiovisual!!.id!!)
 
         fragmentStaticImage = StaticAudiovisualResource.newInstance(audiovisual?.src)
         fragmentInfoAudiovisual = AudiovisualInfoDetails.newInstance(audiovisual)
@@ -140,6 +174,15 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
     override fun onResume() {
         super.onResume()
         listeningPagerEvents()
+    }
+
+    override fun onBackPressed() {
+        if (mPager.currentItem != 0) {
+            mPager.currentItem = 0
+        } else {
+            super.onBackPressed()
+        }
+
     }
 
     override fun onClickLink(urlString: String) {

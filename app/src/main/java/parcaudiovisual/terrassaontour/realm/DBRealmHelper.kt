@@ -44,7 +44,10 @@ class DBRealmHelper {
         val puntosDeInteres = realm.where(PuntoInteres::class.java).findAll()
 
         val copyOfPuntos = realm.copyFromRealm(puntosDeInteres)
+
+        Realm.compactRealm(realm.configuration)
         realm.close()
+
         return copyOfPuntos
     }
 
@@ -57,6 +60,7 @@ class DBRealmHelper {
 
         val randomId = puntosArray.first().id
 
+        Realm.compactRealm(realm.configuration)
         realm.close()
         return randomId
     }
@@ -84,7 +88,10 @@ class DBRealmHelper {
 
         Log.i("LifeCycle","Statics to be copied are: $staticsObj")
         val copyStaticsObj = realm.copyFromRealm(staticsObj)
+
+        Realm.compactRealm(realm.configuration)
         realm.close()
+
         return copyStaticsObj
 
     }
@@ -101,6 +108,7 @@ class DBRealmHelper {
             e.printStackTrace()
         }
 
+        Realm.compactRealm(realm.configuration)
         realm.close()
     }
 
@@ -115,7 +123,9 @@ class DBRealmHelper {
 
         val copyOfStatics = realm.copyFromRealm(staticsObj)
 
+        Realm.compactRealm(realm.configuration)
         realm.close()
+
         return copyOfStatics
     }
 
@@ -130,6 +140,7 @@ class DBRealmHelper {
             e.printStackTrace()
         }
 
+        Realm.compactRealm(realm.configuration)
         realm.close()
     }
 
@@ -142,10 +153,14 @@ class DBRealmHelper {
             Log.i("Insertar","Statics inserción iniciada: id: $pointID , statics ${statics?.getVisitedPoints()}")
         }, {
             Log.i("Insertar","Statics inserción success")
+
+            Realm.compactRealm(realm.configuration)
             realm.close()
 
         }, {
             Log.i("Insertar","Statics inserción Fail")
+
+            Realm.compactRealm(realm.configuration)
             realm.close()
         })
     }
@@ -157,9 +172,13 @@ class DBRealmHelper {
             val statics = it.where(Statics::class.java).findFirst()
             statics?.addAudiovisualVisit(audiovisualID)
         }, {
+
+            Realm.compactRealm(realm.configuration)
             realm.close()
 
         }, {
+
+            Realm.compactRealm(realm.configuration)
             realm.close()
         })
 
@@ -172,7 +191,10 @@ class DBRealmHelper {
         var success = true
 
         if (ruta == null) {
+
+            Realm.compactRealm(realm.configuration)
             realm.close()
+
             return false
         }
 
@@ -187,7 +209,9 @@ class DBRealmHelper {
             success = false
         }
 
+        Realm.compactRealm(realm.configuration)
         realm.close()
+
         return success
     }
 
@@ -206,7 +230,10 @@ class DBRealmHelper {
         val audiovisualList = copyOfRouteDetails.idAudiovisuales
         Log.i("AudiovisualesEnRuta","CoyList: ${audiovisualList}")
         Log.i("AudiovisualesEnRuta","------------------------------------------")
+
+        Realm.compactRealm(realm.configuration)
         realm.close()
+
         return  audiovisualList
     }
 
@@ -215,7 +242,10 @@ class DBRealmHelper {
         val audiovisuales = realm.where(Audiovisual::class.java).equalTo("id_punto_audiovisual",pointID).findAll()
 
         val copyOfAudiovisuales = realm.copyFromRealm(audiovisuales)
+
+        Realm.compactRealm(realm.configuration)
         realm.close()
+
         return if (copyOfAudiovisuales != null) copyOfAudiovisuales
         else null
     }
@@ -243,7 +273,9 @@ class DBRealmHelper {
             )
         }
 
+       Realm.compactRealm(realm.configuration)
        realm.close()
+
        return resultado
     }
 
@@ -253,7 +285,10 @@ class DBRealmHelper {
         val audiovisual = realm.where(Audiovisual::class.java).equalTo("id",audiovisualID).findFirst()
 
         val copyOfAudiovisual = realm.copyFromRealm(audiovisual)
+
+        Realm.compactRealm(realm.configuration)
         realm.close()
+
         return copyOfAudiovisual
     }
 
@@ -270,6 +305,7 @@ class DBRealmHelper {
             e.printStackTrace()
         }
 
+        Realm.compactRealm(realm.configuration)
         realm.close()
     }
 
@@ -278,7 +314,10 @@ class DBRealmHelper {
         val rutas = realm.where(Ruta::class.java).findAll()
 
         val copyOfRutas = realm.copyFromRealm(rutas)
+
+        Realm.compactRealm(realm.configuration)
         realm.close()
+
         return copyOfRutas
     }
 
@@ -301,6 +340,7 @@ class DBRealmHelper {
             e.printStackTrace()
         }
 
+        Realm.compactRealm(realm.configuration)
         realm.close()
 
     }
@@ -317,6 +357,7 @@ class DBRealmHelper {
             e.printStackTrace()
         }
 
+        Realm.compactRealm(realm.configuration)
         realm.close()
     }
 
@@ -332,6 +373,7 @@ class DBRealmHelper {
             e.printStackTrace()
         }
 
+        Realm.compactRealm(realm.configuration)
         realm.close()
     }
 
@@ -470,7 +512,10 @@ class DBRealmHelper {
         deleteAudiovisualsFromDB()
 
         if (audiovisualList.isEmpty()) {
+
+            Realm.compactRealm(realm.configuration)
             realm.close()
+
             return true
         }
 
@@ -489,7 +534,9 @@ class DBRealmHelper {
         actualVersion ++
         updateVersion ++
 
+        Realm.compactRealm(realm.configuration)
         realm.close()
+
         return  success
     }
 
@@ -499,7 +546,10 @@ class DBRealmHelper {
         deletePoisFromDB()
 
         if (poisList.isEmpty()) {
+
+            Realm.compactRealm(realm.configuration)
             realm.close()
+
             return true
         }
 
@@ -520,7 +570,9 @@ class DBRealmHelper {
         actualVersion ++
         updateVersion ++
 
+        Realm.compactRealm(realm.configuration)
         realm.close()
+
         return success
     }
 
@@ -530,7 +582,10 @@ class DBRealmHelper {
         deleteRoutesFromDB()
 
         if (rutesList.isEmpty()) {
+
+            Realm.compactRealm(realm.configuration)
             realm.close()
+
             return true
         }
 
@@ -550,7 +605,9 @@ class DBRealmHelper {
         actualVersion ++
         updateVersion ++
 
+        Realm.compactRealm(realm.configuration)
         realm.close()
+
         return success
     }
 

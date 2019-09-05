@@ -42,7 +42,8 @@
                 android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
         <activity
-                android:name=".InfoWindowDetail">
+                android:name=".InfoWindowDetail"
+                android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
         <activity android:name=".LoadingActivity">
             <intent-filter>
@@ -51,9 +52,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".MultipleAudiovisualActivity">
+        <activity
+                android:name=".MultipleAudiovisualActivity">
         </activity>
-        <activity android:name=".AudiovisualDetailActivity">
+        <activity
+                android:name=".AudiovisualDetailActivity">
         </activity>
     </application>
 

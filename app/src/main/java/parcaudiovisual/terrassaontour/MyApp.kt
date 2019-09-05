@@ -16,7 +16,6 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import io.realm.Realm
-import com.squareup.leakcanary.LeakCanary
 import io.realm.RealmConfiguration
 import parcaudiovisual.terrassaontour.interfaces.AppStateChange
 import parcaudiovisual.terrassaontour.interfaces.DataLoaded
@@ -62,13 +61,6 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         registerActivityLifecycleCallbacks(this)
-
-        if (LeakCanary.isInAnalyzerProcess(this)) {
-            // This process is dedicated to LeakCanary for heap analysis.
-            // You should not init your app in this process.
-            return
-        }
-        LeakCanary.install(this)
     }
 
     fun setUpRealm(){
@@ -76,6 +68,7 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         val config = RealmConfiguration.Builder()
         config.name("tot_db")
         config.deleteRealmIfMigrationNeeded()
+        config.compactOnLaunch()
         Realm.setDefaultConfiguration(config.build())
         dbHelper.removeCurrentPreviousRouteOnAppStart()
     }
@@ -164,7 +157,8 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
 
     override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
         currentActivity = activity
-        hideSystemUI()
+        //if (activity?.localClassName == "LoadingActivity" ) hideSystemUI()
+        //else showSystemUI()
         sendStatics()
     }
 
@@ -220,12 +214,17 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
     private fun hideSystemUI() {
 
         currentActivity?.window?.decorView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-
                 or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_FULLSCREEN)
         currentActivity?.window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+    }
+
+    private fun showSystemUI() {
+        currentActivity?.window?.decorView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
     }
 }

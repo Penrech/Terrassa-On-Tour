@@ -169,6 +169,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //showSystemUI()
         setContentView(R.layout.drawer_menu)
 
         dbHelper = DBRealmHelper()
@@ -731,6 +732,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         intent.putExtra("AUDIOVISUALES",audiovisualesPunto)
         intent.putExtra("RUTEAUD",audiovisualesRutaActual)
         startActivity(intent)
+    }
+
+    private fun showSystemUI() {
+        window?.decorView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
     }
 
   /*  fun loadRutes(){

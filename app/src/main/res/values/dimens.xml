@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="infoWindowCornerRadius">10dp</dimen>
+    <dimen name="infoToolbarHeight">72dp</dimen>
+    <dimen name="infoToolbarImageHeight">250dp</dimen>
 </resources>

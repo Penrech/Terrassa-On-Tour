@@ -37,6 +37,7 @@
             android:clickable="true"
             android:focusable="true"
             app:backgroundTint="@color/blancoRoto"
+            app:fabSize="mini"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_icono_info" />
@@ -49,6 +50,7 @@
             android:layout_marginTop="16dp"
             android:clickable="true"
             app:backgroundTint="@color/blancoRoto"
+            app:fabSize="mini"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_icono_back" />

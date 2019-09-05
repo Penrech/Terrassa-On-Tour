@@ -36,6 +36,7 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
                 Icon.NIGHT
             }
         }
+        field = value
     }
 
     private var typeIcon: Icon? = null
@@ -136,6 +137,14 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
         super.onResume()
         Log.i("Time","Time init Resume: ${Date()}")
         listeningPagerEvents()
+    }
+
+    override fun onBackPressed() {
+        if (mPager.currentItem != 0) {
+            mPager.currentItem = 0
+        } else {
+            super.onBackPressed()
+        }
     }
 
 }

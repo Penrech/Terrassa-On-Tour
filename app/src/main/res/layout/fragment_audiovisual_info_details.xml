@@ -8,30 +8,74 @@
     <android.support.design.widget.AppBarLayout
             android:id="@+id/appbar"
             android:layout_height="wrap_content"
-            android:layout_width="match_parent" android:fitsSystemWindows="true">
+            android:layout_width="match_parent"
+            android:fitsSystemWindows="true">
         <android.support.design.widget.CollapsingToolbarLayout
                 android:layout_width="match_parent"
+                app:statusBarScrim="@android:color/transparent"
+                app:scrimVisibleHeightTrigger = "0dp"
                 android:layout_height="match_parent"
                 app:toolbarId="@+id/AudiovisualTitleToolbar"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                app:contentScrim="@color/googleLightBlueLight" android:fitsSystemWindows="true"
+                app:contentScrim="@color/googleLightBlueLight"
+                android:fitsSystemWindows="true"
                 android:id="@+id/CollapsingToolbarLayout">
             <ImageView
                     android:src="@drawable/target_cupula_pequeno"
                     android:layout_width="match_parent"
-                    android:layout_height="250dp" android:id="@+id/AudiovisualImageView"
+                    android:layout_height="@dimen/infoToolbarImageHeight"
+                    android:id="@+id/AudiovisualImageView"
                     android:scaleType="centerCrop"/>
         </android.support.design.widget.CollapsingToolbarLayout>
         <android.support.v7.widget.Toolbar
-                app:autoSizeStepGranularity="2sp"
-                app:autoSizeTextType="uniform"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/googleLightBlueLight"
                 android:theme="@style/custom_action_bar"
-                android:minHeight="?attr/actionBarSize"
+                android:minHeight="@dimen/infoToolbarHeight"
                 android:id="@+id/AudiovisualTitleToolbar"
-                app:layout_scrollFlags="exitUntilCollapsed"/>
+                app:layout_scrollFlags="exitUntilCollapsed">
+
+            <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/infoToolbarHeight"
+                    android:layout_marginEnd="50dp">
+
+                <android.support.v7.widget.AppCompatTextView
+                        android:id="@+id/audInfoTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:gravity="center_vertical"
+                        android:text="Polla"
+                        android:textColor="@color/negroRoto"
+                        app:autoSizeMaxTextSize="24sp"
+                        app:autoSizeStepGranularity="2sp"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                </android.support.v7.widget.AppCompatTextView>
+
+                <android.support.v7.widget.AppCompatTextView
+                        android:id="@+id/audInfoYear"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="2dp"
+                        android:text="2018"
+                        android:textColor="@color/negroMasRoto"
+                        app:autoSizeMaxTextSize="18sp"
+                        app:autoSizeStepGranularity="2sp"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/audInfoTitle" />
+
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.v7.widget.Toolbar>
+
     </android.support.design.widget.AppBarLayout>
     <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"
