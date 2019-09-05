@@ -34,6 +34,7 @@ import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
+import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.*
 import io.realm.Realm
@@ -738,6 +739,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         window?.decorView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+    }
+
+    override fun onBackPressed() {
+        if (drawer_menu.isDrawerVisible(Gravity.START)){
+            drawer_menu.closeDrawer(Gravity.START)
+        } else {
+            super.onBackPressed()
+        }
+
     }
 
   /*  fun loadRutes(){
