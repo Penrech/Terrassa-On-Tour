@@ -1,9 +1,9 @@
 package parcaudiovisual.terrassaontour
 
 
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.view.ViewPager
+import androidx.viewpager.widget.ViewPager
 import android.util.Log
 import android.view.View
 import kotlinx.android.synthetic.main.activity_info_window_detail.*

@@ -1,8 +1,8 @@
 package parcaudiovisual.terrassaontour.adapters
 
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
 import parcaudiovisual.terrassaontour.Audiovisual
 import parcaudiovisual.terrassaontour.ClienteProductora
 import parcaudiovisual.terrassaontour.ClienteProductoraParcelable

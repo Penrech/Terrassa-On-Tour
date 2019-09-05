@@ -7,10 +7,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
+import androidx.core.content.ContextCompat
 import android.util.Log
 import android.view.View
 
@@ -26,9 +26,9 @@ import android.graphics.Point
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.net.Uri
-import android.support.v4.content.LocalBroadcastManager
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.Gravity
 import android.view.WindowManager
 import android.view.animation.Animation
@@ -119,7 +119,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     private var currentRoutePolyline: Polyline? = null
 
-    private var rutesLayoutManager: RecyclerView.LayoutManager? = null
+    private var rutesLayoutManager: androidx.recyclerview.widget.RecyclerView.LayoutManager? = null
     private var rutesAdapter: RutasListAdapter? = null
     private var rutesList: List<Ruta> = listOf()
 
@@ -235,7 +235,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     //Funciones de setteo
 
     private fun setUpRoutesRecyclerView(){
-        rutesLayoutManager = LinearLayoutManager(this)
+        rutesLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         rutesAdapter = RutasListAdapter(this,rutesList,this)
 
         rutes_RV.adapter = rutesAdapter
@@ -273,7 +273,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration?) {
+    override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         try {
             mMap.setInfoWindowAdapter(InfoWindowAdapter(applicationContext,layoutInflater,marcadores))

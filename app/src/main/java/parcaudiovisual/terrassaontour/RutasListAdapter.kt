@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Animatable
 import android.graphics.drawable.ColorDrawable
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +13,7 @@ import io.realm.RealmList
 import kotlinx.android.synthetic.main.ruta_cell.view.*
 import kotlinx.android.synthetic.main.rute_cell_loading.view.*
 
-class RutasListAdapter(private val context: Context, private var list: List<Ruta>, private var listener: LoadRuteUtils): RecyclerView.Adapter<RutasListAdapter.ViewHolder>() {
+class RutasListAdapter(private val context: Context, private var list: List<Ruta>, private var listener: LoadRuteUtils): androidx.recyclerview.widget.RecyclerView.Adapter<RutasListAdapter.ViewHolder>() {
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ViewHolder {
         Log.i("Lista","Size: ${list.isEmpty()} ${list.size}")
         return if (list.isEmpty()) {
@@ -69,7 +69,7 @@ class RutasListAdapter(private val context: Context, private var list: List<Ruta
         }
     }
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         var titleView = itemView.ruteTitle
         var colorView = itemView.ruteColor
         var caracteristicas = itemView.ruteCaracteristicas

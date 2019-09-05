@@ -1,23 +1,30 @@
 package parcaudiovisual.terrassaontour
 
-import android.support.v7.app.AppCompatActivity
+import android.graphics.Color
+import android.graphics.drawable.Drawable
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.support.v4.app.Fragment
-import android.support.v4.view.ViewPager
+import androidx.fragment.app.Fragment
+import androidx.viewpager.widget.ViewPager
 import android.util.Log
+import android.util.TypedValue
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_audiovisual_detail.*
+import kotlinx.android.synthetic.main.activity_info_window_detail.*
 import parcaudiovisual.terrassaontour.adapters.InfoElementsLinkRecyclerAdapter
 import parcaudiovisual.terrassaontour.adapters.InfoWindowImageViewPager
 import parcaudiovisual.terrassaontour.fragments.AudiovisualInfoDetails
 import parcaudiovisual.terrassaontour.fragments.InfoElementFragment
 import parcaudiovisual.terrassaontour.fragments.StaticAudiovisualResource
+import parcaudiovisual.terrassaontour.interfaces.ChangeDetailCloseButton
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
 import java.net.URL
 import java.util.*
+import kotlin.math.max
+import kotlin.math.min
 
-class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeListener, InfoElementsLinkRecyclerAdapter.OnClickLink {
+class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeListener, InfoElementsLinkRecyclerAdapter.OnClickLink, ChangeDetailCloseButton {
 
     private lateinit var mPager: ViewPager
     private var pagerAdapter: InfoWindowImageViewPager? = null
@@ -25,8 +32,8 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
     private var fragmentStaticImage: StaticAudiovisualResource? = null
     private var fragmentInfoAudiovisual: AudiovisualInfoDetails? = null
 
-    private val InfoDrawable = R.drawable.ic_icono_info
-    private val CloseDrawable = R.drawable.ic_icono_cerrar
+    private var InfoDrawable : Drawable? = null
+    private var CloseDrawable : Drawable? = null
 
     private var fragmentsList: MutableList<Fragment> = mutableListOf()
 
@@ -45,13 +52,19 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
         set(value) {
             typeIcon = when(value) {
                 Icon.MULTIMEDIA -> {
-                    runOnUiThread {ChangeToInfoFAB.setImageDrawable(getDrawable(InfoDrawable))}
+                    runOnUiThread {ChangeToInfoFAB.setImageDrawable(InfoDrawable)}
                     runOnUiThread{BackToCameraFAB.show()}
+                    if (isCloseButtonHiddenOnInfoWindow) {
+                        runOnUiThread { ChangeToInfoFAB.show() }
+                    }
                     //runOnUiThread { ChangeToInfoFAB.show() }
                     Icon.MULTIMEDIA
                 } else -> {
-                    runOnUiThread {ChangeToInfoFAB.setImageDrawable(getDrawable(CloseDrawable)) }
+                    runOnUiThread {ChangeToInfoFAB.setImageDrawable(CloseDrawable) }
                     runOnUiThread{BackToCameraFAB.hide()}
+                    if (isCloseButtonHiddenOnInfoWindow) {
+                        runOnUiThread { ChangeToInfoFAB.hide() }
+                    }
                     //runOnUiThread { ChangeToInfoFAB.hide() }
                     Icon.INFO
                 }
@@ -60,6 +73,8 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
         }
 
     private var typeIcon: Icon? = null
+
+    private var isCloseButtonHiddenOnInfoWindow = false
 
     override fun onPageSelected(p0: Int) {
         if (typeIcon != null) {
@@ -70,10 +85,10 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState?.putInt("PageNumber",mPager.currentItem)
-        outState?.putParcelable("audiovisual",audiovisual)
+        outState.putInt("PageNumber",mPager.currentItem)
+        outState.putParcelable("audiovisual",audiovisual)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,6 +101,9 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
 
         val pageNumber = savedInstanceState?.getInt("PageNumber")
         val bundleAudiovisual: AudiovisualParcelable? = savedInstanceState?.getParcelable("audiovisual")
+
+        InfoDrawable = getDrawable(R.drawable.ic_icono_info)?.mutate()
+        CloseDrawable = getDrawable(R.drawable.ic_icono_cerrar)?.mutate()
 
         setCloseOpenInfo()
         setCloseAudiovisualDetails()
@@ -146,6 +164,7 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
         }
     }
 
+
     private fun setCloseAudiovisualDetails(){
         BackToCameraFAB.setOnClickListener {
             finish()
@@ -195,4 +214,21 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
         finish()
     }
 
+    override fun hideChangeToMultimediaButton(hide: Boolean) {
+        if (hide) {
+            if (!isCloseButtonHiddenOnInfoWindow) {
+                ChangeToInfoFAB.hide()
+            }
+        } else {
+            if (isCloseButtonHiddenOnInfoWindow) {
+                ChangeToInfoFAB.show()
+            }
+        }
+
+        isCloseButtonHiddenOnInfoWindow = hide
+    }
+
+    override fun backToInfo() {
+        mPager.currentItem = 0
+    }
 }

@@ -2,16 +2,16 @@ package parcaudiovisual.terrassaontour
 
 import android.app.Activity
 import android.app.Application
-import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.OnLifecycleEvent
-import android.arch.lifecycle.LifecycleObserver
-import android.arch.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.ProcessLifecycleOwner
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.content.LocalBroadcastManager
+import com.google.android.material.snackbar.Snackbar
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.util.Log
 import android.view.View
 import android.view.WindowManager

@@ -2,7 +2,7 @@ package parcaudiovisual.terrassaontour
 
 import android.content.Context
 import android.content.res.Resources
-import android.support.design.widget.Snackbar
+import com.google.android.material.snackbar.Snackbar
 import android.util.Log
 import android.view.View
 import com.google.android.gms.maps.model.LatLng
@@ -88,7 +88,8 @@ class MapServices(var context: Context, private var rootView: View) {
     }
 
     private fun printError() {
-        val snackbar = Snackbar.make(rootView,"No hay conexión a internet para realizar la acción",Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(rootView,"No hay conexión a internet para realizar la acción",
+            Snackbar.LENGTH_LONG)
         snackbar.show()
     }
 

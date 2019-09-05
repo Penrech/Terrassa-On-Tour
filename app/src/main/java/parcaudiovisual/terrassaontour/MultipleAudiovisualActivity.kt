@@ -2,10 +2,10 @@ package parcaudiovisual.terrassaontour
 
 import android.content.Intent
 import android.content.res.Configuration
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -15,7 +15,7 @@ import kotlin.math.roundToInt
 
 class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter.OnMaClickListener {
 
-    private var audiovisualsLayoutManager: RecyclerView.LayoutManager? = null
+    private var audiovisualsLayoutManager: androidx.recyclerview.widget.RecyclerView.LayoutManager? = null
     private var audiovisualsAdapter: AudiovisualsListAdapter? = null
     private var dbHelper: DBRealmHelper? = null
 
@@ -61,7 +61,8 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
 
     fun initReyclerView(audiovisualList : ArrayList<AudiovisualParcelable>){
         val numOfColumns = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) NUM_OF_COLUMN_LANDSCAPE else NUM_OF_COLUMN_PORTRAIT
-        audiovisualsLayoutManager = GridLayoutManager(this, numOfColumns)
+        audiovisualsLayoutManager =
+            androidx.recyclerview.widget.GridLayoutManager(this, numOfColumns)
         multipleAudiovisualRV.layoutManager = audiovisualsLayoutManager
         val padding = 8 * resources.displayMetrics.density
         multipleAudiovisualRV.addItemDecoration(MaRecyclerViewItemDecoration(padding.roundToInt(),audiovisualList.size,numOfColumns))

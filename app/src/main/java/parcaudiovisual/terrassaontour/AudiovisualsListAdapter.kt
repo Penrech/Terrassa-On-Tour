@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.ColorFilter
 import android.graphics.PorterDuff
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +12,7 @@ import android.view.ViewGroup
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.multiple_audiovisual_cell.view.*
 
-class AudiovisualsListAdapter(val context: Context, var audiovisualList: ArrayList<AudiovisualParcelable>, private var ruteAudiovisualList: Array<String>, val listener: OnMaClickListener): RecyclerView.Adapter<AudiovisualsListAdapter.AudiovisualVH>() {
+class AudiovisualsListAdapter(val context: Context, var audiovisualList: ArrayList<AudiovisualParcelable>, private var ruteAudiovisualList: Array<String>, val listener: OnMaClickListener): androidx.recyclerview.widget.RecyclerView.Adapter<AudiovisualsListAdapter.AudiovisualVH>() {
 
     interface OnMaClickListener{
         fun onMaClickListener(audiovisual: AudiovisualParcelable)
@@ -53,7 +53,7 @@ class AudiovisualsListAdapter(val context: Context, var audiovisualList: ArrayLi
         }
     }
 
-    inner class AudiovisualVH(itemView: View) : RecyclerView.ViewHolder(itemView){
+    inner class AudiovisualVH(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView){
         val image = itemView.MaImage
         val title = itemView.MaAudiovisualTitleLabel
         val rutes = itemView.MaAudiovisualRutesLabel

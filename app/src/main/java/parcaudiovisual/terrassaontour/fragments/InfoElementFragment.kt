@@ -3,8 +3,8 @@ package parcaudiovisual.terrassaontour.fragments
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.*
+import androidx.fragment.app.Fragment
+import androidx.appcompat.widget.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +25,7 @@ class InfoElementFragment : Fragment(), InfoElementsLinkRecyclerAdapter.OnClickL
     var listener: OnLinkClicked? = null
     private var rootView: View? = null
 
-    private var layoutManager: RecyclerView.LayoutManager? = null
+    private var layoutManager: androidx.recyclerview.widget.RecyclerView.LayoutManager? = null
 
     private var listType: ListType? = null
 
@@ -46,7 +46,11 @@ class InfoElementFragment : Fragment(), InfoElementsLinkRecyclerAdapter.OnClickL
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        layoutManager = LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false)
+        layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
+            context,
+            androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL,
+            false
+        )
         if (context is OnLinkClicked) {
             listener = context
         } else {
@@ -55,12 +59,16 @@ class InfoElementFragment : Fragment(), InfoElementsLinkRecyclerAdapter.OnClickL
     }
 
     fun setRecyclerView(){
-        layoutManager = LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false)
+        layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
+            context,
+            androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL,
+            false
+        )
         val type = arguments?.getInt(ARG_TYPE) ?: return
 
         listType = if (type == 1) ListType.LINK else ListType.NOLINK
 
-        val snapHelper = PagerSnapHelper()
+        val snapHelper = androidx.recyclerview.widget.PagerSnapHelper()
         snapHelper.attachToRecyclerView(rootView!!.InfoElementRV)
 
         rootView!!.InfoElementRV.layoutManager = layoutManager

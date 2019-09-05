@@ -1,9 +1,9 @@
 package parcaudiovisual.terrassaontour.layoutManagers
 
 import android.content.Context
-import android.support.v7.widget.GridLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 
-class NonScrollableGridLayoutManager(context: Context, spanCount: Int) : GridLayoutManager(context, spanCount) {
+class NonScrollableGridLayoutManager(context: Context, spanCount: Int) : androidx.recyclerview.widget.GridLayoutManager(context, spanCount) {
     private var isScrollEnabled = false
 
     fun setScrollEnabled(flag: Boolean) {

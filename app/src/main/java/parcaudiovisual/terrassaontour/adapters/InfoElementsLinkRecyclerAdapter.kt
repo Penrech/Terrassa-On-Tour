@@ -2,7 +2,7 @@ package parcaudiovisual.terrassaontour.adapters
 
 import android.content.Context
 import android.graphics.Paint
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +13,7 @@ import android.util.Log
 import kotlinx.android.synthetic.main.equipo_info_element_audiovisual_cell.view.*
 
 
-class InfoElementsLinkRecyclerAdapter(private val context: Context, private var list: List<ClienteProductoraParcelable>, val listener: OnClickLink) : RecyclerView.Adapter<InfoElementsLinkRecyclerAdapter.ViewHolder>() {
+class InfoElementsLinkRecyclerAdapter(private val context: Context, private var list: List<ClienteProductoraParcelable>, val listener: OnClickLink) : androidx.recyclerview.widget.RecyclerView.Adapter<InfoElementsLinkRecyclerAdapter.ViewHolder>() {
 
     interface OnClickLink{
         fun onClickLink(urlString: String)
@@ -34,7 +34,7 @@ class InfoElementsLinkRecyclerAdapter(private val context: Context, private var 
         p0.setTextAndLink(list[p1])
     }
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         val text = itemView.ElementName
 
         fun setTextAndLink(clienteProductora: ClienteProductoraParcelable) {

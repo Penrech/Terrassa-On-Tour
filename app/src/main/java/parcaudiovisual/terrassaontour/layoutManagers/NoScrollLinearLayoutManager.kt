@@ -1,9 +1,9 @@
 package parcaudiovisual.terrassaontour.layoutManagers
 
 import android.content.Context
-import android.support.v7.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 
-class NoScrollLinearLayoutManager(context: Context) : LinearLayoutManager(context) {
+class NoScrollLinearLayoutManager(context: Context) : androidx.recyclerview.widget.LinearLayoutManager(context) {
     private var isScrollEnabled = false
 
 

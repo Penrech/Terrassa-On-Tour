@@ -1,8 +1,8 @@
 package parcaudiovisual.terrassaontour.adapters
 
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
 
 class InfoWindowImageViewPager(fragmentManager: FragmentManager, private var listFragment: List<Fragment>): FragmentPagerAdapter(fragmentManager) {
     override fun getItem(p0: Int): Fragment {

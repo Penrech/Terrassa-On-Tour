@@ -2,8 +2,8 @@ package parcaudiovisual.terrassaontour.adapters
 
 import android.content.Context
 import android.content.res.Configuration
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +13,7 @@ import parcaudiovisual.terrassaontour.ClienteProductoraParcelable
 import parcaudiovisual.terrassaontour.R
 import parcaudiovisual.terrassaontour.layoutManagers.NonScrollableGridLayoutManager
 
-class ElementsLikeActorsRecyclerAdapter(val context: Context, val elements: ArrayList<Pair<String,List<Any>>>) : RecyclerView.Adapter<ElementsLikeActorsRecyclerAdapter.ViewHolder>() {
+class ElementsLikeActorsRecyclerAdapter(val context: Context, val elements: ArrayList<Pair<String,List<Any>>>) : androidx.recyclerview.widget.RecyclerView.Adapter<ElementsLikeActorsRecyclerAdapter.ViewHolder>() {
 
     private val NUM_OF_COLUMN_LANDSCAPE = 3
     private val NUM_OF_COLUMN_PORTRAIT = 2
@@ -32,7 +32,7 @@ class ElementsLikeActorsRecyclerAdapter(val context: Context, val elements: Arra
         p0.setElement(elements[p1])
     }
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         val headerText = itemView.ElementTitle
         val recyclerView = itemView.ElementsAudiovisualRV
 

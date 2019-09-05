@@ -11,31 +11,31 @@
             android:id="@+id/map"
             tools:context=".MapsActivity"
             android:name="com.google.android.gms.maps.SupportMapFragment"/>
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <android.support.constraint.Guideline
+        <androidx.constraintlayout.widget.Guideline
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/top"
                 app:layout_constraintGuide_percent=".05"/>
-        <android.support.constraint.Guideline
+        <androidx.constraintlayout.widget.Guideline
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/bottom" app:layout_constraintGuide_percent=".95"/>
-        <android.support.constraint.Guideline
+        <androidx.constraintlayout.widget.Guideline
                 android:orientation="vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/leading"
                 app:layout_constraintGuide_percent=".05"/>
-        <android.support.constraint.Guideline
+        <androidx.constraintlayout.widget.Guideline
                 android:orientation="vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/trailing"
                 app:layout_constraintGuide_percent=".95"/>
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/userPosition"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -49,7 +49,7 @@
                 app:srcCompat="@drawable/ic_icono__gps"
                 app:useCompatPadding="false" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/rutesButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -62,7 +62,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_icono_rutas" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/closeRuteFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -75,7 +75,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_icono_cerrar" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/ARButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -86,6 +86,6 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:srcCompat="@drawable/ic_icono_ar" />
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>
