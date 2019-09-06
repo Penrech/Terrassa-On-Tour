@@ -80,8 +80,16 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
         val imagesData = intent.getParcelableExtra<DetailInfoImages>("imagesToDetail")
 
         if (imagesData != null) {
-            fragmentsList.add(BigImageInfoWindow.newInstance(imagesData.imgPrincipal))
-            fragmentsList.add(BigImageInfoWindow.newInstance(imagesData.imgSecundary))
+            var imagePrincipal = imagesData.imgPrincipal
+            var imageSecundary = imagesData.imgSecundary
+
+            if (imagesData.day == 0) {
+                imagePrincipal = imagesData.imgSecundary
+                imageSecundary = imagesData.imgPrincipal
+            }
+
+            fragmentsList.add(BigImageInfoWindow.newInstance(imagePrincipal))
+            fragmentsList.add(BigImageInfoWindow.newInstance(imageSecundary))
             if (typeIcon == null) changeToIcon =  if (imagesData.day == 1) Icon.DAY else Icon.NIGHT
         }
 

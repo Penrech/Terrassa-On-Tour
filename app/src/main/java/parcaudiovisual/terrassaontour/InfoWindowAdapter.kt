@@ -19,7 +19,6 @@ import java.lang.Exception
 import android.view.WindowManager
 import kotlin.math.round
 
-
 class InfoWindowAdapter(
     private val ctxt: Context, val inflater: LayoutInflater,
     private val marcadores: HashMap<String,  Pair<Marker,PuntoInteres>>
@@ -65,7 +64,11 @@ class InfoWindowAdapter(
             if (!allMarkerInfo?.exterior!!) popup!!.locationColor.backgroundTintList = ColorStateList.valueOf(ctxt.getColor(R.color.interiorYellow))
             else popup!!.locationColor.backgroundTintList = ColorStateList.valueOf(ctxt.getColor(R.color.exteriorBlue))
 
-            val image = allMarkerInfo.img_url
+            var image = allMarkerInfo.img_url_small
+
+            if (allMarkerInfo.deDia == false) {
+                image = allMarkerInfo.img_url_small_secundary
+            }
 
             val icon = popup!!.poiImage
 

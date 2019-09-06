@@ -15,7 +15,8 @@ open class PuntoInteres: RealmObject() {
     var title: String? = null
     var latitud: Double = 0.0
     var longitud: Double = 0.0
-    var img_url: String? = null
+    var img_url_small: String? = null
+    var img_url_small_secundary: String? = null
     var img_url_big: String? = null
     var img_url_big_secundary: String? = null
     var exterior: Boolean? = null
@@ -32,7 +33,8 @@ open class PuntoInteres: RealmObject() {
                 resultado.title = referencia.getString("title")
                 resultado.latitud = referencia.getString("lat").toDouble()
                 resultado.longitud = referencia.getString("lon").toDouble()
-                resultado.img_url = referencia.getString("img_url")
+                resultado.img_url_small = referencia.getString("img_url_small")
+                resultado.img_url_small_secundary = referencia.getString("img_url_small_secundary")
                 resultado.img_url_big = referencia.getString("img_url_big")
                 resultado.img_url_big_secundary = referencia.getString("img_url_big_secundary")
                 resultado.exterior = referencia.getString("exterior") == "1"

@@ -1,7 +1,9 @@
 package parcaudiovisual.terrassaontour
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -18,13 +20,18 @@ import parcaudiovisual.terrassaontour.fragments.AudiovisualInfoDetails
 import parcaudiovisual.terrassaontour.fragments.InfoElementFragment
 import parcaudiovisual.terrassaontour.fragments.StaticAudiovisualResource
 import parcaudiovisual.terrassaontour.interfaces.ChangeDetailCloseButton
+import parcaudiovisual.terrassaontour.interfaces.SendLinkToOpenInBrowser
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
 import java.net.URL
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeListener, InfoElementsLinkRecyclerAdapter.OnClickLink, ChangeDetailCloseButton {
+class AudiovisualDetailActivity : AppCompatActivity(),
+    ViewPager.OnPageChangeListener,
+    InfoElementsLinkRecyclerAdapter.OnClickLink,
+    ChangeDetailCloseButton,
+    SendLinkToOpenInBrowser{
 
     private lateinit var mPager: ViewPager
     private var pagerAdapter: InfoWindowImageViewPager? = null
@@ -230,5 +237,11 @@ class AudiovisualDetailActivity : AppCompatActivity(), ViewPager.OnPageChangeLis
 
     override fun backToInfo() {
         mPager.currentItem = 0
+    }
+
+    override fun openInBrowser(link: String) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setData(Uri.parse(link))
+        startActivity(intent)
     }
 }

@@ -3,12 +3,9 @@ package parcaudiovisual.terrassaontour.fragments
 
 import android.content.Context
 import android.content.res.Resources
-import android.graphics.Color
 import android.os.Bundle
 import com.google.android.material.appbar.AppBarLayout
 import androidx.fragment.app.Fragment
-import androidx.core.view.ViewCompat
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import android.util.Log
 import android.util.TypedValue
@@ -17,24 +14,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.fragment_audiovisual_info_details.*
 import kotlinx.android.synthetic.main.fragment_audiovisual_info_details.view.*
-import kotlinx.android.synthetic.main.fragment_audiovisual_info_details.view.AudiovisualTitleToolbar
 import parcaudiovisual.terrassaontour.AudiovisualParcelable
 import parcaudiovisual.terrassaontour.ClienteProductoraParcelable
 
 import parcaudiovisual.terrassaontour.R
-import parcaudiovisual.terrassaontour.adapters.ElementsLikeActorsRecyclerAdapter
+import parcaudiovisual.terrassaontour.SectionModel
+import parcaudiovisual.terrassaontour.adapters.SectionRecyclerViewAdapter
 import parcaudiovisual.terrassaontour.interfaces.ChangeDetailCloseButton
 import parcaudiovisual.terrassaontour.layoutManagers.NoScrollLinearLayoutManager
-import java.lang.reflect.Type
-import java.math.RoundingMode
-import java.text.DecimalFormat
 import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 private const val AUDIOVISUAL = "audiovisual"
 
@@ -42,9 +33,7 @@ class AudiovisualInfoDetails : Fragment() {
     private var sendInfoToParentInterface: ChangeDetailCloseButton? = null
 
     private var rootView: View? = null
-
-    private var linearLayoutManager: androidx.recyclerview.widget.LinearLayoutManager? = null
-    private var adapter: ElementsLikeActorsRecyclerAdapter? = null
+    private var crewRecyclerView: RecyclerView? = null
 
     private var popupAnimation: Animation? = null
     private var popOutAnimation: Animation? = null
@@ -143,6 +132,8 @@ class AudiovisualInfoDetails : Fragment() {
     ): View? {
         rootView = inflater.inflate(R.layout.fragment_audiovisual_info_details, container, false)
 
+        setUpRecyclerView()
+
         imageToolbarHeight = context?.resources?.getDimension(R.dimen.infoToolbarImageHeight)
         textToolbarHeight = context?.resources?.getDimension(R.dimen.infoToolbarHeight)
         midHeightOfFAB = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,20f,context?.resources?.displayMetrics)
@@ -172,21 +163,63 @@ class AudiovisualInfoDetails : Fragment() {
 
         val actoresList = audiovisual?.actores ?: ArrayList()
         val directoresList = audiovisual?.directores ?: ArrayList()
-        val productorasArray: ArrayList<ClienteProductoraParcelable> = audiovisual?.productoras ?: ArrayList()
+        val productorasList: ArrayList<ClienteProductoraParcelable> = audiovisual?.productoras ?: ArrayList()
         val clienteList: ArrayList<ClienteProductoraParcelable> = audiovisual?.clientes ?: ArrayList()
 
-        val elements = ArrayList<Pair<String, List<Any>>>()
-        if (actoresList.isNotEmpty()) elements.add(Pair("Actores",actoresList))
-        if (directoresList.isNotEmpty()) elements.add(Pair("Directores",directoresList))
-        if (productorasArray.isNotEmpty()) elements.add(Pair("Productoras",productorasArray))
-        if (clienteList.isNotEmpty()) elements.add(Pair("Clientes",clienteList))
-        if (!audiovisual?.description.isNullOrEmpty()) elements.add(Pair("Descripción", listOf(audiovisual!!.description!!)))
+        val sectionModelArrayList = ArrayList<SectionModel>()
 
-        linearLayoutManager = NoScrollLinearLayoutManager(context!!)
-        adapter = ElementsLikeActorsRecyclerAdapter(context!!,elements)
-        /*rootView!!.ElementsLikeActorsRV.layoutManager = linearLayoutManager
-        rootView!!.ElementsLikeActorsRV.adapter =  adapter*/
+        if (actoresList.isNotEmpty()) {
+            val sectionTitle = if (actoresList.size > 1) "Actores/Actrices" else "Actor/Actriz"
+            val pairArray = ArrayList<Pair<String,String?>>()
+            actoresList.forEach {
+                pairArray.add(Pair(it,null))
+            }
+            sectionModelArrayList.add(SectionModel(sectionTitle,pairArray))
+        }
 
+        if (directoresList.isNotEmpty()) {
+            val sectionTitle = if (directoresList.size > 1) "Directores/as" else "Director/a"
+            val pairArray = ArrayList<Pair<String,String?>>()
+            directoresList.forEach {
+                pairArray.add(Pair(it,null))
+            }
+            sectionModelArrayList.add(SectionModel(sectionTitle,pairArray))
+        }
+
+        if (productorasList.isNotEmpty()) {
+            val sectionTitle = if (productorasList.size > 1) "Productoras" else "Productora"
+            val pairArray = ArrayList<Pair<String,String?>>()
+            productorasList.forEach {
+                pairArray.add(Pair(it.nombre,it.link))
+            }
+            sectionModelArrayList.add(SectionModel(sectionTitle,pairArray))
+        }
+
+        if (clienteList.isNotEmpty()) {
+            val sectionTitle = if (clienteList.size > 1) "Clientes" else "Cliente"
+            val pairArray = ArrayList<Pair<String,String?>>()
+            clienteList.forEach {
+                pairArray.add(Pair(it.nombre,it.link))
+            }
+            sectionModelArrayList.add(SectionModel(sectionTitle,pairArray))
+        }
+
+        val adapter = SectionRecyclerViewAdapter(context!!,sectionModelArrayList)
+        crewRecyclerView!!.adapter = adapter
+
+        if (!audiovisual?.description.isNullOrEmpty()) {
+            rootView!!.description_text.text = audiovisual!!.description
+        }
+
+
+
+    }
+
+    private fun setUpRecyclerView(){
+        crewRecyclerView = rootView!!.sectioned_RV
+        crewRecyclerView!!.setHasFixedSize(true)
+        val linearLayoutManager = LinearLayoutManager(context)
+        crewRecyclerView!!.layoutManager = linearLayoutManager
     }
 
     override fun onAttach(context: Context) {

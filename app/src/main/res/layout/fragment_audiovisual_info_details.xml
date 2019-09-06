@@ -27,13 +27,14 @@
                     android:id="@+id/AudiovisualImageView"
                     android:scaleType="centerCrop"/>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
+
         <androidx.appcompat.widget.Toolbar
+                android:id="@+id/AudiovisualTitleToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/googleLightBlueLight"
-                android:theme="@style/custom_action_bar"
+                android:background="@color/googleRed300"
                 android:minHeight="@dimen/infoToolbarHeight"
-                android:id="@+id/AudiovisualTitleToolbar"
+                android:theme="@style/custom_action_bar"
                 app:layout_scrollFlags="exitUntilCollapsed">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -47,7 +48,7 @@
                         android:layout_marginEnd="16dp"
                         android:gravity="center_vertical"
                         android:text="Hola"
-                        android:textColor="@color/negroRoto"
+                        android:textColor="@android:color/background_light"
                         app:autoSizeMaxTextSize="24sp"
                         app:autoSizeStepGranularity="2sp"
                         app:autoSizeTextType="uniform"
@@ -64,7 +65,7 @@
                         android:layout_marginTop="2dp"
                         android:layout_marginEnd="16dp"
                         android:text="2018"
-                        android:textColor="@color/negroMasRoto"
+                        android:textColor="@color/blancoRoto"
                         app:autoSizeMaxTextSize="18sp"
                         app:autoSizeStepGranularity="2sp"
                         app:autoSizeTextType="uniform"
@@ -77,11 +78,11 @@
                 <ImageButton
                         android:id="@+id/closeButtonFromToolbar"
                         style="@android:style/Widget.ImageButton"
-                        android:tint="@android:color/background_light"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_marginEnd="16dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
+                        android:tint="@android:color/background_light"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
@@ -96,5 +97,44 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/sectioned_RV"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginEnd="16dp"
+                    android:overScrollMode="never"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+            </androidx.recyclerview.widget.RecyclerView>
+
+            <TextView
+                    android:id="@+id/description_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="64dp"
+                    android:fontFamily="@font/roboto"
+                    android:justificationMode="inter_word"
+                    android:lineSpacingExtra="8sp"
+                    android:text="Texto"
+                    android:textColor="@color/negroMasRoto"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/sectioned_RV"
+                    app:layout_constraintVertical_bias="0.0" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
