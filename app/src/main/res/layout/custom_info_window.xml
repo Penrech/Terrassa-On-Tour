@@ -124,7 +124,7 @@
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:background="@drawable/corner_infowindow_image"
-                    android:backgroundTint="@color/exteriorBlue"
+                    android:backgroundTint="@color/colorAccent"
                     app:layout_constraintBottom_toBottomOf="@id/guideline"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/guideline2"

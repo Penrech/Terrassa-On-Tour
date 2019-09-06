@@ -48,7 +48,7 @@
             android:layout_marginBottom="16dp"
             android:clickable="true"
             android:tint="@color/blancoRoto"
-            app:backgroundTint="@color/exteriorBlue"
+            app:backgroundTint="@color/colorAccent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_icono_dia" />

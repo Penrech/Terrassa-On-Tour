@@ -555,7 +555,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
 
-
     //Funciones Localizacion
 
     private fun moveToUserPosition(){

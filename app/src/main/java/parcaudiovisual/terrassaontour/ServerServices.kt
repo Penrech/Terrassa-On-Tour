@@ -7,9 +7,11 @@ import org.json.JSONObject
 import java.io.*
 import java.lang.Exception
 import java.lang.StringBuilder
+import java.math.BigInteger
 import java.net.URI
 import java.net.URL
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import javax.net.ssl.HttpsURLConnection
 
 class ServerServices {
@@ -65,9 +67,6 @@ class ServerServices {
             for (i: Int in 0 until successRutes.length()) {
                 response.rutesToDelete.add(successRutes.getString(i))
             }
-
-
-
 
 
         } catch (e: Exception) {

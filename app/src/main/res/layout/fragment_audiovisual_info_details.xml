@@ -10,29 +10,31 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:fitsSystemWindows="true">
+
         <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/CollapsingToolbarLayout"
                 android:layout_width="match_parent"
-                app:statusBarScrim="@android:color/transparent"
-                app:scrimVisibleHeightTrigger = "0dp"
                 android:layout_height="match_parent"
-                app:toolbarId="@+id/AudiovisualTitleToolbar"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                app:contentScrim="@color/googleLightBlueLight"
                 android:fitsSystemWindows="true"
-                android:id="@+id/CollapsingToolbarLayout">
+                app:contentScrim="@color/colorAccent"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                app:scrimVisibleHeightTrigger="0dp"
+                app:statusBarScrim="@android:color/transparent"
+                app:toolbarId="@+id/AudiovisualTitleToolbar">
+
             <ImageView
-                    android:src="@drawable/target_cupula_pequeno"
+                    android:id="@+id/AudiovisualImageView"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/infoToolbarImageHeight"
-                    android:id="@+id/AudiovisualImageView"
-                    android:scaleType="centerCrop"/>
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/target_cupula_pequeno" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         <androidx.appcompat.widget.Toolbar
                 android:id="@+id/AudiovisualTitleToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/googleRed300"
+                android:background="@color/colorAccent"
                 android:minHeight="@dimen/infoToolbarHeight"
                 android:theme="@style/custom_action_bar"
                 app:layout_scrollFlags="exitUntilCollapsed">
@@ -44,10 +46,11 @@
                 <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/audInfoTitle"
                         android:layout_width="0dp"
-                        android:layout_height="40dp"
+                        android:layout_height="30dp"
+                        android:layout_marginTop="8dp"
                         android:layout_marginEnd="16dp"
-                        android:gravity="center_vertical"
                         android:text="Hola"
+                        android:textAppearance="@style/tab_text"
                         android:textColor="@android:color/background_light"
                         app:autoSizeMaxTextSize="24sp"
                         app:autoSizeStepGranularity="2sp"
@@ -64,6 +67,7 @@
                         android:layout_height="0dp"
                         android:layout_marginTop="2dp"
                         android:layout_marginEnd="16dp"
+                        android:layout_marginBottom="8dp"
                         android:text="2018"
                         android:textColor="@color/blancoRoto"
                         app:autoSizeMaxTextSize="18sp"

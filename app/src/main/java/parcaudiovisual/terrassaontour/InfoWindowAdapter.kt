@@ -6,6 +6,7 @@ import  com.squareup.picasso.Callback
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.Point
 import android.net.Uri
 import android.util.Log
@@ -51,7 +52,11 @@ class InfoWindowAdapter(
             lastMarker = marker
 
             val deviceHeight = ctxt.resources.displayMetrics.heightPixels
-            val popUpWidth = deviceHeight / 2
+            var popUpWidth = deviceHeight / 2
+
+            if (ctxt.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                popUpWidth = ctxt.resources.displayMetrics.widthPixels / 2
+            }
 
             popup!!.infoRoot.layoutParams.width = popUpWidth
             var tv = popup!!.poiTitle
@@ -62,7 +67,7 @@ class InfoWindowAdapter(
             val allMarkerInfo = marcadores[marker.id]?.second
 
             if (!allMarkerInfo?.exterior!!) popup!!.locationColor.backgroundTintList = ColorStateList.valueOf(ctxt.getColor(R.color.interiorYellow))
-            else popup!!.locationColor.backgroundTintList = ColorStateList.valueOf(ctxt.getColor(R.color.exteriorBlue))
+            else popup!!.locationColor.backgroundTintList = ColorStateList.valueOf(ctxt.getColor(R.color.colorAccent))
 
             var image = allMarkerInfo.img_url_small
 

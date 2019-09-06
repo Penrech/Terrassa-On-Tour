@@ -46,10 +46,10 @@ class AudiovisualsListAdapter(val context: Context, var audiovisualList: ArrayLi
             if (!ruteAudiovisualList.contains(audiovisualID)) {
                 background.background.setColorFilter(context.getColor(R.color.googleBlueLight),PorterDuff.Mode.SRC_IN)
             } else {
-                background.background.setColorFilter(context.getColor(R.color.exteriorBlue),PorterDuff.Mode.SRC_IN)
+                background.background.setColorFilter(context.getColor(R.color.colorAccent),PorterDuff.Mode.SRC_IN)
             }
         } else {
-            background.background.setColorFilter(context.getColor(R.color.exteriorBlue),PorterDuff.Mode.SRC_IN)
+            background.background.setColorFilter(context.getColor(R.color.colorAccent),PorterDuff.Mode.SRC_IN)
         }
     }
 

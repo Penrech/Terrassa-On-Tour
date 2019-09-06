@@ -434,10 +434,12 @@ class DBRealmHelper {
             })
             it.taskListener = object : OnServerResponseFromStaticsQuery {
                 override fun onServerResponseFromStaticsQuery(result: InsertStaticsResponse?) {
-                    Log.i("Insertion","$result")
+                    Log.i("Insertion","${result?.isDayTime}")
                     if (result == null || result.appStateError) return
 
                     appStateInterface?.appStateChange(result.appActive,result.message)
+
+                    if (currentStatics.dayTime != result.isDayTime) appStateInterface?.dayTimeChange()
 
                     updateStaticsAfterInsertion(result)
                 }

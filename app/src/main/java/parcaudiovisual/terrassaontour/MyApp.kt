@@ -196,6 +196,11 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         }
     }
 
+    override fun dayTimeChange() {
+        dbHelper.loadPois()
+
+    }
+
     override fun onStaticsUpdateFromServer(success: Boolean) {
         if (success) staticsSended = false
     }
