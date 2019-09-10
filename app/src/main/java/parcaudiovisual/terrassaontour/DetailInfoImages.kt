@@ -3,11 +3,12 @@ package parcaudiovisual.terrassaontour
 import android.os.Parcel
 import android.os.Parcelable
 
-class DetailInfoImages constructor(val imgPrincipal: String, val imgSecundary: String, val day: Int): Parcelable {
+class DetailInfoImages constructor(val imgPrincipal: String, val imgSecundary: String, val day: Int, val interior: Int): Parcelable {
 
     constructor(source: Parcel) : this(
         source.readString(),
         source.readString(),
+        source.readInt(),
         source.readInt()
         )
 
@@ -15,6 +16,7 @@ class DetailInfoImages constructor(val imgPrincipal: String, val imgSecundary: S
         dest.writeString(imgPrincipal)
         dest.writeString(imgSecundary)
         dest.writeInt(day)
+        dest.writeInt(interior)
     }
 
     override fun describeContents(): Int {

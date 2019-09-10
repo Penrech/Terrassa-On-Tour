@@ -15,6 +15,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import com.squareup.picasso.Picasso
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import parcaudiovisual.terrassaontour.interfaces.AppStateChange
@@ -33,6 +34,9 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
 
     private var staticsSended = false
     private var appActive = true
+
+    private var dataColdLoaded = false
+    private var staticsColdLoaded = false
 
     private var elementsLoaded = 0
 
@@ -56,7 +60,6 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         dbHelper.staticsUpdateInterface = this
 
         setUpRealm()
-
         //loadDataFromDatabase()
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
@@ -70,7 +73,7 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         config.deleteRealmIfMigrationNeeded()
         config.compactOnLaunch()
         Realm.setDefaultConfiguration(config.build())
-        dbHelper.removeCurrentPreviousRouteOnAppStart()
+        //dbHelper.removeCurrentPreviousRouteOnAppStart()
     }
 
     fun startStatics(){
@@ -97,9 +100,14 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
             override fun conectionEnabled(enabled: Boolean) {
                 if (enabled){
                     Log.i("CONECTION","Conexion restablecida")
-                    Log.i("JAJA","Conection from Myapp")
-                    loadDataFromDatabase()
-                    startStatics()
+                    if (!dataColdLoaded && !staticsColdLoaded) {
+                        loadDataFromDatabase()
+                        startStatics()
+
+                        dataColdLoaded = true
+                        staticsColdLoaded = true
+                        Log.i("Lista","Load started")
+                    }
                 } else {
                     Log.i("CONECTION","Conexion perdida")
                     showMessage("No hay conexión a internet")
@@ -227,9 +235,4 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         currentActivity?.window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     }
 
-    private fun showSystemUI() {
-        currentActivity?.window?.decorView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
-    }
 }

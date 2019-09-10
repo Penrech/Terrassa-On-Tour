@@ -80,6 +80,7 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
 
         val intent = Intent(this,AudiovisualDetailActivity::class.java)
         intent.putExtra("AUDIOVISUAL",audiovisual)
+        //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(intent)
     }
 }

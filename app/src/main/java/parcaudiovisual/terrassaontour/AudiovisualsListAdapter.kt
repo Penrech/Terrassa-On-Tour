@@ -9,7 +9,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.squareup.picasso.Picasso
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.transition.DrawableCrossFadeTransition
+//import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.multiple_audiovisual_cell.view.*
 
 class AudiovisualsListAdapter(val context: Context, var audiovisualList: ArrayList<AudiovisualParcelable>, private var ruteAudiovisualList: Array<String>, val listener: OnMaClickListener): androidx.recyclerview.widget.RecyclerView.Adapter<AudiovisualsListAdapter.AudiovisualVH>() {
@@ -76,8 +81,16 @@ class AudiovisualsListAdapter(val context: Context, var audiovisualList: ArrayLi
             }
 
 
-            Picasso.get().load(audiovisual.img_cabecera_thumbnail)
+            /*Picasso.get().load(audiovisual.img_cabecera_thumbnail)
                 .noFade()
+                .placeholder(R.drawable.placeholder_loading)
+                .into(image)*/
+
+            Glide
+                .with(context)
+                .asDrawable()
+                .load(audiovisual.img_cabecera_thumbnail)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(R.drawable.placeholder_loading)
                 .into(image)
         }

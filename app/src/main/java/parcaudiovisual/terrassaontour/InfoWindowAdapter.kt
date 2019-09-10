@@ -7,7 +7,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.graphics.Point
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,7 +19,6 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter
 import kotlinx.android.synthetic.main.custom_info_window.view.*
 import java.lang.Exception
-import android.view.WindowManager
 import kotlin.math.round
 
 class InfoWindowAdapter(
@@ -86,6 +87,7 @@ class InfoWindowAdapter(
                     .noFade()
                     .placeholder(R.drawable.placeholder_loading)
                     .into(icon, MarkerCallback(marker))
+
             }
         }
     }

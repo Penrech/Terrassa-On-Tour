@@ -1,6 +1,8 @@
 package parcaudiovisual.terrassaontour
 
 import android.Manifest
+import android.app.ActionBar
+import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -12,7 +14,6 @@ import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
 import androidx.core.content.ContextCompat
 import android.util.Log
-import android.view.View
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -23,17 +24,20 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.drawable.AnimatedVectorDrawable
+import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.net.Uri
+import android.util.TypedValue
+import android.view.*
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.view.Gravity
-import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
+import androidx.cardview.widget.CardView
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.*
@@ -60,6 +64,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     private var MAX_RESTORE_LOCATION_TRYS = 5
 
     private var currentRestoreLocationTrys = 0
+
+    private var loadingRouteDialog: AlertDialog? = null
 
     private var googleLocationManager: FusedLocationProviderClient? = null
     private var googleLocationRequest: LocationRequest? = null
@@ -120,7 +126,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     private var currentRoutePolyline: Polyline? = null
 
-    private var rutesLayoutManager: androidx.recyclerview.widget.RecyclerView.LayoutManager? = null
+    private var rutesLayoutManager: RecyclerView.LayoutManager? = null
     private var rutesAdapter: RutasListAdapter? = null
     private var rutesList: List<Ruta> = listOf()
 
@@ -215,6 +221,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     fun reloadData(){
+        Log.i("Recargo","Recargo Todo")
         loadMarkers()
         loadRutes()
     }
@@ -305,6 +312,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         googleLocationRequest?.maxWaitTime = 0
         googleLocationRequest?.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         googleLocationRequest?.smallestDisplacement = 1f
+
+        Log.i("Recargo","Recargo mapa")
 
         setOnMarkerClickListener()
         loadMarkers()
@@ -418,7 +427,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                 val imagesToDetail = DetailInfoImages(
                     puntoInteres.img_url_big.toString(),
                     puntoInteres.img_url_big_secundary.toString(),
-                    if (puntoInteres.deDia!!) 1 else 0
+                    if (puntoInteres.deDia!!) 1 else 0,
+                    if (puntoInteres.exterior!!) 0 else 1
                 )
 
                 val intent = Intent(this, InfoWindowDetail::class.java)
@@ -439,15 +449,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
         val currentStatics = dbHelper.getCurrentStatics()
         Log.i("Lista","Current Route = ${currentStatics?.getCurrentRoute()}")
-        if (currentStatics == null || currentStatics.getCurrentRoute() == null) {
+        if (currentStatics?.getCurrentRoute() == null) {
             removeCurrentPolyline()
         } else {
             val currentRouteDisplayed = currentStatics.getCurrentRoute()
-            val ruteDetailsFromServer = rutesList.filter { it.id == currentRouteDisplayed }.firstOrNull()
+            val ruteDetailsFromServer = rutesList.firstOrNull { it.id == currentRouteDisplayed }
+            Log.i("Lista","CurrentRouteDisplayed $currentRouteDisplayed")
+            Log.i("Lista","RuteDetails from server: $ruteDetailsFromServer")
             if (ruteDetailsFromServer != null) {
-                if (!currentStatics.isSameRoute(ruteDetailsFromServer.id!!,ruteDetailsFromServer.idAudiovisuales)) {
-                    printDirectionsRoute(ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
-                }
+                printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
+                /*if (!currentStatics.isSameRoute(ruteDetailsFromServer.id!!,ruteDetailsFromServer.idAudiovisuales)) {
+                    Log.i("Lista","Entro en if")
+                    printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
+                }*/
             }
         }
     }
@@ -460,8 +474,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
     }
 
-    fun printDirectionsRoute(ruteColor: Int?, rutePoints: ArrayList<pointLocationNotRealm>){
+    fun printDirectionsRoute(ruteData: Ruta, ruteColor: Int?, rutePoints: ArrayList<pointLocationNotRealm>){
         AsyncDirections().let {
+            //showLoadingRouteDialog(true)
+            turnCloseRuteButton(true)
             it.execute(Callable {
                 mapservice!!.getRoutePath(rutePoints = rutePoints)
             })
@@ -476,20 +492,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                     if (arrayList != null && arrayList.isNotEmpty() ) {
                         val color = ruteColor ?: Color.GRAY
                         val polylineOptions = PolylineOptions()
-                        var mergedList = listOf<LatLng>()
+                        val mergedList = mutableListOf<LatLng>()
                         arrayList.forEach { list ->
                             polylineOptions.addAll(list)
                             mergedList += list
                         }
 
                         currentRoutePolyline = mMap.addPolyline(polylineOptions.color(color))
-                        turnCloseRuteButton(true)
                         setRouteBounds(mergedList)
 
+                        if (!dbHelper.updateStaticsAddCurrentRoute(ruteData.id!!)) {
+                            val toast = Toast.makeText(this@MapsActivity,"Error cargando ruta",Toast.LENGTH_LONG)
+                            toast.show()
+                            turnCloseRuteButton(false)
+                        }
+
+                        startLoadingRouteAnimation(false)
+
+                        return
                     }
-                    if (arrayList != null && arrayList.isEmpty()) {
-                        dbHelper.removeCurrentPreviousRouteOnAppStart()
-                    }
+
+                    dbHelper.removeCurrentPreviousRouteOnAppStart()
+
+                    turnCloseRuteButton(false)
+
+                    //showLoadingRouteDialog(false)
 
                 }
             }
@@ -533,6 +560,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         if (On) {
             closeRuteFab.show()
             closeRuteFab.startAnimation(popupAnimation)
+            startLoadingRouteAnimation(true)
         } else {
             closeRuteFab.startAnimation(popOutAnimation)
         }
@@ -545,11 +573,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         if (currentStatics != null) {
             if (currentStatics.isSameRoute(ruta.id!!,ruta.idAudiovisuales)) return
         }
-        if (dbHelper.updateStaticsAddCurrentRoute(ruta.id!!)) {
-            printDirectionsRoute(ruteColor = ruta.color,rutePoints = ruta.getPointsInNotRealmClass())
+        printDirectionsRoute(ruta,ruteColor = ruta.color,rutePoints = ruta.getPointsInNotRealmClass())
+       /* if (dbHelper.updateStaticsAddCurrentRoute(ruta.id!!)) {
+            printDirectionsRoute(ruta,ruteColor = ruta.color,rutePoints = ruta.getPointsInNotRealmClass())
         } else {
             val toast = Toast.makeText(this,"Error cargando ruta",Toast.LENGTH_LONG)
             toast.show()
+        }*/
+
+    }
+
+    fun startLoadingRouteAnimation(start: Boolean){
+        if (start) {
+            closeRuteFab.setImageDrawable(getDrawable(R.drawable.progress_indeterminate_anim))
+            val frameAnimation = closeRuteFab.drawable as AnimatedVectorDrawable
+            frameAnimation.start()
+            closeRuteFab.isEnabled = false
+        } else {
+            closeRuteFab.setImageDrawable(getDrawable(R.drawable.ic_icono_cerrar))
+            closeRuteFab.isEnabled = true
         }
 
     }
@@ -731,14 +773,42 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         intent.putExtra("IDPOINT", idPuntoAleatorio)
         intent.putExtra("AUDIOVISUALES",audiovisualesPunto)
         intent.putExtra("RUTEAUD",audiovisualesRutaActual)
+        //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(intent)
     }
 
-    private fun showSystemUI() {
-        window?.decorView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
-    }
+    /*fun showLoadingRouteDialog(show: Boolean){
+        loadingRouteDialog?.let {
+            if (show) it.show()
+            else it.dismiss()
+
+            return
+        }
+
+        val factory = LayoutInflater.from(this)
+        val view = factory.inflate(R.layout.progress_circular_bar_dialog,null)
+
+        loadingRouteDialog = AlertDialog.Builder(this).create()
+        loadingRouteDialog!!.setCancelable(false)
+        loadingRouteDialog!!.setView(view)
+        loadingRouteDialog!!.window.setBackgroundDrawable(getDrawable(android.R.color.transparent))
+        val dialogWindow = loadingRouteDialog!!.window
+        dialogWindow.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
+        dialogWindow.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+
+        val size = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,52f,resources.displayMetrics).toInt()
+
+        val layoutParams = dialogWindow.attributes
+        layoutParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+        layoutParams.width = size
+        layoutParams.height = size
+
+        dialogWindow.attributes = layoutParams
+
+        if (show) loadingRouteDialog!!.show()
+        else loadingRouteDialog!!.dismiss()
+    }*/
 
     override fun onBackPressed() {
         if (drawer_menu.isDrawerVisible(Gravity.START)){
@@ -748,59 +818,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
 
     }
-
-  /*  fun loadRutes(){
-        AsyncRutes().let {
-            it.execute(Callable {
-                mapservice!!.getRoutes()
-            })
-            it.taskListener = object  : OnRutesDownloadCompleted {
-                override fun onRutesDownloaded(arrayList: ArrayList<Ruta?>?) {
-                    rutesList.clear()
-                    arrayList?.forEach { ruta ->
-                        if (ruta != null) rutesList.add(ruta)
-                    }
-                    rutes_RV.adapter = rutesAdapter
-                    //rutesAdapter?.notifyDataSetChanged()
-                }
-            }
-        }
-    }*/
-
-
-
-    /*
-    *  fun loadMarkers(){
-        val areTherePreviousMarkers = !marcadores.isEmpty()
-
-        for ((markerID, markerInfo) in marcadores) {
-            markerInfo.first.remove()
-        }
-        marcadores.clear()
-
-        noUbicationBounds = LatLngBounds.builder()
-
-        val puntosDeInteres = dbHelper.getPoisFromDB()
-        puntosDeInteres.forEach {
-            val posicionPunto = LatLng(it.latitud, it.longitud)
-            addCustomPoiMarker(it, posicionPunto)
-        }
-
-        if (lastMarkerID!= null) {
-
-            val coincidence = marcadores.get(lastMarkerID!!)
-            if (coincidence != null) {
-                val markerToReload = coincidence.first
-                markerToReload.showInfoWindow()
-            }
-            lastMarkerID = null
-        }
-
-        if (!areTherePreviousMarkers) moveCameraIfNoLocation()
-
-    }
-    * */
-
 
 
 }

@@ -1,11 +1,16 @@
 package parcaudiovisual.terrassaontour
 
 
+import android.app.AlertDialog
+import android.app.Dialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.viewpager.widget.ViewPager
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.Window
+import android.widget.ImageButton
 import kotlinx.android.synthetic.main.activity_info_window_detail.*
 import parcaudiovisual.terrassaontour.adapters.InfoWindowImageViewPager
 import parcaudiovisual.terrassaontour.fragments.BigImageInfoWindow
@@ -18,6 +23,8 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
 
     private val DayDrawable = R.drawable.ic_icono_dia
     private val NightDrawable = R.drawable.ic_icono_noche
+
+    private var dialog: AlertDialog? = null
 
     private var fragmentsList: MutableList<BigImageInfoWindow> = mutableListOf()
 
@@ -67,6 +74,7 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
         listeningPagerEvents()
         setCloseFabButton()
         setSwitchFabButton()
+        setInfoInteriorFabButton()
 
         loadData()
     }
@@ -91,6 +99,8 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
             fragmentsList.add(BigImageInfoWindow.newInstance(imagePrincipal))
             fragmentsList.add(BigImageInfoWindow.newInstance(imageSecundary))
             if (typeIcon == null) changeToIcon =  if (imagesData.day == 1) Icon.DAY else Icon.NIGHT
+
+            if (imagesData.interior == 1) InfoInteriorPoiFab.show()
         }
 
         Log.i("Time","Time end loadData: ${Date()}")
@@ -103,8 +113,32 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
             Log.i("Time","Time end runOnUiThread loadData: ${Date()}")
         }
 
+    }
 
+    private fun showDialog(){
+        dialog?.let {
+            it.show()
+            return
+        }
 
+        val factory = LayoutInflater.from(this)
+        val view = factory.inflate(R.layout.custom_dialog,null)
+        dialog = AlertDialog.Builder(this).create()
+        dialog!!.setView(view)
+
+        val dialogButton = view.findViewById<ImageButton>(R.id.CloseDialog)
+        dialogButton.setOnClickListener {
+            dialog!!.dismiss()
+        }
+
+        dialog!!.show()
+
+    }
+
+    private fun setInfoInteriorFabButton(){
+        InfoInteriorPoiFab.setOnClickListener {
+            showDialog()
+        }
     }
 
     private fun setCloseFabButton(){

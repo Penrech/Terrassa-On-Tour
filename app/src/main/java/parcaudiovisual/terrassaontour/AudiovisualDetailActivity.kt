@@ -19,6 +19,7 @@ import parcaudiovisual.terrassaontour.adapters.InfoWindowImageViewPager
 import parcaudiovisual.terrassaontour.fragments.AudiovisualInfoDetails
 import parcaudiovisual.terrassaontour.fragments.InfoElementFragment
 import parcaudiovisual.terrassaontour.fragments.StaticAudiovisualResource
+import parcaudiovisual.terrassaontour.fragments.VideoAudiovisualResource
 import parcaudiovisual.terrassaontour.interfaces.ChangeDetailCloseButton
 import parcaudiovisual.terrassaontour.interfaces.SendLinkToOpenInBrowser
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
@@ -37,6 +38,7 @@ class AudiovisualDetailActivity : AppCompatActivity(),
     private var pagerAdapter: InfoWindowImageViewPager? = null
 
     private var fragmentStaticImage: StaticAudiovisualResource? = null
+    private var fragmentVideo: VideoAudiovisualResource? = null
     private var fragmentInfoAudiovisual: AudiovisualInfoDetails? = null
 
     private var InfoDrawable : Drawable? = null
@@ -71,6 +73,9 @@ class AudiovisualDetailActivity : AppCompatActivity(),
                     runOnUiThread{BackToCameraFAB.hide()}
                     if (isCloseButtonHiddenOnInfoWindow) {
                         runOnUiThread { ChangeToInfoFAB.hide() }
+                    }
+                    if (fragmentVideo != null) {
+                        fragmentVideo!!.pauseOnPageChange()
                     }
                     //runOnUiThread { ChangeToInfoFAB.hide() }
                     Icon.INFO
@@ -148,10 +153,19 @@ class AudiovisualDetailActivity : AppCompatActivity(),
             audiovisual = previousData
         }
 
-        fragmentStaticImage = StaticAudiovisualResource.newInstance(audiovisual?.src)
-        fragmentInfoAudiovisual = AudiovisualInfoDetails.newInstance(audiovisual)
+       if (audiovisual?.tipo_medio != null && audiovisual!!.tipo_medio == "1") {
+            //Video
+           Log.i("JODER","Entro en video")
+            fragmentVideo = VideoAudiovisualResource.newInstance(audiovisual?.src)
+            fragmentsList.add(fragmentVideo!!)
+        } else if (audiovisual?.tipo_medio != null && audiovisual!!.tipo_medio == "2"){
+            //Imagen
+           Log.i("JODER","Entro en Imagen")
+            fragmentStaticImage = StaticAudiovisualResource.newInstance(audiovisual?.src)
+            fragmentsList.add(fragmentStaticImage!!)
+        }
 
-        fragmentsList.add(fragmentStaticImage!!)
+        fragmentInfoAudiovisual = AudiovisualInfoDetails.newInstance(audiovisual)
         fragmentsList.add(fragmentInfoAudiovisual!!)
 
         pagerAdapter = InfoWindowImageViewPager(supportFragmentManager,fragmentsList)
@@ -244,4 +258,6 @@ class AudiovisualDetailActivity : AppCompatActivity(),
         intent.setData(Uri.parse(link))
         startActivity(intent)
     }
+
+
 }
