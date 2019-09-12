@@ -40,6 +40,8 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
 
     private var elementsLoaded = 0
 
+    var activitiesOpen = ArrayList<String>()
+
     private val isNetworkAvailable: Boolean
         get() {
             connectivityManager?.let {
@@ -156,6 +158,9 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
     override fun onActivityStarted(activity: Activity?) {}
 
     override fun onActivityDestroyed(activity: Activity?) {
+        activity?.let {
+            activitiesOpen.remove(it.localClassName)
+        }
         if (currentActivity == activity) {
             currentActivity = null
         }
@@ -167,6 +172,10 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
 
     override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
         Log.i("ActivityCreated","Activity created ${activity?.localClassName}")
+        activity?.let {
+            activitiesOpen.add(it.localClassName)
+        }
+
         currentActivity = activity
         if (activity?.localClassName == "LoadingActivity" ) {
             loadDataFromDatabase()

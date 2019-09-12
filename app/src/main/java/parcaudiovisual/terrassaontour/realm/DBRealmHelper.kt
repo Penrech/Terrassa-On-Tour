@@ -5,6 +5,11 @@ import android.content.Intent
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.util.Log
 import io.realm.Realm
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import parcaudiovisual.terrassaontour.*
@@ -378,7 +383,18 @@ class DBRealmHelper {
     }
 
     fun insertUserOnServerDB(userID: String, userDeviceMode: String, userDeviceName: String, userDeviceType: String){
-        AsyncInsertUser().let {
+        CoroutineScope(IO).launch {
+            val success = serverServices.insertUserIfNeeded(userID,userDeviceMode,userDeviceName,userDeviceType)
+            val currentStatics = getCurrentStatics()
+
+            if (!success || currentStatics == null) return@launch
+
+            withContext(Main){
+                udpateStaticsInsertion()
+            }
+
+        }
+        /*AsyncInsertUser().let {
             it.execute(Callable {
                 serverServices.insertUserIfNeeded(userID,userDeviceMode,userDeviceName,userDeviceType)
             })
@@ -391,7 +407,7 @@ class DBRealmHelper {
                     udpateStaticsInsertion()
                 }
             }
-        }
+        }*/
     }
 
     fun insertStaticsToServer(){
@@ -448,7 +464,7 @@ class DBRealmHelper {
     }
 
     fun loadRutes(){
-        AsyncRutes().let {
+       /* AsyncRutes().let {
             it.execute(Callable {
                 serverServices.getRoutes()
             })
@@ -464,11 +480,22 @@ class DBRealmHelper {
                     }
                 }
             }
+        }*/
+        CoroutineScope(IO).launch {
+            val result = serverServices.getRoutes()
+
+            withContext(Main){
+                if (!result.first) downloadInterface?.rutesLoaded(false)
+                else {
+                    if (saveRoutesToLocalDatabase(result.second)) downloadInterface?.rutesLoaded(true)
+                    else downloadInterface?.rutesLoaded(false)
+                }
+            }
         }
     }
 
     fun loadPois(){
-        AsyncPois().let {
+        /*AsyncPois().let {
             it.execute(Callable {
                 serverServices.getPOIS()
             })
@@ -485,11 +512,23 @@ class DBRealmHelper {
                 }
 
             }
+        }*/
+        CoroutineScope(IO).launch {
+            val result = serverServices.getPOIS()
+
+            withContext(Main) {
+                if (!result.first) downloadInterface?.pointsLoaded(false)
+                else {
+                    if (savePoisToLocalDatabase(result.second)) downloadInterface?.pointsLoaded(true)
+                    else downloadInterface?.pointsLoaded(false)
+                }
+            }
+
         }
     }
 
     fun loadAudiovisuals(){
-        AsyncAudiovisual().let {
+        /*AsyncAudiovisual().let {
             it.execute(Callable {
                 serverServices.getAudiovisuals()
             })
@@ -503,6 +542,17 @@ class DBRealmHelper {
                             else downloadInterface?.audiovisualsLoaded(false)
                         }
                     }
+                }
+            }
+        }*/
+        CoroutineScope(IO).launch {
+            val result = serverServices.getAudiovisuals()
+
+            withContext(Main){
+                if (!result.first) downloadInterface?.audiovisualsLoaded(false)
+                else {
+                    if (saveAudiovisualsToLocalDatabase(result.second)) downloadInterface?.audiovisualsLoaded(true)
+                    else downloadInterface?.audiovisualsLoaded(false)
                 }
             }
         }
@@ -592,7 +642,6 @@ class DBRealmHelper {
         }
 
         var success = true
-
 
         try {
             realm.beginTransaction()

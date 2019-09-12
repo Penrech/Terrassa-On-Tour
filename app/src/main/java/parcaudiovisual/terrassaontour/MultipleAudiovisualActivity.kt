@@ -10,6 +10,11 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_multiple_audiovisual.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
 import kotlin.math.roundToInt
 
@@ -26,25 +31,29 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_multiple_audiovisual)
 
-        dbHelper = DBRealmHelper()
-        setCloseFAB()
+        CoroutineScope(Default).launch{
+            dbHelper = DBRealmHelper()
+            setCloseFAB()
 
-        val idPoint = intent.getStringExtra("IDPOINT")
+            val idPoint = intent.getStringExtra("IDPOINT")
 
-        if (idPoint == null) {
-            errorLoadingAudiovisuals()
-            return
+            if (idPoint == null) {
+                errorLoadingAudiovisuals()
+            }
+
+            withContext(Main){
+                dbHelper?.updateStaticsAddPointVisit(idPoint)
+            }
+
+            val pointAudiovisuals = intent.getParcelableArrayListExtra<AudiovisualParcelable>("AUDIOVISUALES")
+
+            if (pointAudiovisuals == null) {
+                errorLoadingAudiovisuals()
+            } else {
+                initReyclerView(pointAudiovisuals)
+            }
         }
 
-        dbHelper?.updateStaticsAddPointVisit(idPoint)
-
-        val pointAudiovisuals = intent.getParcelableArrayListExtra<AudiovisualParcelable>("AUDIOVISUALES")
-
-        if (pointAudiovisuals == null) {
-            errorLoadingAudiovisuals()
-        } else {
-            initReyclerView(pointAudiovisuals)
-        }
     }
 
     fun setCloseFAB(){
@@ -53,23 +62,29 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
         }
     }
 
-    fun errorLoadingAudiovisuals(){
+    suspend fun errorLoadingAudiovisuals(){
         val toast = Toast.makeText(this,"No se han podido recuperar los audiovisuales del punto de interés", Toast.LENGTH_LONG)
-        toast.show()
-        finish()
+
+        withContext(Main){
+            toast.show()
+            finish()
+        }
     }
 
-    fun initReyclerView(audiovisualList : ArrayList<AudiovisualParcelable>){
+    suspend fun initReyclerView(audiovisualList : ArrayList<AudiovisualParcelable>){
         val numOfColumns = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) NUM_OF_COLUMN_LANDSCAPE else NUM_OF_COLUMN_PORTRAIT
-        audiovisualsLayoutManager =
-            androidx.recyclerview.widget.GridLayoutManager(this, numOfColumns)
-        multipleAudiovisualRV.layoutManager = audiovisualsLayoutManager
-        val padding = 8 * resources.displayMetrics.density
-        multipleAudiovisualRV.addItemDecoration(MaRecyclerViewItemDecoration(padding.roundToInt(),audiovisualList.size,numOfColumns))
+        audiovisualsLayoutManager = GridLayoutManager(this, numOfColumns)
 
+        val padding = 8 * resources.displayMetrics.density
         val routeAudiovisuals = intent.getStringArrayExtra("RUTEAUD")
         audiovisualsAdapter = AudiovisualsListAdapter(this,audiovisualList, routeAudiovisuals,this)
-        multipleAudiovisualRV.adapter = audiovisualsAdapter
+
+        withContext(Main){
+            multipleAudiovisualRV.addItemDecoration(MaRecyclerViewItemDecoration(padding.roundToInt(),audiovisualList.size,numOfColumns))
+            multipleAudiovisualRV.layoutManager = audiovisualsLayoutManager
+            multipleAudiovisualRV.adapter = audiovisualsAdapter
+        }
+
     }
 
     override fun onResume() {

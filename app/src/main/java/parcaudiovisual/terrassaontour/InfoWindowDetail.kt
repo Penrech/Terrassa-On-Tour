@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import androidx.viewpager.widget.ViewPager
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,6 +13,10 @@ import android.view.View
 import android.view.Window
 import android.widget.ImageButton
 import kotlinx.android.synthetic.main.activity_info_window_detail.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import parcaudiovisual.terrassaontour.adapters.InfoWindowImageViewPager
 import parcaudiovisual.terrassaontour.fragments.BigImageInfoWindow
 import java.util.*
@@ -76,11 +81,15 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
         setSwitchFabButton()
         setInfoInteriorFabButton()
 
-        loadData()
+        CoroutineScope(Dispatchers.Default).launch {
+            loadData()
+        }
+
+
     }
 
 
-    private fun loadData(){
+    private suspend fun loadData(){
         Log.i("Time","Time init loadData: ${Date()}")
         fragmentsList.clear()
 
@@ -98,19 +107,16 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
 
             fragmentsList.add(BigImageInfoWindow.newInstance(imagePrincipal))
             fragmentsList.add(BigImageInfoWindow.newInstance(imageSecundary))
-            if (typeIcon == null) changeToIcon =  if (imagesData.day == 1) Icon.DAY else Icon.NIGHT
 
-            if (imagesData.interior == 1) InfoInteriorPoiFab.show()
-        }
+            withContext(Dispatchers.Main){
+                if (typeIcon == null) changeToIcon =  if (imagesData.day == 1) Icon.DAY else Icon.NIGHT
 
-        Log.i("Time","Time end loadData: ${Date()}")
+                if (imagesData.interior == 1) InfoInteriorPoiFab.show()
 
-        runOnUiThread {
-            Log.i("Time","Time init runOnUiThread loadData: ${Date()}")
-            pagerAdapter = InfoWindowImageViewPager(supportFragmentManager,fragmentsList)
-            mPager.adapter = pagerAdapter
+                pagerAdapter = InfoWindowImageViewPager(supportFragmentManager,fragmentsList)
+                mPager.adapter = pagerAdapter
+            }
 
-            Log.i("Time","Time end runOnUiThread loadData: ${Date()}")
         }
 
     }

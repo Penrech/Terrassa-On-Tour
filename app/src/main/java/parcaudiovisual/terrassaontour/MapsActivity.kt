@@ -46,6 +46,13 @@ import io.realm.Realm
 import io.realm.RealmChangeListener
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.drawer_menu.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
 import java.lang.Exception
 import java.util.concurrent.Callable
@@ -67,6 +74,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     private var currentRestoreLocationTrys = 0
 
     private var loadingRouteDialog: AlertDialog? = null
+
+    private var intentQueue: Intent? = null
 
     private var googleLocationManager: FusedLocationProviderClient? = null
     private var googleLocationRequest: LocationRequest? = null
@@ -163,6 +172,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     override fun onPause() {
         super.onPause()
+        intentQueue = null
         disableDBHelperListener()
         unTrackGoogleLocation()
         Log.i("LIFE","Entro en pause")
@@ -421,7 +431,32 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     override fun onInfoWindowClick(p0: Marker?) {
-        if (p0 != null) {
+        val intent = Intent(this, InfoWindowDetail::class.java)
+
+        CoroutineScope(Default).launch {
+            if (p0 != null) {
+                val marcadorInfo = marcadores[p0.id]
+                if (marcadorInfo != null) {
+                    val puntoInteres = marcadorInfo.second
+                    val imagesToDetail = DetailInfoImages(
+                        puntoInteres.img_url_big.toString(),
+                        puntoInteres.img_url_big_secundary.toString(),
+                        if (puntoInteres.deDia!!) 1 else 0,
+                        if (puntoInteres.exterior!!) 0 else 1
+                    )
+
+                    if (checkForTopActivityAmbiguity()) {
+                        withContext(Main){
+                            intent.putExtra("imagesToDetail", imagesToDetail)
+                            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            startActivity(intent)
+                        }
+                    }
+
+                }
+            }
+        }
+        /*if (p0 != null) {
             val marcadorInfo = marcadores[p0.id]
             if (marcadorInfo != null) {
                 val puntoInteres = marcadorInfo.second
@@ -432,12 +467,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                     if (puntoInteres.exterior!!) 0 else 1
                 )
 
+                if (!checkForTopActivityAmbiguity()) return
+
                 val intent = Intent(this, InfoWindowDetail::class.java)
                 intent.putExtra("imagesToDetail", imagesToDetail)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
             }
-        }
+        }*/
 
     }
 
@@ -477,7 +514,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     fun printDirectionsRoute(ruteData: Ruta, ruteColor: Int?, rutePoints: ArrayList<pointLocationNotRealm>){
-        AsyncDirections().let {
+       /* AsyncDirections().let {
             turnCloseRuteButton(true)
             it.execute(Callable {
                 mapservice!!.getRoutePath(rutePoints = rutePoints)
@@ -517,6 +554,52 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
                     turnCloseRuteButton(false)
 
+                }
+            }
+        }
+
+        */
+
+        turnCloseRuteButton(true)
+
+        CoroutineScope(IO).launch {
+            val arrayList = mapservice!!.getRoutePath(rutePoints)
+
+            withContext(Main){
+                if (currentRoutePolyline != null) {
+                    currentRoutePolyline!!.remove()
+                    currentRoutePolyline = null
+                }
+            }
+
+            withContext(Default){
+                val color = ruteColor ?: Color.GRAY
+                val polylineOptions = PolylineOptions()
+                val mergedList = mutableListOf<LatLng>()
+                arrayList.forEach { list ->
+                    polylineOptions.addAll(list)
+                    mergedList += list
+                }
+
+                withContext(Main){
+                    if (arrayList.isNotEmpty() ) {
+
+                        currentRoutePolyline = mMap.addPolyline(polylineOptions.color(color))
+                        setRouteBounds(mergedList)
+
+                        if (!dbHelper.updateStaticsAddCurrentRoute(ruteData.id!!)) {
+                            val toast = Toast.makeText(this@MapsActivity,"Error cargando ruta",Toast.LENGTH_LONG)
+                            toast.show()
+                            turnCloseRuteButton(false)
+                        }
+
+                        startLoadingRouteAnimation(false)
+
+                    } else {
+                        dbHelper.removeCurrentPreviousRouteOnAppStart()
+
+                        turnCloseRuteButton(false)
+                    }
                 }
             }
         }
@@ -768,12 +851,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
         val audiovisualesPunto = dbHelper.getParcelableAudiovisualsFromPoint(idPuntoAleatorio)
 
+        if (!checkForTopActivityAmbiguity()) return
+
         val intent = Intent(this, MultipleAudiovisualActivity::class.java)
         intent.putExtra("IDPOINT", idPuntoAleatorio)
         intent.putExtra("AUDIOVISUALES",audiovisualesPunto)
         intent.putExtra("RUTEAUD",audiovisualesRutaActual)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(intent)
+    }
+
+    fun checkForTopActivityAmbiguity(): Boolean{
+        val applicationLevel = application as MyApp
+        val applicationsOpenArray = applicationLevel.activitiesOpen
+
+        val multipleAudiovisualActivity = MultipleAudiovisualActivity::class.java.simpleName
+        Log.i("Ambiguity","MA activity: $multipleAudiovisualActivity")
+
+        if (applicationsOpenArray.contains(MultipleAudiovisualActivity::class.java.simpleName)
+            || applicationsOpenArray.contains(InfoWindowDetail::class.java.simpleName)) {
+            return false
+        }
+
+        return true
     }
 
     fun intentManager(): Boolean {
