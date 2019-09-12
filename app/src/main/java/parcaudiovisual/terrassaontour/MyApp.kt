@@ -149,7 +149,9 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
 
     override fun onActivityPaused(activity: Activity?) {}
 
-    override fun onActivityResumed(activity: Activity?) {}
+    override fun onActivityResumed(activity: Activity?) {
+        currentActivity = activity
+    }
 
     override fun onActivityStarted(activity: Activity?) {}
 
@@ -164,8 +166,12 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
     override fun onActivityStopped(activity: Activity?) {}
 
     override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
+        Log.i("ActivityCreated","Activity created ${activity?.localClassName}")
         currentActivity = activity
-        //if (activity?.localClassName == "LoadingActivity" ) hideSystemUI()
+        if (activity?.localClassName == "LoadingActivity" ) {
+            loadDataFromDatabase()
+            startStatics()
+        }
         //else showSystemUI()
         sendStatics()
     }
@@ -222,6 +228,10 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
                 elementsLoaded = 0
             }
         }
+    }
+
+    fun getCurrentActivity(): String?{
+        return currentActivity?.localClassName
     }
 
     private fun hideSystemUI() {

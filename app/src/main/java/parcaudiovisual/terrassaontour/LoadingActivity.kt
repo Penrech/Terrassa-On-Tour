@@ -46,6 +46,7 @@ class LoadingActivity : AppCompatActivity(){
         val intent = Intent(this, MapsActivity::class.java)
         startActivity(intent)
         finish()
+        overridePendingTransition(0, 0)
     }
 
     override fun onResume() {

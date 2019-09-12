@@ -38,6 +38,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.cardview.widget.CardView
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.*
@@ -433,6 +434,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
                 val intent = Intent(this, InfoWindowDetail::class.java)
                 intent.putExtra("imagesToDetail", imagesToDetail)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
             }
         }
@@ -476,7 +478,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     fun printDirectionsRoute(ruteData: Ruta, ruteColor: Int?, rutePoints: ArrayList<pointLocationNotRealm>){
         AsyncDirections().let {
-            //showLoadingRouteDialog(true)
             turnCloseRuteButton(true)
             it.execute(Callable {
                 mapservice!!.getRoutePath(rutePoints = rutePoints)
@@ -516,8 +517,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
                     turnCloseRuteButton(false)
 
-                    //showLoadingRouteDialog(false)
-
                 }
             }
         }
@@ -553,7 +552,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     private fun openRutesMenu(){
-        drawer_menu.openDrawer(Gravity.START)
+        drawer_menu.openDrawer(GravityCompat.START)
     }
 
     private fun turnCloseRuteButton(On: Boolean){
@@ -773,46 +772,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         intent.putExtra("IDPOINT", idPuntoAleatorio)
         intent.putExtra("AUDIOVISUALES",audiovisualesPunto)
         intent.putExtra("RUTEAUD",audiovisualesRutaActual)
-        //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(intent)
     }
 
-    /*fun showLoadingRouteDialog(show: Boolean){
-        loadingRouteDialog?.let {
-            if (show) it.show()
-            else it.dismiss()
+    fun intentManager(): Boolean {
+        val app = application as MyApp
+        val currentActivity = app.getCurrentActivity()
 
-            return
-        }
-
-        val factory = LayoutInflater.from(this)
-        val view = factory.inflate(R.layout.progress_circular_bar_dialog,null)
-
-        loadingRouteDialog = AlertDialog.Builder(this).create()
-        loadingRouteDialog!!.setCancelable(false)
-        loadingRouteDialog!!.setView(view)
-        loadingRouteDialog!!.window.setBackgroundDrawable(getDrawable(android.R.color.transparent))
-        val dialogWindow = loadingRouteDialog!!.window
-        dialogWindow.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
-        dialogWindow.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-
-        val size = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,52f,resources.displayMetrics).toInt()
-
-        val layoutParams = dialogWindow.attributes
-        layoutParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-        layoutParams.width = size
-        layoutParams.height = size
-
-        dialogWindow.attributes = layoutParams
-
-        if (show) loadingRouteDialog!!.show()
-        else loadingRouteDialog!!.dismiss()
-    }*/
+        return currentActivity == this.localClassName
+    }
 
     override fun onBackPressed() {
-        if (drawer_menu.isDrawerVisible(Gravity.START)){
-            drawer_menu.closeDrawer(Gravity.START)
+        if (drawer_menu.isDrawerVisible(GravityCompat.START)){
+            drawer_menu.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
         }

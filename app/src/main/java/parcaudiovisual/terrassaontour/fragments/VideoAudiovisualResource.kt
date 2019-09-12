@@ -2,7 +2,9 @@ package parcaudiovisual.terrassaontour.fragments
 
 import android.graphics.Bitmap
 import android.graphics.drawable.ColorDrawable
+import android.media.MediaDrm
 import android.media.MediaPlayer
+import android.media.MediaTimestamp
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -12,14 +14,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 
 import parcaudiovisual.terrassaontour.R
 import parcaudiovisual.terrassaontour.utils.AsyncVideoThumbnail
 import parcaudiovisual.terrassaontour.utils.OnThumbnailLoaded
 import parcaudiovisual.terrassaontour.utils.VideoUtility
-
 
 private const val VIDEO_URI = "videoUri"
 
@@ -38,6 +37,7 @@ class VideoAudiovisualResource : Fragment() {
     private var videoView: VideoView? = null
     private var videoBackground: ImageView? = null
     private var loadingCircle: ProgressBar? = null
+    private var errorLabel: TextView? = null
 
     private var rootView: View? = null
 
@@ -68,6 +68,7 @@ class VideoAudiovisualResource : Fragment() {
     private var videoPositionOnFragmentPause: Int = 0
 
     private var isVideoPrepare = false
+    private var isVideoError = false
     private var waitingForPreparation = false
 
     private var videoThumbnail: Bitmap? = null
@@ -117,6 +118,8 @@ class VideoAudiovisualResource : Fragment() {
             }
         }
 
+        fullScreenContentController?.visibility = View.VISIBLE
+
         loadingCircle?.visibility = View.GONE
 
         totalTimeTextView?.text = utilities!!.formatSecondsToString(it.duration)
@@ -138,6 +141,41 @@ class VideoAudiovisualResource : Fragment() {
             waitingForPreparation = false
         }
     }
+
+    private val onVideoErrorListener = MediaPlayer.OnErrorListener { mp, what, extra ->
+        Log.e("VideoError","Error video: $mp")
+        Log.e("VideoError","Error video type: $what")
+        Log.e("VideoError","Error video extra data: $extra")
+        Log.e("VideoError","Error video link: $videoUri")
+
+        enableErrorUI()
+        isVideoError = true
+
+        true
+    }
+    
+    private val onVideoBufferingInfoListener = MediaPlayer.OnInfoListener { mp, what, extra ->
+        val returnValue: Boolean
+        when (what) {
+            MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
+                Log.i("VideoBuffer","Video start rendering")
+                returnValue = true
+            }
+            MediaPlayer.MEDIA_INFO_BUFFERING_START -> {
+                Log.i("VideoBuffer","Video start buffering")
+                loadingCircle?.visibility = View.VISIBLE
+                returnValue = true
+            }
+            MediaPlayer.MEDIA_INFO_BUFFERING_END -> {
+                Log.i("VideoBuffer","Video end buffering")
+                loadingCircle?.visibility = View.INVISIBLE
+                returnValue = true
+            }
+            else -> returnValue = false
+        }
+        returnValue
+    }
+
 
     private val onVideoCompleteListener = MediaPlayer.OnCompletionListener {
         Log.i("TAG","Completado")
@@ -171,6 +209,7 @@ class VideoAudiovisualResource : Fragment() {
         videoView = rootView?.findViewById<VideoView>(R.id.videoView)
         videoBackground = rootView?.findViewById<ImageView>(R.id.videoBackground)
         loadingCircle = rootView?.findViewById<ProgressBar>(R.id.progressBar)
+        errorLabel = rootView?.findViewById<TextView>(R.id.errorVideoLabel)
 
         utilities = VideoUtility()
 
@@ -237,10 +276,21 @@ class VideoAudiovisualResource : Fragment() {
         AUTO_HIDE = false
     }
 
+    private fun enableErrorUI(){
+        loadingCircle?.visibility = View.GONE
+        videoBackground?.setImageDrawable(context?.getDrawable(android.R.color.background_dark))
+        errorLabel?.visibility = View.VISIBLE
+
+        hide()
+    }
+
     private fun setUpVideo(){
 
         videoView?.setVideoURI(videoPath)
         videoView?.setOnPreparedListener(onVideoPrepareListener)
+        videoView?.setOnErrorListener(onVideoErrorListener)
+        videoView?.setOnInfoListener(onVideoBufferingInfoListener)
+
     }
 
     private fun playPauseVideo(play: Boolean){
@@ -316,6 +366,8 @@ class VideoAudiovisualResource : Fragment() {
     }
 
     private fun toggle() {
+        if (!isVideoPrepare || isVideoError) return
+
         if (mVisible) {
             hide()
         } else {
