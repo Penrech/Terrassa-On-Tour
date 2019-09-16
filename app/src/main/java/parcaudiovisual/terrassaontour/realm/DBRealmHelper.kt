@@ -6,6 +6,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.util.Log
 import io.realm.Realm
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
@@ -72,11 +73,7 @@ class DBRealmHelper {
 
     fun initStatics(): Statics?{
         val realm = Realm.getDefaultInstance()
-        Log.i("LifeCycle","Realm is : $realm")
         var staticsObj = realm.where(Statics::class.java).findFirst()
-
-        Log.i("DatosRealm","Iniciado en server: ${staticsObj?.savedOnRemoteServer}")
-        Log.i("DatosRealm","Statics obj iniciado? = $staticsObj")
 
         if (staticsObj == null) {
             try {
@@ -87,11 +84,11 @@ class DBRealmHelper {
                 staticsObj = startStatics
             } catch (e: Exception) {
                 e.printStackTrace()
+                Log.e("ErrorInitStatics","Error iniciando estadísticas: $e")
                 return null
             }
         }
 
-        Log.i("LifeCycle","Statics to be copied are: $staticsObj")
         val copyStaticsObj = realm.copyFromRealm(staticsObj)
 
         Realm.compactRealm(realm.configuration)
@@ -111,6 +108,7 @@ class DBRealmHelper {
             realm.commitTransaction()
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.e("ErrorRemoveRoute","Error borrando ruta: $e")
         }
 
         Realm.compactRealm(realm.configuration)
@@ -134,7 +132,7 @@ class DBRealmHelper {
         return copyOfStatics
     }
 
-    fun udpateStaticsInsertion() {
+    private fun udpateStaticsInsertion() {
         val realm = Realm.getDefaultInstance()
         try {
             realm.beginTransaction()
@@ -143,6 +141,7 @@ class DBRealmHelper {
             realm.commitTransaction()
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.e("ErrorUpdateStatics","Error actualizando inserción de estadísticas: $e")
         }
 
         Realm.compactRealm(realm.configuration)
@@ -155,16 +154,13 @@ class DBRealmHelper {
         realm.executeTransactionAsync({
             val statics = it.where(Statics::class.java).findFirst()
             statics?.addPointVisit(pointID)
-            Log.i("Insertar","Statics inserción iniciada: id: $pointID , statics ${statics?.getVisitedPoints()}")
         }, {
-            Log.i("Insertar","Statics inserción success")
-
             Realm.compactRealm(realm.configuration)
             realm.close()
 
         }, {
-            Log.i("Insertar","Statics inserción Fail")
 
+            Log.e("ErrorUpdateVisitedPoint","Error actualizando visitas de puntos: $it")
             Realm.compactRealm(realm.configuration)
             realm.close()
         })
@@ -183,6 +179,7 @@ class DBRealmHelper {
 
         }, {
 
+            Log.e("ErrorUpdateVisitedAud","Error actualizando visitas de audiovisuales: $it")
             Realm.compactRealm(realm.configuration)
             realm.close()
         })
@@ -211,6 +208,7 @@ class DBRealmHelper {
             realm.commitTransaction()
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.e("ErrorAddCurrentRoute","Error añadiendo ruta actual: $e")
             success = false
         }
 
@@ -222,19 +220,13 @@ class DBRealmHelper {
 
     fun getAudiovisualsFromCurrentRoute() : List<String> {
         val realm = Realm.getDefaultInstance()
-        Log.i("AudiovisualesEnRuta","------------------------------------------")
         val currentStatics = getCurrentStatics() ?: return listOf()
-        Log.i("AudiovisualesEnRuta","CurrentStatics: $currentStatics")
-        val currentRoute = currentStatics.getCurrentRoute()
-        Log.i("AudiovisualesEnRuta","CurrentRoute Before: ${currentRoute}")
-        if (currentRoute == null) return listOf()
-        Log.i("AudiovisualesEnRuta","CurrentRoute After: ${currentRoute}")
+        val currentRoute = currentStatics.getCurrentRoute() ?: return listOf()
+
         val routeDetails = realm.where(Ruta::class.java).equalTo("id",currentRoute).findFirst() ?: return listOf()
-        Log.i("AudiovisualesEnRuta","RouteDetails: ${routeDetails}")
+
         val copyOfRouteDetails = realm.copyFromRealm(routeDetails)
         val audiovisualList = copyOfRouteDetails.idAudiovisuales
-        Log.i("AudiovisualesEnRuta","CoyList: ${audiovisualList}")
-        Log.i("AudiovisualesEnRuta","------------------------------------------")
 
         Realm.compactRealm(realm.configuration)
         realm.close()
@@ -251,8 +243,7 @@ class DBRealmHelper {
         Realm.compactRealm(realm.configuration)
         realm.close()
 
-        return if (copyOfAudiovisuales != null) copyOfAudiovisuales
-        else null
+        return copyOfAudiovisuales
     }
 
    fun getParcelableAudiovisualsFromPoint(pointID: String): ArrayList<AudiovisualParcelable>{
@@ -298,7 +289,7 @@ class DBRealmHelper {
     }
 
 
-    fun deletePoisFromDB(){
+    private fun deletePoisFromDB(){
         val realm = Realm.getDefaultInstance()
         val results = realm.where(PuntoInteres::class.java).findAll()
 
@@ -308,6 +299,7 @@ class DBRealmHelper {
             realm.commitTransaction()
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.e("ErrorRemovingPois","Error borrando puntos de interes de la DB: $e")
         }
 
         Realm.compactRealm(realm.configuration)
@@ -326,23 +318,21 @@ class DBRealmHelper {
         return copyOfRutas
     }
 
-    fun updateStaticsAfterInsertion(data: InsertStaticsResponse){
+    private fun updateStaticsAfterInsertion(data: InsertStaticsResponse){
         val realm = Realm.getDefaultInstance()
         val staticsObj = realm.where(Statics::class.java).findFirst() ?: return
 
         try {
-            Log.i("Insertion","----------------")
-            Log.i("Insertion","data: ${data.rutesToDelete}")
-            Log.i("Insertion","----------------")
             realm.beginTransaction()
             staticsObj.dayTime = data.isDayTime
             staticsObj.cleanAudiovisuals(data.audiovisualsToDelete)
             staticsObj.cleanPoints(data.pointsToDelete)
             staticsObj.cleanRoutes(data.rutesToDelete)
             realm.commitTransaction()
-            Log.i("StaticsAfterUpdate","$staticsObj")
+
         } catch (e: Exception){
             e.printStackTrace()
+            Log.e("ErrorUpdatingStatics","Error actualizando estadísticas despues de la inserción: $e")
         }
 
         Realm.compactRealm(realm.configuration)
@@ -350,7 +340,7 @@ class DBRealmHelper {
 
     }
 
-    fun deleteRoutesFromDB(){
+    private fun deleteRoutesFromDB(){
         val realm = Realm.getDefaultInstance()
         val results = realm.where(Ruta::class.java).findAll()
 
@@ -360,13 +350,14 @@ class DBRealmHelper {
             realm.commitTransaction()
         } catch (e: Exception){
             e.printStackTrace()
+            Log.e("ErrorDeletingRoutes","Error borrando rutas de la base de datos: $e")
         }
 
         Realm.compactRealm(realm.configuration)
         realm.close()
     }
 
-    fun deleteAudiovisualsFromDB(){
+    private fun deleteAudiovisualsFromDB(){
         val realm = Realm.getDefaultInstance()
         val results = realm.where(Audiovisual::class.java).findAll()
 
@@ -376,6 +367,7 @@ class DBRealmHelper {
             realm.commitTransaction()
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.e("ErrorDeletingAud","Error borrando audiovisuales de la base de datos: $e")
         }
 
         Realm.compactRealm(realm.configuration)
@@ -394,93 +386,61 @@ class DBRealmHelper {
             }
 
         }
-        /*AsyncInsertUser().let {
-            it.execute(Callable {
-                serverServices.insertUserIfNeeded(userID,userDeviceMode,userDeviceName,userDeviceType)
-            })
-            it.taskListener = object : OnUserInsertionCompleted {
-                override fun userInsertedOnServerDB(success: Boolean?) {
-                    val currentStatics = getCurrentStatics()
-
-                    if (success == null || currentStatics == null || success == false) return
-
-                    udpateStaticsInsertion()
-                }
-            }
-        }*/
     }
 
     fun insertStaticsToServer(){
-        AsyncStatics().let {
-            val currentStatics = getCurrentStatics() ?: return
-            val postData = JSONObject()
-            postData.put("id",currentStatics.id)
-            val pointsArray = JSONArray()
-            val rutesArray = JSONArray()
-            val audiovisualsArray = JSONArray()
+        CoroutineScope(Main).launch {
+            val currentStatics = getCurrentStatics() ?: return@launch
 
-            currentStatics.getVisitedPoints().forEach { pointsVisited->
-                val pointsVisitedJsonObject = JSONObject()
-                pointsVisitedJsonObject.put("id",pointsVisited.id)
-                pointsVisitedJsonObject.put("date",pointsVisited.date.toString())
-                pointsArray.put(pointsVisitedJsonObject)
-            }
+            withContext(Default){
+                val postData = JSONObject()
+                postData.put("id",currentStatics.id)
+                val pointsArray = JSONArray()
+                val rutesArray = JSONArray()
+                val audiovisualsArray = JSONArray()
 
-            currentStatics.getVisitedAudiovisuals().forEach { audiovisualVisited ->
-                val audiovisualVisitedJsonObject = JSONObject()
-                audiovisualVisitedJsonObject.put("id",audiovisualVisited.id)
-                audiovisualVisitedJsonObject.put("date",audiovisualVisited.date.toString())
-                audiovisualsArray.put(audiovisualVisitedJsonObject)
-            }
+                currentStatics.getVisitedPoints().forEach { pointsVisited->
+                    val pointsVisitedJsonObject = JSONObject()
+                    pointsVisitedJsonObject.put("id",pointsVisited.id)
+                    pointsVisitedJsonObject.put("date",pointsVisited.date.toString())
+                    pointsArray.put(pointsVisitedJsonObject)
+                }
 
-            currentStatics.getVisitedRoutes().forEach { ruteVisited->
-                val ruteVisitedJsonObject = JSONObject()
-                ruteVisitedJsonObject.put("id",ruteVisited.id)
-                ruteVisitedJsonObject.put("date",ruteVisited.date.toString())
-                rutesArray.put(ruteVisitedJsonObject)
-            }
+                currentStatics.getVisitedAudiovisuals().forEach { audiovisualVisited ->
+                    val audiovisualVisitedJsonObject = JSONObject()
+                    audiovisualVisitedJsonObject.put("id",audiovisualVisited.id)
+                    audiovisualVisitedJsonObject.put("date",audiovisualVisited.date.toString())
+                    audiovisualsArray.put(audiovisualVisitedJsonObject)
+                }
 
-            if (pointsArray.length() > 0) postData.put("points",pointsArray)
-            if (audiovisualsArray.length() > 0) postData.put("audiovisuals",audiovisualsArray)
-            if (rutesArray.length() > 0) postData.put("rutes", rutesArray)
+                currentStatics.getVisitedRoutes().forEach { ruteVisited->
+                    val ruteVisitedJsonObject = JSONObject()
+                    ruteVisitedJsonObject.put("id",ruteVisited.id)
+                    ruteVisitedJsonObject.put("date",ruteVisited.date.toString())
+                    rutesArray.put(ruteVisitedJsonObject)
+                }
 
-            Log.i("Insertion","PostData: $postData")
-            it.execute(Callable {
-                serverServices.insertPeriodicallyStatics(postData)
-            })
-            it.taskListener = object : OnServerResponseFromStaticsQuery {
-                override fun onServerResponseFromStaticsQuery(result: InsertStaticsResponse?) {
-                    Log.i("Insertion","${result?.isDayTime}")
-                    if (result == null || result.appStateError) return
+                if (pointsArray.length() > 0) postData.put("points",pointsArray)
+                if (audiovisualsArray.length() > 0) postData.put("audiovisuals",audiovisualsArray)
+                if (rutesArray.length() > 0) postData.put("rutes", rutesArray)
 
-                    appStateInterface?.appStateChange(result.appActive,result.message)
+                withContext(IO){
+                    val result = serverServices.insertPeriodicallyStatics(postData)
+                    if (!result.appStateError){
+                        withContext(Main){
+                            appStateInterface?.appStateChange(result.appActive,result.message)
 
-                    if (currentStatics.dayTime != result.isDayTime) appStateInterface?.dayTimeChange()
+                            if (currentStatics.dayTime != result.isDayTime) appStateInterface?.dayTimeChange()
 
-                    updateStaticsAfterInsertion(result)
+                            updateStaticsAfterInsertion(result)
+                        }
+                    }
                 }
             }
         }
     }
 
     fun loadRutes(){
-       /* AsyncRutes().let {
-            it.execute(Callable {
-                serverServices.getRoutes()
-            })
-            it.taskListener = object : OnRutesDownloadCompleted {
-                override fun onRutesDownloaded(result: Pair<Boolean, ArrayList<Ruta>>?) {
-                    if (result == null) downloadInterface?.rutesLoaded(false)
-                    else {
-                        if (!result.first) downloadInterface?.rutesLoaded(false)
-                        else {
-                            if (saveRoutesToLocalDatabase(result.second)) downloadInterface?.rutesLoaded(true)
-                            else downloadInterface?.rutesLoaded(false)
-                        }
-                    }
-                }
-            }
-        }*/
         CoroutineScope(IO).launch {
             val result = serverServices.getRoutes()
 
@@ -495,24 +455,6 @@ class DBRealmHelper {
     }
 
     fun loadPois(){
-        /*AsyncPois().let {
-            it.execute(Callable {
-                serverServices.getPOIS()
-            })
-            it.taskListener = object : OnDownloadsCompleted {
-                override fun onPoisDonwloaded(result: Pair<Boolean, ArrayList<PuntoInteres>>?) {
-                    if (result == null) downloadInterface?.pointsLoaded(false)
-                    else {
-                        if (!result.first) downloadInterface?.pointsLoaded(false)
-                        else {
-                            if (savePoisToLocalDatabase(result.second)) downloadInterface?.pointsLoaded(true)
-                            else downloadInterface?.pointsLoaded(false)
-                        }
-                    }
-                }
-
-            }
-        }*/
         CoroutineScope(IO).launch {
             val result = serverServices.getPOIS()
 
@@ -528,23 +470,6 @@ class DBRealmHelper {
     }
 
     fun loadAudiovisuals(){
-        /*AsyncAudiovisual().let {
-            it.execute(Callable {
-                serverServices.getAudiovisuals()
-            })
-            it.taskListener = object : OnAudiovisuaDownloadCompleted {
-                override fun onAudiovisualDonwloaded(result: Pair<Boolean, ArrayList<Audiovisual>>?) {
-                    if (result == null) downloadInterface?.audiovisualsLoaded(false)
-                    else {
-                        if (!result.first) downloadInterface?.audiovisualsLoaded(false)
-                        else {
-                            if (saveAudiovisualsToLocalDatabase(result.second)) downloadInterface?.audiovisualsLoaded(true)
-                            else downloadInterface?.audiovisualsLoaded(false)
-                        }
-                    }
-                }
-            }
-        }*/
         CoroutineScope(IO).launch {
             val result = serverServices.getAudiovisuals()
 
@@ -558,7 +483,7 @@ class DBRealmHelper {
         }
     }
 
-    fun saveAudiovisualsToLocalDatabase(audiovisualList: ArrayList<Audiovisual>) : Boolean {
+    private fun saveAudiovisualsToLocalDatabase(audiovisualList: ArrayList<Audiovisual>) : Boolean {
         val realm = Realm.getDefaultInstance()
 
         deleteAudiovisualsFromDB()
@@ -574,12 +499,13 @@ class DBRealmHelper {
         var success = true
 
         try {
-                realm.beginTransaction()
-                realm.copyToRealmOrUpdate(audiovisualList)
-                realm.commitTransaction()
+            realm.beginTransaction()
+            realm.copyToRealmOrUpdate(audiovisualList)
+            realm.commitTransaction()
 
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.e("ErrorSavingAudiovisuals","Error guardando audiovisuales en la base de datos local: $e")
             success = false
         }
 
@@ -592,7 +518,7 @@ class DBRealmHelper {
         return  success
     }
 
-    fun savePoisToLocalDatabase(poisList: ArrayList<PuntoInteres>): Boolean {
+    private fun savePoisToLocalDatabase(poisList: ArrayList<PuntoInteres>): Boolean {
         val realm = Realm.getDefaultInstance()
 
         deletePoisFromDB()
@@ -615,9 +541,9 @@ class DBRealmHelper {
 
         } catch (e: Exception){
             e.printStackTrace()
+            Log.e("ErrorSavingPois","Error guardando puntos de interés en la base de datos local: $e")
             success = false
         }
-
 
         actualVersion ++
         updateVersion ++
@@ -628,7 +554,7 @@ class DBRealmHelper {
         return success
     }
 
-    fun saveRoutesToLocalDatabase(rutesList: ArrayList<Ruta>) : Boolean {
+    private fun saveRoutesToLocalDatabase(rutesList: ArrayList<Ruta>) : Boolean {
         val realm = Realm.getDefaultInstance()
 
         deleteRoutesFromDB()
@@ -649,9 +575,9 @@ class DBRealmHelper {
             realm.commitTransaction()
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.e("ErrorSavingRoutes","Error guardando rutas en la base de datos local: $e")
             success = false
         }
-
 
         actualVersion ++
         updateVersion ++

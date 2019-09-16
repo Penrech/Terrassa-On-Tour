@@ -2,10 +2,8 @@ package parcaudiovisual.terrassaontour.fragments
 
 import android.graphics.Bitmap
 import android.graphics.drawable.ColorDrawable
-import android.media.MediaDrm
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
-import android.media.MediaTimestamp
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -22,18 +20,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 import parcaudiovisual.terrassaontour.R
-import parcaudiovisual.terrassaontour.utils.AsyncVideoThumbnail
-import parcaudiovisual.terrassaontour.utils.OnThumbnailLoaded
 import parcaudiovisual.terrassaontour.utils.VideoUtility
 import java.lang.Exception
 
 private const val VIDEO_URI = "videoUri"
+private const val AUTO_HIDE_DELAY_MILLIS = 3000
+private const val UI_ANIMATION_DELAY = 300
 
 class VideoAudiovisualResource : Fragment() {
 
-    private var AUTO_HIDE = false
-    private val AUTO_HIDE_DELAY_MILLIS = 3000
-    private val UI_ANIMATION_DELAY = 300
+    private var autoHide = false
 
     private var totalTimeTextView: TextView? = null
     private var currentTimeTextView: TextView? = null
@@ -118,9 +114,8 @@ class VideoAudiovisualResource : Fragment() {
         isVideoPrepare = true
 
         videoThumbnail?.let { bitmap ->
-            Log.i("Thumbnail","VideoBackground en video prepare: ${videoBackground!!.background}")
+
             if (videoBackground?.background is ColorDrawable) {
-                Log.i("Thumbnail","Inserto bitmap en video prepare")
                 videoBackground!!.setImageBitmap(bitmap)
             }
         }
@@ -185,7 +180,6 @@ class VideoAudiovisualResource : Fragment() {
 
 
     private val onVideoCompleteListener = MediaPlayer.OnCompletionListener {
-        Log.i("TAG","Completado")
         restartVideo()
     }
 
@@ -239,23 +233,6 @@ class VideoAudiovisualResource : Fragment() {
     }
 
     private fun getVideoThumbnail(){
-        /*AsyncVideoThumbnail().let {
-            it.execute(videoUri)
-
-            it.taskListener = object : OnThumbnailLoaded {
-                override fun onThumbnailLoaded(bitmap: Bitmap?) {
-                    videoThumbnail = bitmap
-                    Log.i("Thumbnail","Thumbnail recibida: $bitmap")
-                    Log.i("Thumbnail","VideoBackground en callback: ${videoBackground!!.background}")
-                    videoThumbnail?.let {
-                        if (isVideoPrepare && videoBackground!!.background is ColorDrawable) {
-                            Log.i("Thumbnail","Inserto bitmap en callback")
-                            videoBackground!!.setImageBitmap(it)
-                        }
-                    }
-                }
-            }
-        }*/
         CoroutineScope(IO).launch {
             var bitmap: Bitmap? = null
             val mediaMetadataRetriever = MediaMetadataRetriever()
@@ -305,7 +282,7 @@ class VideoAudiovisualResource : Fragment() {
         updateProgressBar()
         videoSeekBar?.progress = 0
         cancelDelayedHide()
-        AUTO_HIDE = false
+        autoHide = false
     }
 
     private fun enableErrorUI(){
@@ -335,7 +312,7 @@ class VideoAudiovisualResource : Fragment() {
             videoView?.start()
             updateProgressBar()
             setUpPlayButton()
-            AUTO_HIDE = true
+            autoHide = true
             hide()
 
         } else {
@@ -343,7 +320,7 @@ class VideoAudiovisualResource : Fragment() {
             mHideHandler.removeCallbacks(videoRunnable)
             setUpPlayButton()
             cancelDelayedHide()
-            AUTO_HIDE = false
+            autoHide = false
             show()
 
         }
@@ -404,7 +381,7 @@ class VideoAudiovisualResource : Fragment() {
             hide()
         } else {
             show()
-            if (AUTO_HIDE)
+            if (autoHide)
                 delayedHide(AUTO_HIDE_DELAY_MILLIS)
         }
     }

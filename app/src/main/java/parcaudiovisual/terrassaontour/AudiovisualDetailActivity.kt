@@ -1,42 +1,28 @@
 package parcaudiovisual.terrassaontour
 
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.PersistableBundle
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
 import android.util.Log
-import android.util.TypedValue
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_audiovisual_detail.*
-import kotlinx.android.synthetic.main.activity_info_window_detail.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import parcaudiovisual.terrassaontour.adapters.InfoElementsLinkRecyclerAdapter
 import parcaudiovisual.terrassaontour.adapters.InfoWindowImageViewPager
 import parcaudiovisual.terrassaontour.fragments.AudiovisualInfoDetails
-import parcaudiovisual.terrassaontour.fragments.InfoElementFragment
 import parcaudiovisual.terrassaontour.fragments.StaticAudiovisualResource
 import parcaudiovisual.terrassaontour.fragments.VideoAudiovisualResource
 import parcaudiovisual.terrassaontour.interfaces.ChangeDetailCloseButton
 import parcaudiovisual.terrassaontour.interfaces.SendLinkToOpenInBrowser
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
-import java.net.URL
-import java.util.*
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.random.Random
 
 class AudiovisualDetailActivity : AppCompatActivity(),
     ViewPager.OnPageChangeListener,
-    InfoElementsLinkRecyclerAdapter.OnClickLink,
     ChangeDetailCloseButton,
     SendLinkToOpenInBrowser{
 
@@ -273,10 +259,6 @@ class AudiovisualDetailActivity : AppCompatActivity(),
             super.onBackPressed()
         }
 
-    }
-
-    override fun onClickLink(urlString: String) {
-        Log.i("Clicked","URl Clicked $urlString")
     }
 
     fun errorLoadingAudiovisual(){

@@ -12,7 +12,7 @@ import kotlinx.android.synthetic.main.fragment_big_image_info_window.view.*
 import parcaudiovisual.terrassaontour.R
 
 class BigImageInfoWindow : Fragment() {
-   var rootView: View? = null
+   private var rootView: View? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

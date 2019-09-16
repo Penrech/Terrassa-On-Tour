@@ -1,11 +1,9 @@
 package parcaudiovisual.terrassaontour.adapters
 
-import android.content.Context
 import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.equipo_info_element_audiovisual_cell.view.*
 import parcaudiovisual.terrassaontour.R
@@ -24,7 +22,7 @@ class ItemRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         holder.itemLabel.text = arrayList[position].first
-        //Url
+
         if (arrayList[position].second != null) {
             holder.itemLabel.paintFlags = holder.itemLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
             var link = arrayList[position].second
@@ -40,7 +38,6 @@ class ItemRecyclerViewAdapter(
         } else {
             holder.itemLabel.background = null
         }
-        //arrayList[position].second
     }
 
     override fun getItemCount(): Int {

@@ -1,6 +1,5 @@
 package parcaudiovisual.terrassaontour.fragments
 
-
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -12,7 +11,7 @@ import kotlinx.android.synthetic.main.fragment_static_audiovisual_resource.view.
 import parcaudiovisual.terrassaontour.R
 
 class StaticAudiovisualResource : Fragment() {
-    var rootView: View? = null
+    private var rootView: View? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

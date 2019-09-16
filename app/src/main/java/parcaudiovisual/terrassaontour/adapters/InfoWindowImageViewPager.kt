@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 
-class InfoWindowImageViewPager(fragmentManager: FragmentManager, private var listFragment: List<Fragment>): FragmentPagerAdapter(fragmentManager) {
+class InfoWindowImageViewPager(fragmentManager: FragmentManager, private var listFragment: List<Fragment>): FragmentPagerAdapter(fragmentManager,BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
     override fun getItem(p0: Int): Fragment {
         return listFragment[p0]
     }

@@ -23,7 +23,8 @@ class ServerServices {
     private val insertAllStatics = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/InsertAllStatistics.php"
 
     fun insertUserIfNeeded(userID: String, userDeviceMode: String, userDeviceName: String, userDeviceType: String): Boolean{
-        val url = insertUser + "?id=$userID&model=$userDeviceMode&name=$userDeviceName&type=$userDeviceType"
+        val url =
+            "$insertUser?id=$userID&model=$userDeviceMode&name=$userDeviceName&type=$userDeviceType"
         try {
             val json = JSONObject(getJson(url))
             val success = json.getString("result") == "success"

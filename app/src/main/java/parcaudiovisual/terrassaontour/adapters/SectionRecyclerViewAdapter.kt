@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.fragment_audiovisual_info_details.view.*
 import kotlinx.android.synthetic.main.section_custom_row_layout.view.*
 import parcaudiovisual.terrassaontour.R
 import parcaudiovisual.terrassaontour.SectionModel
@@ -32,7 +31,6 @@ class SectionRecyclerViewAdapter(
         val sectionModel = sectionModelArrayList[position]
         holder.sectionLabel.text = sectionModel.sectionLabel
 
-       // holder.itemRecyclerView.setHasFixedSize(true)
         holder.itemRecyclerView.isNestedScrollingEnabled = false
 
         val orientation = context.resources.configuration.orientation
@@ -45,7 +43,6 @@ class SectionRecyclerViewAdapter(
         holder.itemRecyclerView.adapter = adapter
         holder.itemRecyclerView.layoutManager = gridLayoutManager
     }
-
 
     inner class SectionViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val sectionLabel = itemView.section_title

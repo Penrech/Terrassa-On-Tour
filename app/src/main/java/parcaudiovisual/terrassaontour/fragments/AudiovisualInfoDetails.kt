@@ -1,13 +1,10 @@
 package parcaudiovisual.terrassaontour.fragments
 
-
 import android.content.Context
-import android.content.res.Resources
 import android.os.Bundle
 import com.google.android.material.appbar.AppBarLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +14,11 @@ import android.view.animation.AnimationUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_audiovisual_info_details.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import parcaudiovisual.terrassaontour.AudiovisualParcelable
 import parcaudiovisual.terrassaontour.ClienteProductoraParcelable
 
@@ -24,7 +26,6 @@ import parcaudiovisual.terrassaontour.R
 import parcaudiovisual.terrassaontour.SectionModel
 import parcaudiovisual.terrassaontour.adapters.SectionRecyclerViewAdapter
 import parcaudiovisual.terrassaontour.interfaces.ChangeDetailCloseButton
-import parcaudiovisual.terrassaontour.layoutManagers.NoScrollLinearLayoutManager
 import kotlin.math.abs
 
 private const val AUDIOVISUAL = "audiovisual"
@@ -45,61 +46,15 @@ class AudiovisualInfoDetails : Fragment() {
 
     private var onOffsetChangeToolbarListener =
 
-        AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
-           /* val screenHeight = Resources.getSystem().displayMetrics.heightPixels
-            val screenWidth = Resources.getSystem().displayMetrics.widthPixels
-            val textToolbar = rootView!!.AudiovisualTitleToolbar
-            val titleTextView = if (textToolbar.getChildAt(0) is AppCompatTextView) textToolbar.getChildAt(0) as AppCompatTextView else null
-            val yearTextView = if (textToolbar.getChildAt(0) is AppCompatTextView) textToolbar.getChildAt(1) as AppCompatTextView else null
-            Log.i("TextParams","Param1: ${titleTextView?.width}, Param2: ${titleTextView?.translationX}")
-            val marginMax = (screenWidth * 0.15).roundToInt()
-            val maximum = screenHeight * 0.4
-            val maxCenter = ((textToolbar.width ) / 2)
-            Log.i("Offset","Textoolbar Inset: ${textToolbar.contentInsetLeft}")
-            val offset = Math.abs(verticalOffset)
-            val percentage = (offset * 100) / maximum
-            val marginNormalized = ((percentage * marginMax) / 100).roundToInt()
-            val centerNormalized = (percentage * maxCenter / 100).toFloat()
-            if (offset >= 0 && offset <= maximum) {
-                textToolbar.setPadding(marginNormalized ,textToolbar.paddingTop,marginNormalized,textToolbar.paddingBottom)
-                titleTextView?.translationX = centerNormalized - 2 * marginNormalized
-                yearTextView?.translationX = centerNormalized - 2 * marginNormalized
+        AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
 
-                if (offset == maximum.toInt()) {
-
-                }
-            }*/
-           /*if (Math.abs(verticalOffset) >= (screenHeight * 0.4)) {
-                  Log.i("Offset","TOP")
-                  textToolbar.setPadding(margin,textToolbar.paddingTop,margin,textToolbar.paddingBottom)
-           } else {
-
-           }*/
-            Log.i("OFFSET","Offset pixeles: $verticalOffset")
-            val topLimit = imageToolbarHeight!! - textToolbarHeight!! //+ midHeightOfFAB!!
             val bottomLimit = imageToolbarHeight!!
             val absOffset = abs(verticalOffset)
             val minPercentage = 1 - (textToolbarHeight!! / imageToolbarHeight!!)
-            Log.i("OFFSET","ABS OFFSET: $absOffset")
-            Log.i("OFFSET","TOPLIMIT: $topLimit")
-            Log.i("OFFSET","min percentage: $minPercentage")
 
             val percentage = (absOffset / bottomLimit)
 
-            /*if (percentage > minPercentage) {
-                /*val multiplier = 1 / (1 - minPercentage)
-                val elevation = (1 - percentage) * multiplier
-                val df = DecimalFormat("#.##")
-                df.roundingMode = RoundingMode.FLOOR
-                val elevationNormalized = df.format(elevation)
-                sendInfoToParentInterface?.elevationChange(elevationNormalized.toFloat())
-                Log.i("OFFSET","Elevation multiplier: $elevationNormalized")*/
-
-            } else {
-
-            }*/
             hideFabShowToolbarButton(percentage > minPercentage)
-
         }
 
     private var popOutAnimationListener = object : Animation.AnimationListener{
@@ -140,26 +95,17 @@ class AudiovisualInfoDetails : Fragment() {
         rootView?.closeButtonFromToolbar?.visibility = View.INVISIBLE
         rootView?.closeButtonFromToolbar?.setOnClickListener(onCloseClickListerner)
 
-        loadData()
+        CoroutineScope(Default).launch {
+            loadData()
+        }
+
         setUpAnimations()
 
         return rootView
     }
 
-    private fun loadData(){
+    private suspend fun loadData(){
         val audiovisual = arguments?.getParcelable<AudiovisualParcelable>(AUDIOVISUAL)
-        //rootView!!.AudiovisualImageView.layoutParams.height = (screenSize * 0.4).roundToInt()
-
-        Picasso.get()
-            .load(audiovisual?.img_cabecera)
-            .noFade()
-            .placeholder(R.drawable.placeholder_loading_big)
-            .into(rootView!!.AudiovisualImageView)
-
-        rootView!!.audInfoTitle.text = audiovisual?.title
-        rootView!!.audInfoYear.text = audiovisual?.year
-
-        val screenSize = Resources.getSystem().displayMetrics.heightPixels
 
         val actoresList = audiovisual?.actores ?: ArrayList()
         val directoresList = audiovisual?.directores ?: ArrayList()
@@ -204,14 +150,23 @@ class AudiovisualInfoDetails : Fragment() {
             sectionModelArrayList.add(SectionModel(sectionTitle,pairArray))
         }
 
-        val adapter = SectionRecyclerViewAdapter(context!!,sectionModelArrayList)
-        crewRecyclerView!!.adapter = adapter
+        withContext(Main){
+            Picasso.get()
+                .load(audiovisual?.img_cabecera)
+                .noFade()
+                .placeholder(R.drawable.placeholder_loading_big)
+                .into(rootView!!.AudiovisualImageView)
 
-        if (!audiovisual?.description.isNullOrEmpty()) {
-            rootView!!.description_text.text = audiovisual!!.description
+            rootView!!.audInfoTitle.text = audiovisual?.title
+            rootView!!.audInfoYear.text = audiovisual?.year
+
+            val adapter = SectionRecyclerViewAdapter(context!!,sectionModelArrayList)
+            crewRecyclerView!!.adapter = adapter
+
+            if (!audiovisual?.description.isNullOrEmpty()) {
+                rootView!!.description_text.text = audiovisual!!.description
+            }
         }
-
-
 
     }
 
@@ -246,14 +201,14 @@ class AudiovisualInfoDetails : Fragment() {
         deleteOffsetListener()
     }
 
-    fun setOffsetListener(){
+    private fun setOffsetListener(){
         if (!appbarListenerOffsetOn) {
             rootView!!.appbar.addOnOffsetChangedListener(onOffsetChangeToolbarListener)
             appbarListenerOffsetOn = true
         }
     }
 
-    fun deleteOffsetListener(){
+    private fun deleteOffsetListener(){
         if (appbarListenerOffsetOn) {
             rootView!!.appbar.removeOnOffsetChangedListener(onOffsetChangeToolbarListener)
             appbarListenerOffsetOn = false
