@@ -3,6 +3,7 @@ package parcaudiovisual.terrassaontour.fragments
 import android.graphics.Bitmap
 import android.graphics.drawable.ColorDrawable
 import android.media.MediaDrm
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.media.MediaTimestamp
 import android.net.Uri
@@ -14,11 +15,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import parcaudiovisual.terrassaontour.R
 import parcaudiovisual.terrassaontour.utils.AsyncVideoThumbnail
 import parcaudiovisual.terrassaontour.utils.OnThumbnailLoaded
 import parcaudiovisual.terrassaontour.utils.VideoUtility
+import java.lang.Exception
 
 private const val VIDEO_URI = "videoUri"
 
@@ -232,7 +239,7 @@ class VideoAudiovisualResource : Fragment() {
     }
 
     private fun getVideoThumbnail(){
-        AsyncVideoThumbnail().let {
+        /*AsyncVideoThumbnail().let {
             it.execute(videoUri)
 
             it.taskListener = object : OnThumbnailLoaded {
@@ -245,6 +252,31 @@ class VideoAudiovisualResource : Fragment() {
                             Log.i("Thumbnail","Inserto bitmap en callback")
                             videoBackground!!.setImageBitmap(it)
                         }
+                    }
+                }
+            }
+        }*/
+        CoroutineScope(IO).launch {
+            var bitmap: Bitmap? = null
+            val mediaMetadataRetriever = MediaMetadataRetriever()
+
+            try {
+                mediaMetadataRetriever.setDataSource(videoUri,HashMap<String,String>())
+                bitmap = mediaMetadataRetriever.frameAtTime
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.e("GettingVideoThumb","Error getting video thumb: $e")
+            } finally {
+                mediaMetadataRetriever.release()
+            }
+
+            videoThumbnail = bitmap
+
+            withContext(Main){
+                videoThumbnail?.let {
+                    if (isVideoPrepare && videoBackground!!.background is ColorDrawable) {
+                        videoBackground!!.setImageBitmap(it)
                     }
                 }
             }

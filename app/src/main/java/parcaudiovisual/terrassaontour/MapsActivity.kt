@@ -347,17 +347,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     private fun manageInfoWindowChangeSizeOnScreenRotate() {
-        var markerInfoWindowShown : Marker? = null
-        for ((key, marker) in marcadores) {
-            if (marker.first.isInfoWindowShown) {
-                markerInfoWindowShown = marker.first
-                break
+        CoroutineScope(Default).launch {
+            var markerInfoWindowShown : Marker? = null
+
+            for ((key, marker) in marcadores) {
+                if (marker.first.isInfoWindowShown) {
+                    markerInfoWindowShown = marker.first
+                    break
+                }
             }
-        }
-        if (markerInfoWindowShown != null){
-            centerProperly(markerInfoWindowShown)
-            markerInfoWindowShown.hideInfoWindow()
-            markerInfoWindowShown.showInfoWindow()
+
+            if (markerInfoWindowShown != null){
+                withContext(Main){
+                    centerProperly(markerInfoWindowShown)
+                    markerInfoWindowShown.hideInfoWindow()
+                    markerInfoWindowShown.showInfoWindow()
+                }
+            }
         }
     }
 
@@ -381,7 +387,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     //Funciones Google map - markers
 
     fun loadMarkers(){
-        val areTherePreviousMarkers = !marcadores.isEmpty()
+        val areTherePreviousMarkers = marcadores.isNotEmpty()
 
         for ((markerID, markerInfo) in marcadores) {
             markerInfo.first.remove()
@@ -393,24 +399,35 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         val puntosDeInteres = dbHelper.getPoisFromDB()
         puntosDeInteres.forEach {
             val posicionPunto = LatLng(it.latitud, it.longitud)
-            addCustomPoiMarker(it, posicionPunto)
+            val currentMarkerID = addCustomPoiMarker(it, posicionPunto)
+
+            Log.i("RECARGAR","Ultimo marcador : $lastMarkerID")
+            if (lastMarkerID != null && it.id == lastMarkerID) {
+                marcadores[currentMarkerID]?.first?.showInfoWindow()
+
+                Log.i("RECARGAR","marcador que coincide")
+
+                lastMarkerID = null
+            }
         }
 
-        if (lastMarkerID!= null) {
+        /*Log.i("RECARGAR","Ultimo marcador : $lastMarkerID")
+        if (lastMarkerID != null) {
 
             val coincidence = marcadores.get(lastMarkerID!!)
             if (coincidence != null) {
                 val markerToReload = coincidence.first
                 markerToReload.showInfoWindow()
+                Log.i("RECARGAR","marcador que coincide : $markerToReload")
             }
             lastMarkerID = null
         }
-
+*/
         if (!areTherePreviousMarkers) moveCameraIfNoLocation()
 
     }
 
-    fun addCustomPoiMarker(puntoInteres: PuntoInteres, position: LatLng){
+    fun addCustomPoiMarker(puntoInteres: PuntoInteres, position: LatLng) : String{
         var drawable = R.drawable.ic_pointer_interior
         var locationText = "Int"
 
@@ -428,6 +445,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
         marcadores[marker.id] = Pair(marker, puntoInteres)
         noUbicationBounds.include(marker.position)
+
+        return marker.id
     }
 
     override fun onInfoWindowClick(p0: Marker?) {
@@ -753,13 +772,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     private fun unTrackGoogleLocation(){
-        val markers = ArrayList<Marker>()
+        val markers = ArrayList<String>()
         for ((key, markerInfo) in marcadores) {
-            if (markerInfo.first.isInfoWindowShown) markers.add(markerInfo.first)
+            if (markerInfo.first.isInfoWindowShown) {
+                markerInfo.second.id?.let {
+                    markers.add(it)
+                }
+            }
         }
 
         if (markers.count() > 0) {
-            lastMarkerID = markers.first().id
+            lastMarkerID = markers.first()
         }
         if (isGoogleLocationsUpdatesActive && googleLocationManager != null) {
 
