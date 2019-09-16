@@ -347,7 +347,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     private fun manageInfoWindowChangeSizeOnScreenRotate() {
-        CoroutineScope(Default).launch {
+        CoroutineScope(Main).launch {
             var markerInfoWindowShown : Marker? = null
 
             for ((key, marker) in marcadores) {
@@ -358,11 +358,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             }
 
             if (markerInfoWindowShown != null){
-                withContext(Main){
-                    centerProperly(markerInfoWindowShown)
-                    markerInfoWindowShown.hideInfoWindow()
-                    markerInfoWindowShown.showInfoWindow()
-                }
+                centerProperly(markerInfoWindowShown)
+                markerInfoWindowShown.hideInfoWindow()
+                markerInfoWindowShown.showInfoWindow()
             }
         }
     }
@@ -773,6 +771,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     private fun unTrackGoogleLocation(){
         val markers = ArrayList<String>()
+
         for ((key, markerInfo) in marcadores) {
             if (markerInfo.first.isInfoWindowShown) {
                 markerInfo.second.id?.let {

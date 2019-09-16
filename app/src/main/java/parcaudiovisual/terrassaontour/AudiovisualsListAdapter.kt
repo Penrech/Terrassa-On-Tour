@@ -58,7 +58,7 @@ class AudiovisualsListAdapter(val context: Context, var audiovisualList: ArrayLi
         }
     }
 
-    inner class AudiovisualVH(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView){
+    inner class AudiovisualVH(itemView: View) : RecyclerView.ViewHolder(itemView){
         val image = itemView.MaImage
         val title = itemView.MaAudiovisualTitleLabel
         val rutes = itemView.MaAudiovisualRutesLabel

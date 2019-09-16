@@ -14,6 +14,11 @@ import android.util.TypedValue
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_audiovisual_detail.*
 import kotlinx.android.synthetic.main.activity_info_window_detail.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import parcaudiovisual.terrassaontour.adapters.InfoElementsLinkRecyclerAdapter
 import parcaudiovisual.terrassaontour.adapters.InfoWindowImageViewPager
 import parcaudiovisual.terrassaontour.fragments.AudiovisualInfoDetails
@@ -27,6 +32,7 @@ import java.net.URL
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.random.Random
 
 class AudiovisualDetailActivity : AppCompatActivity(),
     ViewPager.OnPageChangeListener,
@@ -135,7 +141,51 @@ class AudiovisualDetailActivity : AppCompatActivity(),
 
     private fun loadData(previousData: AudiovisualParcelable?){
 
-        if (previousData == null) {
+        CoroutineScope(Main).launch {
+
+            if (previousData == null) {
+
+                val dbHelper = DBRealmHelper()
+
+                audiovisual = intent.getParcelableExtra("AUDIOVISUAL")
+
+
+                changeToIcon = Icon.MULTIMEDIA
+
+                if (audiovisual == null) {
+                    errorLoadingAudiovisual()
+                }
+
+                dbHelper.updateStaticsAddAudiovisualVisit(audiovisual!!.id!!)
+
+
+            } else {
+                audiovisual = previousData
+            }
+
+            if (audiovisual?.tipo_medio != null && audiovisual!!.tipo_medio == "1") {
+                //Video
+                Log.i("JODER","Entro en video")
+                fragmentVideo = VideoAudiovisualResource.newInstance(audiovisual?.src)
+                fragmentsList.add(fragmentVideo!!)
+            } else if (audiovisual?.tipo_medio != null && audiovisual!!.tipo_medio == "2"){
+                //Imagen
+                Log.i("JODER","Entro en Imagen")
+                fragmentStaticImage = StaticAudiovisualResource.newInstance(audiovisual?.src)
+                fragmentsList.add(fragmentStaticImage!!)
+            }
+
+
+            fragmentInfoAudiovisual = AudiovisualInfoDetails.newInstance(audiovisual)
+            fragmentsList.add(fragmentInfoAudiovisual!!)
+
+            pagerAdapter = InfoWindowImageViewPager(supportFragmentManager,fragmentsList)
+            mPager.adapter = pagerAdapter
+
+
+        }
+
+       /* if (previousData == null) {
 
             val dbHelper = DBRealmHelper()
 
@@ -169,7 +219,7 @@ class AudiovisualDetailActivity : AppCompatActivity(),
         fragmentsList.add(fragmentInfoAudiovisual!!)
 
         pagerAdapter = InfoWindowImageViewPager(supportFragmentManager,fragmentsList)
-        mPager.adapter = pagerAdapter
+        mPager.adapter = pagerAdapter*/
 
     }
 

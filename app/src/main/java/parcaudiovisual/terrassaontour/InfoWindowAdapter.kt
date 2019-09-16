@@ -20,6 +20,7 @@ import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter
 import kotlinx.android.synthetic.main.custom_info_window.view.*
 import java.lang.Exception
 import kotlin.math.round
+import kotlin.math.roundToInt
 
 class InfoWindowAdapter(
     private val ctxt: Context, val inflater: LayoutInflater,
