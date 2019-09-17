@@ -61,6 +61,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     private var loadingRouteDialog: AlertDialog? = null
 
+    private var lastUpdateTime: Int? = null
+
     private var intentQueue: Intent? = null
 
     private var googleLocationManager: FusedLocationProviderClient? = null
@@ -219,9 +221,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         loadRutes()
     }
 
-    //todo CAMBIAR
     private fun checkIfDBUpdatedWhilePause(){
-        if (dbHelper.actualVersion != DBRealmHelper.updateVersion) {
+        val currentStatics = dbHelper.getCurrentStatics()
+        var currentUpdateTime: Int? = null
+
+        currentStatics?.let {
+            currentUpdateTime = it.lastServerUpdate
+        }
+
+        if (lastUpdateTime == null) lastUpdateTime = currentUpdateTime
+
+        if (lastUpdateTime != currentUpdateTime) {
             reloadData()
         }
     }

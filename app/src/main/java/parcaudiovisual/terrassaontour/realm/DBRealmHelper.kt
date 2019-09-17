@@ -21,7 +21,7 @@ import kotlin.collections.ArrayList
 class DBRealmHelper {
 
     companion object {
-        var updateVersion = 0
+
         const val BROADCAST_CHANGE_DB = "dbUploaded"
         const val BROADCAST_CHANGE_POINTS = "dbPointsUpdated"
         const val BROADCAST_CHANGE_RUTES = "dbRutesUpdated"
@@ -34,11 +34,6 @@ class DBRealmHelper {
     var appStateInterface: AppStateChange? = null
     var staticsUpdateInterface: StaticsUpdateFromServer? = null
 
-    var actualVersion = 0
-
-    init {
-        actualVersion = updateVersion
-    }
 
     fun getPoisFromDB(): List<PuntoInteres>{
         val realm = Realm.getDefaultInstance()
@@ -127,11 +122,12 @@ class DBRealmHelper {
         return copyOfStatics
     }
 
-    private fun udpateStaticsInsertion() {
+    private fun udpateStaticsInsertion(lastDataUpdate: Int?) {
         val realm = Realm.getDefaultInstance()
         try {
             realm.beginTransaction()
             val statics = realm.where(Statics::class.java).findFirst()
+            lastDataUpdate?.let { statics?.lastServerUpdate = it }
             statics?.savedOnRemoteServer = true
             realm.commitTransaction()
         } catch (e: Exception) {
@@ -320,6 +316,9 @@ class DBRealmHelper {
         try {
             realm.beginTransaction()
             staticsObj.dayTime = data.isDayTime
+            data.lastUpdate?.let {
+                staticsObj.lastServerUpdate = it
+            }
             staticsObj.cleanAudiovisuals(data.audiovisualsToDelete)
             staticsObj.cleanPoints(data.pointsToDelete)
             staticsObj.cleanRoutes(data.rutesToDelete)
@@ -374,10 +373,10 @@ class DBRealmHelper {
             val success = serverServices.insertUserIfNeeded(userID,userDeviceMode,userDeviceName,userDeviceType)
             val currentStatics = getCurrentStatics()
 
-            if (!success || currentStatics == null) return@launch
+            if (!success.first || currentStatics == null) return@launch
 
             withContext(Main){
-                udpateStaticsInsertion()
+                udpateStaticsInsertion(success.second)
             }
 
         }
@@ -427,55 +426,50 @@ class DBRealmHelper {
 
                             if (currentStatics.dayTime != result.isDayTime) appStateInterface?.dayTimeChange()
 
+                            if (currentStatics.lastServerUpdate != result.lastUpdate) appStateInterface?.reloadData()
+
                             updateStaticsAfterInsertion(result)
                         }
+                    }
+                    withContext(Main) {
+                        staticsUpdateInterface?.onStaticsUpdateFromServer(true)
                     }
                 }
             }
         }
     }
 
-    fun loadRutes(){
-        CoroutineScope(IO).launch {
+    suspend fun loadRutes(): Boolean{
             val result = serverServices.getRoutes()
 
-            withContext(Main){
-                if (!result.first) downloadInterface?.rutesLoaded(false)
+            return withContext(Main){
+                if (!result.first) false
                 else {
-                    if (saveRoutesToLocalDatabase(result.second)) downloadInterface?.rutesLoaded(true)
-                    else downloadInterface?.rutesLoaded(false)
+                    saveRoutesToLocalDatabase(result.second)
                 }
+            }
+    }
+
+    suspend fun loadPois(): Boolean{
+        val result = serverServices.getPOIS()
+
+       return withContext(Main) {
+            if (!result.first) false
+            else {
+                savePoisToLocalDatabase(result.second)
             }
         }
     }
 
-    fun loadPois(){
-        CoroutineScope(IO).launch {
-            val result = serverServices.getPOIS()
-
-            withContext(Main) {
-                if (!result.first) downloadInterface?.pointsLoaded(false)
-                else {
-                    if (savePoisToLocalDatabase(result.second)) downloadInterface?.pointsLoaded(true)
-                    else downloadInterface?.pointsLoaded(false)
-                }
-            }
-
-        }
-    }
-
-    fun loadAudiovisuals(){
-        CoroutineScope(IO).launch {
+    suspend fun loadAudiovisuals(): Boolean{
             val result = serverServices.getAudiovisuals()
 
-            withContext(Main){
-                if (!result.first) downloadInterface?.audiovisualsLoaded(false)
+            return withContext(Main){
+                if (!result.first) false
                 else {
-                    if (saveAudiovisualsToLocalDatabase(result.second)) downloadInterface?.audiovisualsLoaded(true)
-                    else downloadInterface?.audiovisualsLoaded(false)
+                    saveAudiovisualsToLocalDatabase(result.second)
                 }
             }
-        }
     }
 
     private fun saveAudiovisualsToLocalDatabase(audiovisualList: ArrayList<Audiovisual>) : Boolean {
@@ -503,9 +497,6 @@ class DBRealmHelper {
             Log.e("ErrorSavingAudiovisuals","Error guardando audiovisuales en la base de datos local: $e")
             success = false
         }
-
-        actualVersion ++
-        updateVersion ++
 
         Realm.compactRealm(realm.configuration)
         realm.close()
@@ -540,9 +531,6 @@ class DBRealmHelper {
             success = false
         }
 
-        actualVersion ++
-        updateVersion ++
-
         Realm.compactRealm(realm.configuration)
         realm.close()
 
@@ -573,9 +561,6 @@ class DBRealmHelper {
             Log.e("ErrorSavingRoutes","Error guardando rutas en la base de datos local: $e")
             success = false
         }
-
-        actualVersion ++
-        updateVersion ++
 
         Realm.compactRealm(realm.configuration)
         realm.close()

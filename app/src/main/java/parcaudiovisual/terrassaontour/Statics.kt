@@ -16,6 +16,7 @@ open class Statics: RealmObject() {
     var product = Build.PRODUCT
     var savedOnRemoteServer = false
     var dayTime = true
+    var lastServerUpdate = 0
     private var visitedPoints = RealmList<visitHistory>()
     private var visitedAudiovisuals = RealmList<visitHistory>()
     private var visitedRoutes = RealmList<visitHistory>()
@@ -178,6 +179,7 @@ class InsertStaticsResponse {
     var appActive = true
     var message: String? = null
     var isDayTime = true
+    var lastUpdate: Int? = null
 
     var audiovisualsToDelete = ArrayList<String>()
     var pointsToDelete = arrayListOf<String>()

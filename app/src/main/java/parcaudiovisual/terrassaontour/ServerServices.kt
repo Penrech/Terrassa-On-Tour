@@ -16,16 +16,17 @@ class ServerServices {
     private val insertUser = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/insertUser.php"
     private val insertAllStatics = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/InsertAllStatistics.php"
 
-    fun insertUserIfNeeded(userID: String, userDeviceMode: String, userDeviceName: String, userDeviceType: String): Boolean{
+    fun insertUserIfNeeded(userID: String, userDeviceMode: String, userDeviceName: String, userDeviceType: String): Pair<Boolean,Int?>{
         val url =
             "$insertUser?id=$userID&model=$userDeviceMode&name=$userDeviceName&type=$userDeviceType"
         try {
             val json = JSONObject(getJson(url))
             val success = json.getString("result") == "success"
-            return success
+            val lastUpdate = json.getInt("lastUpdate")
+            return Pair(success,lastUpdate)
         } catch (e: Exception) {
             e.printStackTrace()
-            return false
+            return Pair(false,null)
         }
     }
 
@@ -46,6 +47,7 @@ class ServerServices {
             response.appActive = appState.getBoolean("appActive")
             response.message = appState.getString("message")
             response.isDayTime = json.getBoolean("isDayTime")
+            response.lastUpdate = appState.getInt("lastUpdate")
 
             for (i: Int in 0 until successAudiovisuals.length()){
                 response.audiovisualsToDelete.add(successAudiovisuals.getString(i))

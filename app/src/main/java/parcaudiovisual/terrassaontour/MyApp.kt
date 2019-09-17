@@ -15,6 +15,11 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.util.Log
 import io.realm.Realm
 import io.realm.RealmConfiguration
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import parcaudiovisual.terrassaontour.interfaces.AppStateChange
 import parcaudiovisual.terrassaontour.interfaces.DataLoaded
 import parcaudiovisual.terrassaontour.interfaces.StaticsUpdateFromServer
@@ -74,7 +79,10 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
 
     fun startStatics(){
         val currentStatics = dbHelper.initStatics()
-        if (currentStatics != null) dbHelper.insertUserOnServerDB(currentStatics.id,currentStatics.model,currentStatics.name,currentStatics.product)
+        if (currentStatics != null) {
+            staticsSended = true
+            dbHelper.insertUserOnServerDB(currentStatics.id,currentStatics.model,currentStatics.name,currentStatics.product)
+        }
     }
 
     private fun sendStatics(){
@@ -179,9 +187,20 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
     }
 
     fun loadDataFromDatabase(){
-        dbHelper.loadPois()
-        dbHelper.loadRutes()
-        dbHelper.loadAudiovisuals()
+        Log.i("Data","Data reloading...")
+        CoroutineScope(Main).launch {
+            val poiCoroutine = async(IO) { dbHelper.loadPois() }
+            val routeCoroutine = async(IO) { dbHelper.loadRutes() }
+            val audCoroutine = async(IO) { dbHelper.loadAudiovisuals() }
+
+            poiCoroutine.await()
+            routeCoroutine.await()
+            audCoroutine.await()
+
+            manageAllDataLoading()
+
+            Log.i("Data","All Data reload")
+        }
     }
 
     override fun pointsLoaded(succes: Boolean) {
@@ -203,7 +222,10 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
     }
 
     override fun allLoaded(succes: Boolean) {
-
+        if (currentActivity?.localClassName == "LoadingActivity") {
+            val intent = Intent(DBRealmHelper.BROADCAST_FIRST_DATA_LOAD)
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        }
     }
 
     override fun appStateChange(appActive: Boolean, message: String?) {
@@ -212,8 +234,14 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         }
     }
 
+    override fun reloadData() {
+        loadDataFromDatabase()
+    }
+
     override fun dayTimeChange() {
-        dbHelper.loadPois()
+        CoroutineScope(IO).launch {
+            dbHelper.loadPois()
+        }
 
     }
 
@@ -221,7 +249,7 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         if (success) staticsSended = false
     }
 
-    private fun manageAllDataLoading() {
+   /* private fun manageAllDataLoading() {
         if (currentActivity?.localClassName == "LoadingActivity") {
             elementsLoaded++
             if (elementsLoaded == 3) {
@@ -230,6 +258,12 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
                 elementsLoaded = 0
             }
         }
-    }
+    }*/
+   private fun manageAllDataLoading() {
+       if (currentActivity?.localClassName == "LoadingActivity") {
+           val intent = Intent(DBRealmHelper.BROADCAST_FIRST_DATA_LOAD)
+           LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+       }
+   }
 
 }
