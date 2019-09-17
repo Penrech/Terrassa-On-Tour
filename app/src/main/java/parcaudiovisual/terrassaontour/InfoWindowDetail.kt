@@ -1,16 +1,11 @@
 package parcaudiovisual.terrassaontour
 
-
 import android.app.AlertDialog
-import android.app.Dialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import androidx.viewpager.widget.ViewPager
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
-import android.view.Window
 import android.widget.ImageButton
 import kotlinx.android.synthetic.main.activity_info_window_detail.*
 import kotlinx.coroutines.CoroutineScope
@@ -26,8 +21,8 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
     private lateinit var mPager: ViewPager
     private var pagerAdapter: InfoWindowImageViewPager? = null
 
-    private val DayDrawable = R.drawable.ic_icono_dia
-    private val NightDrawable = R.drawable.ic_icono_noche
+    private val dayDrawable = R.drawable.ic_icono_dia
+    private val nightDrawable = R.drawable.ic_icono_noche
 
     private var dialog: AlertDialog? = null
 
@@ -41,10 +36,10 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
     set(value) {
         typeIcon = when(value) {
             Icon.DAY -> {
-                runOnUiThread {switchInfoPhoto.setImageDrawable(getDrawable(NightDrawable))}
+                runOnUiThread {switchInfoPhoto.setImageDrawable(getDrawable(nightDrawable))}
                 Icon.DAY
             } else -> {
-                runOnUiThread {switchInfoPhoto.setImageDrawable(getDrawable(DayDrawable)) }
+                runOnUiThread {switchInfoPhoto.setImageDrawable(getDrawable(dayDrawable)) }
                 Icon.NIGHT
             }
         }
@@ -60,7 +55,7 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
     override fun onPageScrolled(p0: Int, p1: Float, p2: Int) {}
 
     override fun onPageSelected(p0: Int) {
-        Log.i("Pagina","Pagina cambiada a $p0")
+
         if (typeIcon != null) {
             changeToIcon = when (typeIcon) {
                 Icon.DAY -> Icon.NIGHT
@@ -73,7 +68,6 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_info_window_detail)
 
-        Log.i("Time","Time init onCreate: ${Date()}")
         mPager = detailImagePager
 
         listeningPagerEvents()
@@ -84,13 +78,9 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
         CoroutineScope(Dispatchers.Default).launch {
             loadData()
         }
-
-
     }
 
-
     private suspend fun loadData(){
-        Log.i("Time","Time init loadData: ${Date()}")
         fragmentsList.clear()
 
         val intent = intent
@@ -116,9 +106,7 @@ class InfoWindowDetail : AppCompatActivity(), ViewPager.OnPageChangeListener {
                 pagerAdapter = InfoWindowImageViewPager(supportFragmentManager,fragmentsList)
                 mPager.adapter = pagerAdapter
             }
-
         }
-
     }
 
     private fun showDialog(){

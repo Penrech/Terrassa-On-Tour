@@ -1,13 +1,11 @@
 package parcaudiovisual.terrassaontour
 
 import android.content.Context
-import android.content.res.Resources
 import com.google.android.material.snackbar.Snackbar
 import android.util.Log
 import android.view.View
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
-import io.realm.RealmList
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -17,6 +15,7 @@ import java.net.URL
 
 class MapServices(var context: Context, private var rootView: View) {
 
+    //todo extraer
     private val directionsURL = "https://maps.googleapis.com/maps/api/directions/json?"
 
     fun getRoutePath(rutePoints: ArrayList<pointLocationNotRealm>): ArrayList<List<LatLng>> {
@@ -26,7 +25,7 @@ class MapServices(var context: Context, private var rootView: View) {
 
         try {
             val json = JSONObject(getJson(createDirectionsURL(normalizedArray)))
-            Log.i("ServerResponse","${json.toString()}")
+
             val routes = json.getJSONArray("routes")
             val legs = routes.getJSONObject(0).getJSONArray("legs")
             val steps = legs.getJSONObject(0).getJSONArray("steps")

@@ -1,8 +1,5 @@
 package parcaudiovisual.terrassaontour.realm
 
-import android.content.Context
-import android.content.Intent
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.util.Log
 import io.realm.Realm
 import kotlinx.coroutines.CoroutineScope
@@ -18,9 +15,7 @@ import parcaudiovisual.terrassaontour.interfaces.AppStateChange
 import parcaudiovisual.terrassaontour.interfaces.DataLoaded
 import parcaudiovisual.terrassaontour.interfaces.StaticsUpdateFromServer
 import java.lang.Exception
-import java.security.spec.ECField
 import java.util.*
-import java.util.concurrent.Callable
 import kotlin.collections.ArrayList
 
 class DBRealmHelper {

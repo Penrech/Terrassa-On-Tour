@@ -1,7 +1,6 @@
 package parcaudiovisual.terrassaontour
 
 import android.Manifest
-import android.app.ActionBar
 import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -25,38 +24,25 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.drawable.AnimatedVectorDrawable
-import android.graphics.drawable.AnimationDrawable
-import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
-import android.net.Uri
-import android.util.TypedValue
 import android.view.*
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
-import androidx.cardview.widget.CardView
 import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.*
-import io.realm.Realm
-import io.realm.RealmChangeListener
-import io.realm.RealmList
 import kotlinx.android.synthetic.main.drawer_menu.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
 import java.lang.Exception
-import java.util.concurrent.Callable
-
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
     RutasListAdapter.LoadRuteUtils {
@@ -83,8 +69,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         private var lastStatus: Boolean = false
         override fun onLocationResult(p0: LocationResult?) {
             super.onLocationResult(p0)
-
-            Log.i("Locacion","Nueva Locacion")
         }
 
         override fun onLocationAvailability(p0: LocationAvailability?) {
@@ -175,7 +159,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         intentQueue = null
         disableDBHelperListener()
         unTrackGoogleLocation()
-        Log.i("LIFE","Entro en pause")
     }
 
     override fun onResume() {
@@ -187,7 +170,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //showSystemUI()
         setContentView(R.layout.drawer_menu)
 
         dbHelper = DBRealmHelper()
@@ -201,7 +183,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         setUpRoutesRecyclerView()
 
         mapservice = MapServices(this,mapRoot)
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -231,13 +213,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         loadMarkers()
     }
 
-    fun reloadData(){
+    private fun reloadData(){
         Log.i("Recargo","Recargo Todo")
         loadMarkers()
         loadRutes()
     }
 
-    fun checkIfDBUpdatedWhilePause(){
+    //todo CAMBIAR
+    private fun checkIfDBUpdatedWhilePause(){
         if (dbHelper.actualVersion != DBRealmHelper.updateVersion) {
             reloadData()
         }
@@ -334,7 +317,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     }
 
-    fun setOnMarkerClickListener() {
+    private fun setOnMarkerClickListener() {
         mMap.setOnMarkerClickListener {
 
             if (!it.isInfoWindowShown) {
@@ -350,7 +333,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         CoroutineScope(Main).launch {
             var markerInfoWindowShown : Marker? = null
 
-            for ((key, marker) in marcadores) {
+            for ((_, marker) in marcadores) {
                 if (marker.first.isInfoWindowShown) {
                     markerInfoWindowShown = marker.first
                     break
@@ -384,10 +367,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     //Funciones Google map - markers
 
-    fun loadMarkers(){
+    private fun loadMarkers(){
         val areTherePreviousMarkers = marcadores.isNotEmpty()
 
-        for ((markerID, markerInfo) in marcadores) {
+        for ((_, markerInfo) in marcadores) {
             markerInfo.first.remove()
         }
         marcadores.clear()
@@ -399,33 +382,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             val posicionPunto = LatLng(it.latitud, it.longitud)
             val currentMarkerID = addCustomPoiMarker(it, posicionPunto)
 
-            Log.i("RECARGAR","Ultimo marcador : $lastMarkerID")
             if (lastMarkerID != null && it.id == lastMarkerID) {
+
                 marcadores[currentMarkerID]?.first?.showInfoWindow()
-
-                Log.i("RECARGAR","marcador que coincide")
-
                 lastMarkerID = null
             }
         }
 
-        /*Log.i("RECARGAR","Ultimo marcador : $lastMarkerID")
-        if (lastMarkerID != null) {
-
-            val coincidence = marcadores.get(lastMarkerID!!)
-            if (coincidence != null) {
-                val markerToReload = coincidence.first
-                markerToReload.showInfoWindow()
-                Log.i("RECARGAR","marcador que coincide : $markerToReload")
-            }
-            lastMarkerID = null
-        }
-*/
         if (!areTherePreviousMarkers) moveCameraIfNoLocation()
-
     }
 
-    fun addCustomPoiMarker(puntoInteres: PuntoInteres, position: LatLng) : String{
+    private fun addCustomPoiMarker(puntoInteres: PuntoInteres, position: LatLng) : String {
         var drawable = R.drawable.ic_pointer_interior
         var locationText = "Int"
 
@@ -473,56 +440,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                 }
             }
         }
-        /*if (p0 != null) {
-            val marcadorInfo = marcadores[p0.id]
-            if (marcadorInfo != null) {
-                val puntoInteres = marcadorInfo.second
-                val imagesToDetail = DetailInfoImages(
-                    puntoInteres.img_url_big.toString(),
-                    puntoInteres.img_url_big_secundary.toString(),
-                    if (puntoInteres.deDia!!) 1 else 0,
-                    if (puntoInteres.exterior!!) 0 else 1
-                )
-
-                if (!checkForTopActivityAmbiguity()) return
-
-                val intent = Intent(this, InfoWindowDetail::class.java)
-                intent.putExtra("imagesToDetail", imagesToDetail)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                startActivity(intent)
-            }
-        }*/
-
     }
 
     //Funciones rutas
 
-    fun loadRutes(){
+    private fun loadRutes(){
         rutesList = listOf()
         rutesList = dbHelper.getRutesFromDB()
         rutes_RV.adapter = rutesAdapter
         rutesAdapter?.update(rutesList)
 
         val currentStatics = dbHelper.getCurrentStatics()
-        Log.i("Lista","Current Route = ${currentStatics?.getCurrentRoute()}")
+
         if (currentStatics?.getCurrentRoute() == null) {
             removeCurrentPolyline()
         } else {
             val currentRouteDisplayed = currentStatics.getCurrentRoute()
             val ruteDetailsFromServer = rutesList.firstOrNull { it.id == currentRouteDisplayed }
-            Log.i("Lista","CurrentRouteDisplayed $currentRouteDisplayed")
-            Log.i("Lista","RuteDetails from server: $ruteDetailsFromServer")
+
             if (ruteDetailsFromServer != null) {
                 printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
-                /*if (!currentStatics.isSameRoute(ruteDetailsFromServer.id!!,ruteDetailsFromServer.idAudiovisuales)) {
-                    Log.i("Lista","Entro en if")
-                    printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
-                }*/
             }
         }
     }
 
-    fun removeCurrentPolyline(){
+    private fun removeCurrentPolyline(){
         turnCloseRuteButton(false)
         if (currentRoutePolyline != null) {
             currentRoutePolyline!!.remove()
@@ -530,53 +472,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
     }
 
-    fun printDirectionsRoute(ruteData: Ruta, ruteColor: Int?, rutePoints: ArrayList<pointLocationNotRealm>){
-       /* AsyncDirections().let {
-            turnCloseRuteButton(true)
-            it.execute(Callable {
-                mapservice!!.getRoutePath(rutePoints = rutePoints)
-            })
-            it.taskListener = object : OnDirectionsDownloadedCompleted {
-                override fun onPoisDonwloaded(arrayList: ArrayList<List<LatLng>>?) {
-                    if (currentRoutePolyline != null) {
-                        currentRoutePolyline!!.remove()
-                        currentRoutePolyline = null
-                    }
-                    Log.i("Directions","$arrayList")
-
-                    if (arrayList != null && arrayList.isNotEmpty() ) {
-                        val color = ruteColor ?: Color.GRAY
-                        val polylineOptions = PolylineOptions()
-                        val mergedList = mutableListOf<LatLng>()
-                        arrayList.forEach { list ->
-                            polylineOptions.addAll(list)
-                            mergedList += list
-                        }
-
-                        currentRoutePolyline = mMap.addPolyline(polylineOptions.color(color))
-                        setRouteBounds(mergedList)
-
-                        if (!dbHelper.updateStaticsAddCurrentRoute(ruteData.id!!)) {
-                            val toast = Toast.makeText(this@MapsActivity,"Error cargando ruta",Toast.LENGTH_LONG)
-                            toast.show()
-                            turnCloseRuteButton(false)
-                        }
-
-                        startLoadingRouteAnimation(false)
-
-                        return
-                    }
-
-                    dbHelper.removeCurrentPreviousRouteOnAppStart()
-
-                    turnCloseRuteButton(false)
-
-                }
-            }
-        }
-
-        */
-
+    private fun printDirectionsRoute(ruteData: Ruta, ruteColor: Int?, rutePoints: ArrayList<pointLocationNotRealm>){
         turnCloseRuteButton(true)
 
         CoroutineScope(IO).launch {
@@ -623,7 +519,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
 
-    fun setRouteBounds(listOfLocations: List<LatLng>){
+    private fun setRouteBounds(listOfLocations: List<LatLng>){
         val bounds = LatLngBounds.builder()
         listOfLocations.forEach {
             bounds.include(it)
@@ -673,16 +569,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             if (currentStatics.isSameRoute(ruta.id!!,ruta.idAudiovisuales)) return
         }
         printDirectionsRoute(ruta,ruteColor = ruta.color,rutePoints = ruta.getPointsInNotRealmClass())
-       /* if (dbHelper.updateStaticsAddCurrentRoute(ruta.id!!)) {
-            printDirectionsRoute(ruta,ruteColor = ruta.color,rutePoints = ruta.getPointsInNotRealmClass())
-        } else {
-            val toast = Toast.makeText(this,"Error cargando ruta",Toast.LENGTH_LONG)
-            toast.show()
-        }*/
-
     }
 
-    fun startLoadingRouteAnimation(start: Boolean){
+    private fun startLoadingRouteAnimation(start: Boolean){
         if (start) {
             closeRuteFab.setImageDrawable(getDrawable(R.drawable.progress_indeterminate_anim))
             val frameAnimation = closeRuteFab.drawable as AnimatedVectorDrawable
@@ -692,9 +581,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             closeRuteFab.setImageDrawable(getDrawable(R.drawable.ic_icono_cerrar))
             closeRuteFab.isEnabled = true
         }
-
     }
-
 
     //Funciones Localizacion
 
@@ -755,7 +642,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
     }
 
-    fun moveCameraIfNoLocation(){
+    //todo CAMBIAR
+    private fun moveCameraIfNoLocation(){
         googleLocationManager?.let {
             val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             if (permiso == PackageManager.PERMISSION_GRANTED) {
@@ -772,7 +660,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     private fun unTrackGoogleLocation(){
         val markers = ArrayList<String>()
 
-        for ((key, markerInfo) in marcadores) {
+        for ((_, markerInfo) in marcadores) {
             if (markerInfo.first.isInfoWindowShown) {
                 markerInfo.second.id?.let {
                     markers.add(it)
@@ -808,7 +696,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     //Funciones permisos de localización
 
     private fun requestPermission(){
-        Log.i("Primero","Request permission")
         val permiso = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
         if (permiso == PackageManager.PERMISSION_GRANTED){
             if (!isGoogleLocationsUpdatesActive) {
@@ -841,7 +728,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     //Funciones conexión
 
-    fun checkNetworkOnCreate(){
+    private fun checkNetworkOnCreate(){
         connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         if (!connectionUtils.checkConection(this)) showMessage("No hay conexión a internet")
     }
@@ -866,10 +753,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     //Funciones de prueba
 
-    fun loadRandomPoint(){
+    private fun loadRandomPoint(){
         val idPuntoAleatorio = dbHelper.getRandomPoint() ?: return
         val audiovisualesRutaActual = dbHelper.getAudiovisualsFromCurrentRoute().toTypedArray()
-        Log.i("AudiovisualesEnRuta","${audiovisualesRutaActual.size}")
 
         val audiovisualesPunto = dbHelper.getParcelableAudiovisualsFromPoint(idPuntoAleatorio)
 
@@ -883,12 +769,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         startActivity(intent)
     }
 
-    fun checkForTopActivityAmbiguity(): Boolean{
+    private fun checkForTopActivityAmbiguity(): Boolean{
         val applicationLevel = application as MyApp
         val applicationsOpenArray = applicationLevel.activitiesOpen
-
-        val multipleAudiovisualActivity = MultipleAudiovisualActivity::class.java.simpleName
-        Log.i("Ambiguity","MA activity: $multipleAudiovisualActivity")
 
         if (applicationsOpenArray.contains(MultipleAudiovisualActivity::class.java.simpleName)
             || applicationsOpenArray.contains(InfoWindowDetail::class.java.simpleName)) {
@@ -898,21 +781,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         return true
     }
 
-    fun intentManager(): Boolean {
-        val app = application as MyApp
-        val currentActivity = app.getCurrentActivity()
-
-        return currentActivity == this.localClassName
-    }
-
     override fun onBackPressed() {
         if (drawer_menu.isDrawerVisible(GravityCompat.START)){
             drawer_menu.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
         }
-
     }
-
 
 }

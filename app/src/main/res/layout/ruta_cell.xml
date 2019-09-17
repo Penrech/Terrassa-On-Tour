@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -85,7 +86,6 @@
                 android:fontFamily="@font/roboto_medium"
                 android:gravity="center_vertical"
                 android:maxLines="2"
-                android:text="Ruta videografica centros enseñanza"
                 android:textAlignment="textStart"
                 android:textColor="@color/negroRoto"
                 android:textSize="18sp"
@@ -104,7 +104,6 @@
                 android:fontFamily="@font/roboto_bold"
                 android:gravity="center_vertical"
                 android:maxLines="1"
-                android:text="TextView"
                 android:textColor="@color/negroRoto"
                 android:textSize="16sp"
                 app:autoSizeStepGranularity="2sp"
@@ -113,7 +112,8 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/guideline6"
                 app:layout_constraintStart_toStartOf="@+id/guideline7"
-                app:layout_constraintTop_toTopOf="@+id/guideline9"
-                tools:text="Guiada, Exterior" />
+                app:layout_constraintTop_toTopOf="@+id/guideline9" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

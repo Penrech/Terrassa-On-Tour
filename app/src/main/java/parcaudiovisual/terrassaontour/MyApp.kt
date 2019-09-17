@@ -13,9 +13,6 @@ import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.util.Log
-import android.view.View
-import android.view.WindowManager
-import com.squareup.picasso.Picasso
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import parcaudiovisual.terrassaontour.interfaces.AppStateChange
@@ -55,27 +52,24 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
     override fun onCreate() {
         super.onCreate()
 
-        Log.i("Lifecycle","On app created")
         dbHelper = DBRealmHelper()
         dbHelper.downloadInterface = this
         dbHelper.appStateInterface = this
         dbHelper.staticsUpdateInterface = this
 
         setUpRealm()
-        //loadDataFromDatabase()
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         registerActivityLifecycleCallbacks(this)
     }
 
-    fun setUpRealm(){
+    private fun setUpRealm(){
         Realm.init(applicationContext)
         val config = RealmConfiguration.Builder()
         config.name("tot_db")
         config.deleteRealmIfMigrationNeeded()
         config.compactOnLaunch()
         Realm.setDefaultConfiguration(config.build())
-        //dbHelper.removeCurrentPreviousRouteOnAppStart()
     }
 
     fun startStatics(){
@@ -83,7 +77,7 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         if (currentStatics != null) dbHelper.insertUserOnServerDB(currentStatics.id,currentStatics.model,currentStatics.name,currentStatics.product)
     }
 
-    fun sendStatics(){
+    private fun sendStatics(){
         connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         if (isNetworkAvailable && !staticsSended) {
@@ -91,7 +85,7 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         }
     }
 
-    fun trackConectivity() {
+    private fun trackConectivity() {
         connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         if (!isNetworkAvailable) showMessage("No hay conexión a internet")
@@ -108,7 +102,6 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
 
                         dataColdLoaded = true
                         staticsColdLoaded = true
-                        Log.i("Lista","Load started")
                     }
                 } else {
                     Log.i("CONECTION","Conexion perdida")
@@ -171,17 +164,17 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
     override fun onActivityStopped(activity: Activity?) {}
 
     override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
-        Log.i("ActivityCreated","Activity created ${activity?.localClassName}")
         activity?.let {
             activitiesOpen.add(it.localClassName)
         }
 
+        //todo extraer loadingactivity en constante
         currentActivity = activity
         if (activity?.localClassName == "LoadingActivity" ) {
             loadDataFromDatabase()
             startStatics()
         }
-        //else showSystemUI()
+
         sendStatics()
     }
 
@@ -228,7 +221,7 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         if (success) staticsSended = false
     }
 
-    fun manageAllDataLoading() {
+    private fun manageAllDataLoading() {
         if (currentActivity?.localClassName == "LoadingActivity") {
             elementsLoaded++
             if (elementsLoaded == 3) {
@@ -237,21 +230,6 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
                 elementsLoaded = 0
             }
         }
-    }
-
-    fun getCurrentActivity(): String?{
-        return currentActivity?.localClassName
-    }
-
-    private fun hideSystemUI() {
-
-        currentActivity?.window?.decorView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_FULLSCREEN)
-        currentActivity?.window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     }
 
 }

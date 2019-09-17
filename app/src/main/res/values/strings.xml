@@ -4,4 +4,19 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="Content_descriptor_app_logo">App Logo</string>
+    <string name="Ma_default_title">Audiovisuales en este punto de interés</string>
+    <string name="Info_interior_point">Este punto de interés está catalogado como interior. Los puntos interiores pueden encontrarse dentro de edificios o de recintos vallados.\n\nEs posible que debas pedir permiso al administrador del lugar para poder visitar este punto de interés.\n\nEn caso de estar realizando una ruta marcada como guiada sin un/a guia, puede que tengas que saltarte este punto de interés.</string>
+    <string name="info_interior_point_title">Interior</string>
+    <string name="Content_descriptor_close_interior_info_window">Close interior info window</string>
+    <string name="Info_window_default_location_abbreviation">Ext</string>
+    <string name="Info_Window_image">Info window image</string>
+    <string name="header_image_audiovisual_info_details">Header image audiovisual info details</string>
+    <string name="Content_descriptor_audiovisual_info_close">Cerrar ventana de info de audiovisual</string>
+    <string name="Content_descriptor_detail_info_window_image">Image detalle de info window</string>
+    <string name="Content_descriptor_static_image_from_audiovisual">Imagen estática del audiovisual</string>
+    <string name="Audiovisual_video_error_loading">Oops. Algo ha ido mal.\nNo se puede reproducir el video.</string>
+    <string name="Content_descriptor_multiple_audiovisual_image">Imagen de audiovisual</string>
+    <string name="Content_descriptor_cerrar_rutas">Botón cerrar rutas</string>
+    <string name="routes_menu_title">Rutas</string>
 </resources>

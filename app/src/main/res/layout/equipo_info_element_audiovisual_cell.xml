@@ -15,7 +15,6 @@
             android:maxLines="3"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:clickable="true"
-            android:text="Antonio Banderas"
             android:textAlignment="center"
             android:textColor="@android:color/background_light"
             android:textSize="16sp"

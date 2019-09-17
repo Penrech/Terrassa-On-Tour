@@ -66,6 +66,7 @@
                 app:layout_constraintGuide_percent="0.79" />
 
         <ImageButton
+                android:contentDescription="@string/Content_descriptor_cerrar_rutas"
                 android:id="@+id/imageButton2"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -91,7 +92,7 @@
                 android:layout_height="0dp"
                 android:fontFamily="@font/roboto_bold"
                 android:gravity="center_vertical"
-                android:text="Rutas"
+                android:text="@string/routes_menu_title"
                 android:textAlignment="textStart"
                 android:textColor="@color/blancoRoto"
                 android:textSize="30sp"
@@ -101,5 +102,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/guideline15"
                 app:layout_constraintStart_toStartOf="@+id/guideline12"
                 app:layout_constraintTop_toTopOf="@+id/guideline10" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent">
-
 
     <androidx.cardview.widget.CardView
             android:id="@+id/infoRoot"
@@ -108,7 +108,7 @@
                     android:layout_height="0dp"
                     android:fontFamily="@font/roboto_condensed_bold"
                     android:gravity="center"
-                    android:text="Ext"
+                    android:text="@string/Info_window_default_location_abbreviation"
                     android:textAlignment="center"
                     android:textColor="@color/negroRoto"
                     android:textSize="20sp"
@@ -128,7 +128,7 @@
                     app:layout_constraintBottom_toBottomOf="@id/guideline"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/guideline2"
-                    app:layout_constraintTop_toTopOf="parent"></View>
+                    app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                     android:id="@+id/poiTitle"
@@ -137,7 +137,6 @@
                     android:layout_gravity="fill_vertical"
                     android:fontFamily="@font/roboto_medium"
                     android:gravity="center"
-                    android:text="Cúpula estación de autobuses"
                     android:textAlignment="textStart"
                     android:textColor="@color/blancoRoto"
                     android:textSize="22sp"
@@ -160,14 +159,17 @@
             <ImageView
                     android:id="@+id/poiImage"
                     android:layout_width="0dp"
+                    android:contentDescription="@string/Info_Window_image"
                     android:layout_height="0dp"
                     android:scaleType="centerCrop"
                     app:layout_constraintDimensionRatio="W,1:1.25"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/divider"
-                    app:srcCompat="@drawable/target_cupula_pequeno" />
+                    android:src="@drawable/placeholder_loading"/>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

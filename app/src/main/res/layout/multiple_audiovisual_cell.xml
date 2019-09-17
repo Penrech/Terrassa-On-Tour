@@ -4,8 +4,8 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:background="@android:color/transparent">
-
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent">
 
     <androidx.cardview.widget.CardView
             android:id="@+id/MARoot"
@@ -121,6 +121,7 @@
                     app:layout_constraintGuide_percent="0.88" />
 
             <ImageView
+                    android:contentDescription="@string/Content_descriptor_multiple_audiovisual_image"
                     android:id="@+id/MaImage"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -129,7 +130,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/target_cupula_pequeno" />
+                    app:srcCompat="@drawable/placeholder_loading_big" />
 
             <View
                     android:id="@+id/MaLabelBackground"
@@ -140,7 +141,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/guideline"></View>
+                    app:layout_constraintTop_toTopOf="@+id/guideline" />
 
             <TextView
                     android:id="@+id/MaAudiovisualTitleLabel"
@@ -149,7 +150,6 @@
                     android:fontFamily="@font/roboto_medium"
                     android:gravity="center_vertical"
                     android:maxLines="2"
-                    android:text="Titulo Audiovisual 1"
                     android:textAlignment="textStart"
                     android:textColor="@color/blancoRoto"
                     android:textSize="22sp"
@@ -179,7 +179,9 @@
                     app:layout_constraintEnd_toStartOf="@+id/titleLabelTrailing"
                     app:layout_constraintStart_toStartOf="@+id/locationLabelLeading"
                     app:layout_constraintTop_toTopOf="@+id/locationLabelRutasTop" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

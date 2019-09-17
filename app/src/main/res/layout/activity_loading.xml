@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
@@ -38,6 +39,7 @@
     <ImageView
             android:id="@+id/imageView"
             android:layout_width="0dp"
+            android:contentDescription="@string/Content_descriptor_app_logo"
             android:layout_height="0dp"
             android:scaleType="centerInside"
             app:layout_constraintBottom_toTopOf="@+id/guideline21"
@@ -45,4 +47,5 @@
             app:layout_constraintStart_toStartOf="@+id/guideline18"
             app:layout_constraintTop_toTopOf="@+id/guideline20"
             app:srcCompat="@drawable/ic_icono_loading_2" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

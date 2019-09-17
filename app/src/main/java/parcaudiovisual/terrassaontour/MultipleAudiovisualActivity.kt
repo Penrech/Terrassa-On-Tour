@@ -5,9 +5,6 @@ import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import android.util.Log
-import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_multiple_audiovisual.*
 import kotlinx.coroutines.CoroutineScope
@@ -18,14 +15,14 @@ import kotlinx.coroutines.withContext
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
 import kotlin.math.roundToInt
 
+private const val NUM_OF_COLUMN_LANDSCAPE = 3
+private const val NUM_OF_COLUMN_PORTRAIT = 2
+
 class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter.OnMaClickListener {
 
     private var audiovisualsLayoutManager: androidx.recyclerview.widget.RecyclerView.LayoutManager? = null
     private var audiovisualsAdapter: AudiovisualsListAdapter? = null
     private var dbHelper: DBRealmHelper? = null
-
-    private val NUM_OF_COLUMN_LANDSCAPE = 3
-    private val NUM_OF_COLUMN_PORTRAIT = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,16 +50,15 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
                 initReyclerView(pointAudiovisuals)
             }
         }
-
     }
 
-    fun setCloseFAB(){
+    private fun setCloseFAB(){
         closeMultipleAudiovisual.setOnClickListener {
             finish()
         }
     }
 
-    suspend fun errorLoadingAudiovisuals(){
+    private suspend fun errorLoadingAudiovisuals(){
         val toast = Toast.makeText(this,"No se han podido recuperar los audiovisuales del punto de interés", Toast.LENGTH_LONG)
 
         withContext(Main){
@@ -71,7 +67,7 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
         }
     }
 
-    suspend fun initReyclerView(audiovisualList : ArrayList<AudiovisualParcelable>){
+    private suspend fun initReyclerView(audiovisualList : ArrayList<AudiovisualParcelable>){
         val numOfColumns = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) NUM_OF_COLUMN_LANDSCAPE else NUM_OF_COLUMN_PORTRAIT
         audiovisualsLayoutManager = GridLayoutManager(this, numOfColumns)
 
@@ -87,15 +83,9 @@ class MultipleAudiovisualActivity : AppCompatActivity(), AudiovisualsListAdapter
 
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-
     override fun onMaClickListener(audiovisual: AudiovisualParcelable) {
-
         val intent = Intent(this,AudiovisualDetailActivity::class.java)
         intent.putExtra("AUDIOVISUAL",audiovisual)
-        //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(intent)
     }
 }

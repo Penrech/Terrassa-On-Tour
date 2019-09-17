@@ -5,28 +5,33 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".AudiovisualDetailActivity" android:id="@+id/rootAudiovisualDetail">
+        tools:context=".AudiovisualDetailActivity"
+        android:id="@+id/rootAudiovisualDetail">
 
     <androidx.constraintlayout.widget.Guideline
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/ADTop" app:layout_constraintGuide_percent="0.05"/>
+            android:id="@+id/ADTop"
+            app:layout_constraintGuide_percent="0.05"/>
     <androidx.constraintlayout.widget.Guideline
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/ADBottom" app:layout_constraintGuide_percent="0.95"/>
+            android:id="@+id/ADBottom"
+            app:layout_constraintGuide_percent="0.95"/>
     <androidx.constraintlayout.widget.Guideline
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/ADLeading" app:layout_constraintGuide_percent="0.05"/>
+            android:id="@+id/ADLeading"
+            app:layout_constraintGuide_percent="0.05"/>
     <androidx.constraintlayout.widget.Guideline
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/ADTrailing" app:layout_constraintGuide_percent="0.95"/>
+            android:id="@+id/ADTrailing"
+            app:layout_constraintGuide_percent="0.95"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/ChangeToInfoFAB"
@@ -49,6 +54,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:clickable="true"
+            android:focusable="true"
             app:backgroundTint="@color/blancoRoto"
             app:fabSize="mini"
             app:layout_constraintStart_toStartOf="parent"
@@ -63,4 +69,5 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:id="@+id/AudiovisualInfoPager"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

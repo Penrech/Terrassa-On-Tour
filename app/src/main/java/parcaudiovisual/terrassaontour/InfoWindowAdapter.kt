@@ -7,20 +7,13 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.graphics.Bitmap
-import android.graphics.Point
-import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter
 import kotlinx.android.synthetic.main.custom_info_window.view.*
 import java.lang.Exception
 import kotlin.math.round
-import kotlin.math.roundToInt
 
 class InfoWindowAdapter(
     private val ctxt: Context, val inflater: LayoutInflater,
@@ -35,15 +28,14 @@ class InfoWindowAdapter(
     }
 
     override fun getInfoWindow(marker: Marker): View? {
-        setInfoData(marker)
 
+        setInfoData(marker)
         return popup
     }
 
     @SuppressLint("InflateParams")
     override fun getInfoContents(marker: Marker): View {
 
-        Log.i("Success","info Contents Marker")
         setInfoData(marker)
         return popup!!
     }
@@ -82,8 +74,8 @@ class InfoWindowAdapter(
             if (image == null) {
                 icon.visibility = View.GONE
             } else {
-                Log.i("Success","Inicio picasso")
                 icon.visibility = View.VISIBLE
+
                 Picasso.get().load(image)
                     .noFade()
                     .placeholder(R.drawable.placeholder_loading)
@@ -102,13 +94,12 @@ class InfoWindowAdapter(
      class MarkerCallback(private var marker: Marker?) : Callback {
 
         override fun onError(e: Exception?) {
-            Log.i("ERROR","Error loading thumbnail : $e")
+            Log.e("ErrorInfoWindowImage","Error loading info window image : $e")
         }
 
         override fun onSuccess() {
-            Log.i("Success","Success marker")
+
             if (marker != null && marker!!.isInfoWindowShown) {
-                Log.i("Success","marker not null")
                 marker!!.showInfoWindow()
             }
         }

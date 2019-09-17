@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Animatable
 import android.graphics.drawable.ColorDrawable
-import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +14,7 @@ import kotlinx.android.synthetic.main.rute_cell_loading.view.*
 
 class RutasListAdapter(private val context: Context, private var list: List<Ruta>, private var listener: LoadRuteUtils): androidx.recyclerview.widget.RecyclerView.Adapter<RutasListAdapter.ViewHolder>() {
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ViewHolder {
-        Log.i("Lista","Size: ${list.isEmpty()} ${list.size}")
+
         return if (list.isEmpty()) {
             val vistaCelda = LayoutInflater.from(context)
                 .inflate(R.layout.rute_cell_loading, p0, false)
@@ -25,7 +24,6 @@ class RutasListAdapter(private val context: Context, private var list: List<Ruta
                 .inflate(R.layout.ruta_cell, p0, false)
             ViewHolder(vistaCelda)
         }
-
     }
 
     fun update(data: List<Ruta>) {
@@ -76,7 +74,7 @@ class RutasListAdapter(private val context: Context, private var list: List<Ruta
         var rutePoints = RealmList<pointLocation>()
 
         fun setRuteData(ruta: Ruta){
-            titleView.text = ruta.id + ". " + ruta.title
+            titleView.text = String.format("%s. %s",ruta.id,ruta.title)
             val color: Int = if (ruta.color != null) ruta.color!! else Color.DKGRAY
             colorView.background = ColorDrawable(color)
             caracteristicas.text = ruta.caracteristicas.joinToString()

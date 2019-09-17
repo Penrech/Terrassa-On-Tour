@@ -8,8 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.util.Log
-import android.view.View
-import android.view.WindowManager
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
 
 class LoadingActivity : AppCompatActivity(){
@@ -18,7 +16,6 @@ class LoadingActivity : AppCompatActivity(){
 
     private val dbChangeLocalBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.i("JAJA", "Intent recibido : $intent")
             when(intent?.action){
                 DBRealmHelper.BROADCAST_FIRST_DATA_LOAD -> startMainActivity()
             }
@@ -28,17 +25,16 @@ class LoadingActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_loading)
-
     }
 
-    fun loadDatabase(){
+    private fun loadDatabase(){
         if (!conectionUtils.checkConection(this)) startMainActivity()
         else {
             LocalBroadcastManager.getInstance(this).registerReceiver(dbChangeLocalBroadcastReceiver, IntentFilter(DBRealmHelper.BROADCAST_FIRST_DATA_LOAD))
         }
     }
 
-    fun unLoadListener(){
+    private fun unLoadListener(){
         LocalBroadcastManager.getInstance(this).unregisterReceiver(dbChangeLocalBroadcastReceiver)
     }
 

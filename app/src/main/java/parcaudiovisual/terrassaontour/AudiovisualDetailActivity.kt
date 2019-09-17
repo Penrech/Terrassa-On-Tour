@@ -58,7 +58,6 @@ class AudiovisualDetailActivity : AppCompatActivity(),
                     if (isCloseButtonHiddenOnInfoWindow) {
                         runOnUiThread { ChangeToInfoFAB.show() }
                     }
-                    //runOnUiThread { ChangeToInfoFAB.show() }
                     Icon.MULTIMEDIA
                 } else -> {
                     runOnUiThread {ChangeToInfoFAB.setImageDrawable(CloseDrawable) }
@@ -69,7 +68,6 @@ class AudiovisualDetailActivity : AppCompatActivity(),
                     if (fragmentVideo != null) {
                         fragmentVideo!!.pauseOnPageChange()
                     }
-                    //runOnUiThread { ChangeToInfoFAB.hide() }
                     Icon.INFO
                 }
             }
@@ -121,8 +119,8 @@ class AudiovisualDetailActivity : AppCompatActivity(),
     private fun managePage(previousPageNumber: Int?) {
         if (previousPageNumber == null) return
 
-        if (previousPageNumber == 0) changeToIcon = Icon.MULTIMEDIA
-        else changeToIcon = Icon.INFO
+        changeToIcon = if (previousPageNumber == 0) Icon.MULTIMEDIA
+        else Icon.INFO
     }
 
     private fun loadData(previousData: AudiovisualParcelable?){
@@ -135,7 +133,6 @@ class AudiovisualDetailActivity : AppCompatActivity(),
 
                 audiovisual = intent.getParcelableExtra("AUDIOVISUAL")
 
-
                 changeToIcon = Icon.MULTIMEDIA
 
                 if (audiovisual == null) {
@@ -144,23 +141,21 @@ class AudiovisualDetailActivity : AppCompatActivity(),
 
                 dbHelper.updateStaticsAddAudiovisualVisit(audiovisual!!.id!!)
 
-
             } else {
                 audiovisual = previousData
             }
 
             if (audiovisual?.tipo_medio != null && audiovisual!!.tipo_medio == "1") {
                 //Video
-                Log.i("JODER","Entro en video")
                 fragmentVideo = VideoAudiovisualResource.newInstance(audiovisual?.src)
                 fragmentsList.add(fragmentVideo!!)
+
             } else if (audiovisual?.tipo_medio != null && audiovisual!!.tipo_medio == "2"){
                 //Imagen
-                Log.i("JODER","Entro en Imagen")
                 fragmentStaticImage = StaticAudiovisualResource.newInstance(audiovisual?.src)
                 fragmentsList.add(fragmentStaticImage!!)
-            }
 
+            }
 
             fragmentInfoAudiovisual = AudiovisualInfoDetails.newInstance(audiovisual)
             fragmentsList.add(fragmentInfoAudiovisual!!)
@@ -168,45 +163,7 @@ class AudiovisualDetailActivity : AppCompatActivity(),
             pagerAdapter = InfoWindowImageViewPager(supportFragmentManager,fragmentsList)
             mPager.adapter = pagerAdapter
 
-
         }
-
-       /* if (previousData == null) {
-
-            val dbHelper = DBRealmHelper()
-
-            audiovisual = intent.getParcelableExtra("AUDIOVISUAL")
-
-            changeToIcon = Icon.MULTIMEDIA
-
-            if (audiovisual == null) {
-                errorLoadingAudiovisual()
-            }
-
-            dbHelper.updateStaticsAddAudiovisualVisit(audiovisual!!.id!!)
-
-        } else {
-            audiovisual = previousData
-        }
-
-       if (audiovisual?.tipo_medio != null && audiovisual!!.tipo_medio == "1") {
-            //Video
-           Log.i("JODER","Entro en video")
-            fragmentVideo = VideoAudiovisualResource.newInstance(audiovisual?.src)
-            fragmentsList.add(fragmentVideo!!)
-        } else if (audiovisual?.tipo_medio != null && audiovisual!!.tipo_medio == "2"){
-            //Imagen
-           Log.i("JODER","Entro en Imagen")
-            fragmentStaticImage = StaticAudiovisualResource.newInstance(audiovisual?.src)
-            fragmentsList.add(fragmentStaticImage!!)
-        }
-
-        fragmentInfoAudiovisual = AudiovisualInfoDetails.newInstance(audiovisual)
-        fragmentsList.add(fragmentInfoAudiovisual!!)
-
-        pagerAdapter = InfoWindowImageViewPager(supportFragmentManager,fragmentsList)
-        mPager.adapter = pagerAdapter*/
-
     }
 
     private fun setCloseOpenInfo(){
@@ -220,7 +177,6 @@ class AudiovisualDetailActivity : AppCompatActivity(),
             }
         }
     }
-
 
     private fun setCloseAudiovisualDetails(){
         BackToCameraFAB.setOnClickListener {
@@ -261,7 +217,7 @@ class AudiovisualDetailActivity : AppCompatActivity(),
 
     }
 
-    fun errorLoadingAudiovisual(){
+    private fun errorLoadingAudiovisual(){
         val toast = Toast.makeText(this,"No se han podido recuperar la información del audiovisual", Toast.LENGTH_LONG)
         toast.show()
         finish()
@@ -277,7 +233,6 @@ class AudiovisualDetailActivity : AppCompatActivity(),
                 ChangeToInfoFAB.show()
             }
         }
-
         isCloseButtonHiddenOnInfoWindow = hide
     }
 

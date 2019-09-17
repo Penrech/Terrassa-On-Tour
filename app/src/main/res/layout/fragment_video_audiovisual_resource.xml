@@ -46,7 +46,7 @@
             android:fontFamily="@font/roboto_bold"
             android:paddingStart="32dp"
             android:paddingEnd="32dp"
-            android:text="Oops. Algo ha ido mal.\nNo se puede reproducir el video."
+            android:text="@string/Audiovisual_video_error_loading"
             android:textAlignment="center"
             android:textColor="@android:color/background_light"
             android:textSize="18sp"
@@ -115,7 +115,9 @@
                     android:text="00:00"
                     android:textAlignment="center"
                     android:textColor="@android:color/background_light" />
+
         </LinearLayout>
+
     </FrameLayout>
 
 </FrameLayout>

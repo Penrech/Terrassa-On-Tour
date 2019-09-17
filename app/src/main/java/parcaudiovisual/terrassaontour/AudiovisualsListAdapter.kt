@@ -1,20 +1,13 @@
 package parcaudiovisual.terrassaontour
 
 import android.content.Context
-import android.graphics.Color
-import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.transition.DrawableCrossFadeTransition
-//import com.squareup.picasso.Picasso
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.multiple_audiovisual_cell.view.*
 
 class AudiovisualsListAdapter(val context: Context, var audiovisualList: ArrayList<AudiovisualParcelable>, private var ruteAudiovisualList: Array<String>, val listener: OnMaClickListener): androidx.recyclerview.widget.RecyclerView.Adapter<AudiovisualsListAdapter.AudiovisualVH>() {
@@ -67,9 +60,8 @@ class AudiovisualsListAdapter(val context: Context, var audiovisualList: ArrayLi
 
         fun setAudiovisualData(audiovisual: AudiovisualParcelable, position: Int) {
             title.text = audiovisual.title
-            Log.i("AudiovisualesMA","$audiovisual")
             if (audiovisual.rutas_audiovisual.isNotEmpty()) {
-                rutes.text = "Ruta " + audiovisual.rutas_audiovisual.joinToString()
+                rutes.text = String.format("Ruta %s",audiovisual.rutas_audiovisual.joinToString())
             }
 
             this.position = position
@@ -80,17 +72,8 @@ class AudiovisualsListAdapter(val context: Context, var audiovisualList: ArrayLi
                 listener.onMaClickListener(audiovisual)
             }
 
-
-            /*Picasso.get().load(audiovisual.img_cabecera_thumbnail)
+            Picasso.get().load(audiovisual.img_cabecera_thumbnail)
                 .noFade()
-                .placeholder(R.drawable.placeholder_loading)
-                .into(image)*/
-
-            Glide
-                .with(context)
-                .asDrawable()
-                .load(audiovisual.img_cabecera_thumbnail)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(R.drawable.placeholder_loading)
                 .into(image)
         }

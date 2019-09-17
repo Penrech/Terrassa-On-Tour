@@ -1,21 +1,15 @@
 package parcaudiovisual.terrassaontour
 
-import android.app.job.JobInfo
-import android.net.Uri
 import android.util.Log
 import org.json.JSONObject
 import java.io.*
 import java.lang.Exception
 import java.lang.StringBuilder
-import java.math.BigInteger
-import java.net.URI
 import java.net.URL
-import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
-import javax.net.ssl.HttpsURLConnection
 
 class ServerServices {
 
+    //todo extraer todo en recursos
     private val poiURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getMarkers.php"
     private val rutesURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getRoutes.php"
     private val audiovisualsURL = "https://citmalumnes.upc.es/~pauel/TOT_Test/phpApp/getAllAudiovisuals.php"
@@ -41,12 +35,9 @@ class ServerServices {
         try {
             val json = JSONObject(getJsonPOST(insertAllStatics,postData))
             val appState = json.getJSONObject("appState")
-            Log.i("JSONPOST","appState: $appState")
             val audiovisuals = json.getJSONObject("audiovisuals")
-            Log.i("JSONPOST","audiovisuals: $audiovisuals")
             val successAudiovisuals = audiovisuals.getJSONArray("success")
             val points = json.getJSONObject("points")
-            Log.i("JSONPOST","points: $points")
             val successPoints = points.getJSONArray("success")
             val rutes = json.getJSONObject("rutes")
             val successRutes = rutes.getJSONArray("success")
@@ -55,7 +46,6 @@ class ServerServices {
             response.appActive = appState.getBoolean("appActive")
             response.message = appState.getString("message")
             response.isDayTime = json.getBoolean("isDayTime")
-            Log.i("JSONPOST","isDayTime: ${response.isDayTime}")
 
             for (i: Int in 0 until successAudiovisuals.length()){
                 response.audiovisualsToDelete.add(successAudiovisuals.getString(i))
@@ -69,10 +59,9 @@ class ServerServices {
                 response.rutesToDelete.add(successRutes.getString(i))
             }
 
-
         } catch (e: Exception) {
             e.printStackTrace()
-            Log.i("JSONPOST","Crash!")
+            Log.e("ErrorInsertPStatics","Error inserting periodically statics : $e")
         }
 
         return response
@@ -193,7 +182,6 @@ class ServerServices {
             e.printStackTrace()
         }
 
-        Log.i("Respuesta", "$contenidoRespuesta")
         return contenidoRespuesta.toString()
     }
 

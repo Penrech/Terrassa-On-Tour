@@ -5,6 +5,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
     <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appbar"
             android:layout_height="wrap_content"
@@ -23,11 +24,13 @@
                 app:toolbarId="@+id/AudiovisualTitleToolbar">
 
             <ImageView
+                    android:contentDescription="@string/header_image_audiovisual_info_details"
                     android:id="@+id/AudiovisualImageView"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/infoToolbarImageHeight"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/target_cupula_pequeno" />
+                    android:src="@drawable/placeholder_loading_big" />
+
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         <androidx.appcompat.widget.Toolbar
@@ -49,7 +52,6 @@
                         android:layout_height="30dp"
                         android:layout_marginTop="8dp"
                         android:layout_marginEnd="16dp"
-                        android:text="Hola"
                         android:textAppearance="@style/tab_text"
                         android:textColor="@android:color/background_light"
                         app:autoSizeMaxTextSize="24sp"
@@ -68,7 +70,6 @@
                         android:layout_marginTop="2dp"
                         android:layout_marginEnd="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="2018"
                         android:textColor="@color/blancoRoto"
                         app:autoSizeMaxTextSize="18sp"
                         app:autoSizeStepGranularity="2sp"
@@ -80,6 +81,7 @@
                         app:layout_constraintTop_toBottomOf="@+id/audInfoTitle" />
 
                 <ImageButton
+                        android:contentDescription="@string/Content_descriptor_audiovisual_info_close"
                         android:id="@+id/closeButtonFromToolbar"
                         style="@android:style/Widget.ImageButton"
                         android:layout_width="40dp"
@@ -97,6 +99,7 @@
         </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -131,7 +134,6 @@
                     android:fontFamily="@font/roboto"
                     android:justificationMode="inter_word"
                     android:lineSpacingExtra="8sp"
-                    android:text="Texto"
                     android:textColor="@color/negroMasRoto"
                     android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -139,6 +141,9 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/sectioned_RV"
                     app:layout_constraintVertical_bias="0.0" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.core.widget.NestedScrollView>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

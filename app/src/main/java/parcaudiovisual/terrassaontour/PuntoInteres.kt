@@ -4,7 +4,6 @@ import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import org.json.JSONException
 import org.json.JSONObject
-import java.net.URL
 
 open class PuntoInteres: RealmObject() {
 

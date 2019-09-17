@@ -4,12 +4,12 @@ import android.os.Build
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
-import java.time.Instant
 import java.util.*
 import kotlin.collections.ArrayList
 
 open class Statics: RealmObject() {
 
+    //todo añadir campo de tiempo para sync con servidor
     @PrimaryKey var id: String = UUID.randomUUID().toString()
     var model = Build.MODEL
     var name = Build.DEVICE
