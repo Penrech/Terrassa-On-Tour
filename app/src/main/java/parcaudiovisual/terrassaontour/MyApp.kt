@@ -25,7 +25,10 @@ import parcaudiovisual.terrassaontour.interfaces.DataLoaded
 import parcaudiovisual.terrassaontour.interfaces.StaticsUpdateFromServer
 import parcaudiovisual.terrassaontour.realm.DBRealmHelper
 
-class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCallbacks, DataLoaded, AppStateChange, StaticsUpdateFromServer {
+private const val MAPS_ACTIVITY = "MapsActivity"
+private const val LOADING_ACTIVITY = "LoadingActivity"
+
+class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCallbacks, AppStateChange, StaticsUpdateFromServer {
 
     private var connectionUtils = ConnectionStateMonitor()
     private var connectivityManager: ConnectivityManager? = null
@@ -37,10 +40,7 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
     private var staticsSended = false
     private var appActive = true
 
-    private var dataColdLoaded = false
     private var staticsColdLoaded = false
-
-    private var elementsLoaded = 0
 
     var activitiesOpen = ArrayList<String>()
 
@@ -58,7 +58,6 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         super.onCreate()
 
         dbHelper = DBRealmHelper()
-        dbHelper.downloadInterface = this
         dbHelper.appStateInterface = this
         dbHelper.staticsUpdateInterface = this
 
@@ -80,6 +79,7 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
     fun startStatics(){
         val currentStatics = dbHelper.initStatics()
         if (currentStatics != null) {
+            Log.i("Data","Envio al iniciar estadisticas al servidor")
             staticsSended = true
             dbHelper.insertUserOnServerDB(currentStatics.id,currentStatics.model,currentStatics.name,currentStatics.product)
         }
@@ -89,6 +89,7 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         if (isNetworkAvailable && !staticsSended) {
+            Log.i("Data","Renvio estadisticas al servidor")
             dbHelper.insertStaticsToServer()
         }
     }
@@ -104,11 +105,10 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
             override fun conectionEnabled(enabled: Boolean) {
                 if (enabled){
                     Log.i("CONECTION","Conexion restablecida")
-                    if (!dataColdLoaded && !staticsColdLoaded) {
-                        loadDataFromDatabase()
+                    loadDataFromDatabase()
+                    if (!staticsColdLoaded) {
                         startStatics()
 
-                        dataColdLoaded = true
                         staticsColdLoaded = true
                     }
                 } else {
@@ -126,7 +126,7 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
 
     fun showMessage(message: String) {
         if (currentActivity != null) {
-            if (currentActivity!!.localClassName == "LoadingActivity") return
+            if (currentActivity!!.localClassName == LOADING_ACTIVITY) return
 
             val view = currentActivity!!.window.decorView.rootView
             val snack = Snackbar.make(view,message, Snackbar.LENGTH_LONG)
@@ -178,12 +178,11 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
 
         //todo extraer loadingactivity en constante
         currentActivity = activity
-        if (activity?.localClassName == "LoadingActivity" ) {
-            loadDataFromDatabase()
-            startStatics()
+
+        if (activity?.localClassName != MAPS_ACTIVITY && activity?.localClassName != LOADING_ACTIVITY){
+            sendStatics()
         }
 
-        sendStatics()
     }
 
     fun loadDataFromDatabase(){
@@ -193,40 +192,41 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
             val routeCoroutine = async(IO) { dbHelper.loadRutes() }
             val audCoroutine = async(IO) { dbHelper.loadAudiovisuals() }
 
-            poiCoroutine.await()
-            routeCoroutine.await()
-            audCoroutine.await()
-
-            manageAllDataLoading()
+            manageAllDataLoading(poiSuccess = poiCoroutine.await(),routeSucces = routeCoroutine.await(),audSuccess = audCoroutine.await())
 
             Log.i("Data","All Data reload")
         }
     }
 
-    override fun pointsLoaded(succes: Boolean) {
-        manageAllDataLoading()
+    fun pointsLoaded(succes: Boolean) {
+
+        if (!succes) return
+        if (currentActivity == null) return
+        //TODO AÑADIR LUEGO AQUI TAMBIEN LA ACTIVIDAD DE VUFORIA
+        if (currentActivity!!.localClassName != MAPS_ACTIVITY ) return
+
         val intent = Intent(DBRealmHelper.BROADCAST_CHANGE_POINTS)
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
 
-    override fun rutesLoaded(succes: Boolean) {
-        manageAllDataLoading()
+    fun rutesLoaded(succes: Boolean) {
+
+        if (!succes) return
+        if (currentActivity == null) return
+        if (currentActivity!!.localClassName != MAPS_ACTIVITY ) return
+
         val intent = Intent(DBRealmHelper.BROADCAST_CHANGE_RUTES)
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
 
-    override fun audiovisualsLoaded(succes: Boolean) {
-        manageAllDataLoading()
+    fun audiovisualsLoaded(succes: Boolean) {
+
+        if (!succes) return
+
         val intent = Intent(DBRealmHelper.BROADCAST_CHANGE_AUDIOVISUALS)
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
 
-    override fun allLoaded(succes: Boolean) {
-        if (currentActivity?.localClassName == "LoadingActivity") {
-            val intent = Intent(DBRealmHelper.BROADCAST_FIRST_DATA_LOAD)
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
-        }
-    }
 
     override fun appStateChange(appActive: Boolean, message: String?) {
         if (this.appActive != appActive){
@@ -246,6 +246,7 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
     }
 
     override fun onStaticsUpdateFromServer(success: Boolean) {
+        Log.i("Data","Estadisticas recibidas del servidor, con validacion $success")
         if (success) staticsSended = false
     }
 
@@ -259,11 +260,14 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
             }
         }
     }*/
-   private fun manageAllDataLoading() {
+   private fun manageAllDataLoading(poiSuccess: Boolean,routeSucces: Boolean, audSuccess: Boolean) {
        if (currentActivity?.localClassName == "LoadingActivity") {
            val intent = Intent(DBRealmHelper.BROADCAST_FIRST_DATA_LOAD)
            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
        }
+
+       pointsLoaded(poiSuccess)
+       rutesLoaded(routeSucces)
    }
 
 }

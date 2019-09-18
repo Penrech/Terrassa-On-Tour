@@ -122,7 +122,7 @@ class DBRealmHelper {
         return copyOfStatics
     }
 
-    private fun udpateStaticsInsertion(lastDataUpdate: Int?) {
+    private fun udpateStaticsInsertion(lastDataUpdate: Long?) {
         val realm = Realm.getDefaultInstance()
         try {
             realm.beginTransaction()
@@ -134,6 +134,8 @@ class DBRealmHelper {
             e.printStackTrace()
             Log.e("ErrorUpdateStatics","Error actualizando inserción de estadísticas: $e")
         }
+
+        staticsUpdateInterface?.onStaticsUpdateFromServer(true)
 
         Realm.compactRealm(realm.configuration)
         realm.close()
@@ -426,6 +428,8 @@ class DBRealmHelper {
 
                             if (currentStatics.dayTime != result.isDayTime) appStateInterface?.dayTimeChange()
 
+                            Log.i("Data","Local server update: ${currentStatics.lastServerUpdate} -- Remove server update: ${result.lastUpdate}")
+
                             if (currentStatics.lastServerUpdate != result.lastUpdate) appStateInterface?.reloadData()
 
                             updateStaticsAfterInsertion(result)
@@ -542,6 +546,8 @@ class DBRealmHelper {
 
         deleteRoutesFromDB()
 
+        //deleteRouteFromStaticsIfNeeded(rutesList)
+
         if (rutesList.isEmpty()) {
 
             Realm.compactRealm(realm.configuration)
@@ -566,6 +572,31 @@ class DBRealmHelper {
         realm.close()
 
         return success
+    }
+
+    private fun deleteRouteFromStaticsIfNeeded(listOfRoutesFromServer: ArrayList<Ruta>){
+        val realm = Realm.getDefaultInstance()
+        try {
+            realm.beginTransaction()
+            val statics = realm.where(Statics::class.java).findFirst()
+            statics?.let {staticsObj->
+                val ruteCoincidence = listOfRoutesFromServer.firstOrNull { it.id == staticsObj.getCurrentRoute() }
+
+                if (ruteCoincidence == null) {
+                    staticsObj.removeCurrentRoute()
+                } else {
+                    staticsObj.recalculateRouteStaticsIfRoutePointsChanged(ruteCoincidence.id!!,ruteCoincidence.idAudiovisuales)
+                }
+            }
+            realm.commitTransaction()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("ErrorDeleteCurrentRoute","Error borrando ruta actual: $e")
+        }
+
+
+        Realm.compactRealm(realm.configuration)
+        realm.close()
     }
 
 

@@ -1,6 +1,7 @@
 package parcaudiovisual.terrassaontour
 
 import android.os.Build
+import android.util.Log
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
@@ -16,7 +17,7 @@ open class Statics: RealmObject() {
     var product = Build.PRODUCT
     var savedOnRemoteServer = false
     var dayTime = true
-    var lastServerUpdate = 0
+    var lastServerUpdate : Long = 0
     private var visitedPoints = RealmList<visitHistory>()
     private var visitedAudiovisuals = RealmList<visitHistory>()
     private var visitedRoutes = RealmList<visitHistory>()
@@ -119,13 +120,59 @@ open class Statics: RealmObject() {
             visitedRouteAudiovisuals.removeAll { it.idAudiovisual == idToRemove }
         }
 
+        Log.i("Rutas","Seteo ruta con id: $currentRoute")
+        Log.i("Rutas","Dicha ruta tiene los siguientes audiovisuales:")
+        visitedRouteAudiovisuals.forEach {
+            Log.i("Rutas","--> ID: ${it.idAudiovisual} , Visitado: ${it.visited}")
+        }
+
+    }
+
+    fun recalculateRouteStaticsIfRoutePointsChanged(RuteID: String, RuteAudiovisuals: List<String>){
+        if (currentRoute != RuteID) return
+
+        val flatVisitedIds = visitedRouteAudiovisuals.map { it.idAudiovisual }
+        val sum = RuteAudiovisuals + flatVisitedIds
+
+        val difference = sum.groupBy { it }
+            .filter { it.value.size == 1 }
+            .flatMap { it.value }
+
+        val sum2 = RuteAudiovisuals + difference
+
+        val addIDs = sum2.groupBy { it }
+            .filterNot { it.value.size == 1 }
+            .flatMap { it.value }.distinct()
+
+        val removeIDs = difference - addIDs
+
+        addIDs.forEach {
+            val newAud = AudiovisualFromRouteVisited()
+            newAud.idAudiovisual = it
+            visitedRouteAudiovisuals.add(newAud)
+        }
+
+        removeIDs.forEach { idToRemove ->
+            visitedRouteAudiovisuals.removeAll { it.idAudiovisual == idToRemove }
+        }
+
+        Log.i("Rutas","Recalculo ruta con id: $currentRoute")
+        Log.i("Rutas","Dicha ruta tiene los siguientes puntos:")
+        visitedRouteAudiovisuals.forEach {
+            Log.i("Rutas","--> ID: ${it.idAudiovisual} , Visitado: ${it.visited}")
+        }
+
+        checkIfRouteIsCompleted()
     }
 
     fun removeCurrentRoute(){
         if (currentRoute == null) return
 
+        Log.i("Rutas","Borro ruta con id: $currentRoute")
         currentRoute = null
         visitedRouteAudiovisuals.clear()
+
+
     }
 
     fun isSameRoute(RuteID: String, RuteAudiovisuals: List<String>): Boolean{
@@ -136,6 +183,8 @@ open class Statics: RealmObject() {
         val difference = sum.groupBy { it }
             .filter { it.value.size == 1 }
             .flatMap { it.value }
+
+        Log.i("Rutas","Compruebo si la ruta $RuteID es diferente a la ruta actual $currentRoute , el resultado es ${difference.isEmpty()}")
 
         return difference.isEmpty()
     }
@@ -148,8 +197,12 @@ open class Statics: RealmObject() {
     }
 
     private fun checkIfRouteIsCompleted(){
+        Log.i("Rutas","Compruebo si la ruta $currentRoute ha sido completada")
         visitedRouteAudiovisuals.forEach {
-            if (!it.visited) return
+            if (!it.visited) {
+                Log.i("Rutas","La ruta $currentRoute NO ha sido completada")
+                return
+            }
         }
 
         val newRute = visitHistory()
@@ -161,6 +214,8 @@ open class Statics: RealmObject() {
         visitedRouteAudiovisuals.forEach {
             it.visited = false
         }
+
+        Log.i("Rutas","La ruta $currentRoute SI ha sido completada")
     }
 
 
@@ -179,7 +234,7 @@ class InsertStaticsResponse {
     var appActive = true
     var message: String? = null
     var isDayTime = true
-    var lastUpdate: Int? = null
+    var lastUpdate: Long? = null
 
     var audiovisualsToDelete = ArrayList<String>()
     var pointsToDelete = arrayListOf<String>()

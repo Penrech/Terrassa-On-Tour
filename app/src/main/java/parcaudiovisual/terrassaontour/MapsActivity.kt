@@ -61,7 +61,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     private var loadingRouteDialog: AlertDialog? = null
 
-    private var lastUpdateTime: Int? = null
+    private var lastUpdateTime: Long? = null
 
     private var intentQueue: Intent? = null
 
@@ -206,12 +206,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     fun reloadRutes(){
-        Log.i("Recargo","Recargo rutas")
+        Log.i("Data","Recargo rutas")
         loadRutes()
     }
 
     fun reloadPoints(){
-        Log.i("Recargo","Recargo puntos")
+        Log.i("Data","Recargo puntos")
         loadMarkers()
     }
 
@@ -223,7 +223,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     private fun checkIfDBUpdatedWhilePause(){
         val currentStatics = dbHelper.getCurrentStatics()
-        var currentUpdateTime: Int? = null
+        var currentUpdateTime: Long? = null
 
         currentStatics?.let {
             currentUpdateTime = it.lastServerUpdate
@@ -468,8 +468,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             val currentRouteDisplayed = currentStatics.getCurrentRoute()
             val ruteDetailsFromServer = rutesList.firstOrNull { it.id == currentRouteDisplayed }
 
-            if (ruteDetailsFromServer != null) {
-                printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
+            if (ruteDetailsFromServer != null ) {
+                if (currentRoutePolyline == null) {
+                    printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
+                } else if (!currentStatics.isSameRoute(ruteDetailsFromServer.id!!,ruteDetailsFromServer.idAudiovisuales)){
+                    printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
+                }
+
             }
         }
     }
