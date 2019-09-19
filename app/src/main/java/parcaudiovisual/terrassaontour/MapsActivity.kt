@@ -61,6 +61,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     private var loadingRouteDialog: AlertDialog? = null
 
+    private var oldRoutePois = ArrayList<LatLng>()
+
     private var lastUpdateTime: Long? = null
 
     private var intentQueue: Intent? = null
@@ -276,6 +278,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             if (currentRoutePolyline != null){
                 currentRoutePolyline!!.remove()
             }
+            oldRoutePois.clear()
         }
     }
 
@@ -465,16 +468,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         if (currentStatics?.getCurrentRoute() == null) {
             removeCurrentPolyline()
         } else {
-            val currentRouteDisplayed = currentStatics.getCurrentRoute()
-            val ruteDetailsFromServer = rutesList.firstOrNull { it.id == currentRouteDisplayed }
+            CoroutineScope(Main).launch {
+                val currentRouteDisplayed = currentStatics.getCurrentRoute()
+                val ruteDetailsFromServer = rutesList.firstOrNull { it.id == currentRouteDisplayed }
 
-            if (ruteDetailsFromServer != null ) {
-                if (currentRoutePolyline == null) {
-                    printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
-                } else if (!currentStatics.isSameRoute(ruteDetailsFromServer.id!!,ruteDetailsFromServer.idAudiovisuales)){
-                    printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
+                if (ruteDetailsFromServer != null ) {
+                   /* if (currentRoutePolyline == null) {
+                        printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
+                    } else if (!currentStatics.isSameRoute(ruteDetailsFromServer.id!!,ruteDetailsFromServer.idAudiovisuales)){
+                        printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
+                    } else if (checkIfPolylineNeedRedraw(ruteDetailsFromServer.getPointsInLatLng())){
+                        printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
+                    }*/
+
+                    if (currentRoutePolyline == null
+                        || !currentStatics.isSameRoute(ruteDetailsFromServer.id!!,ruteDetailsFromServer.idAudiovisuales)
+                        || checkIfPolylineNeedRedraw(ruteDetailsFromServer.getPointsInLatLng())) {
+                        printDirectionsRoute(ruteDetailsFromServer,ruteColor = ruteDetailsFromServer.color, rutePoints = ruteDetailsFromServer.getPointsInNotRealmClass())
+                    }
                 }
-
             }
         }
     }
@@ -519,6 +531,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                             val toast = Toast.makeText(this@MapsActivity,"Error cargando ruta",Toast.LENGTH_LONG)
                             toast.show()
                             turnCloseRuteButton(false)
+                        } else {
+                            oldRoutePois = ruteData.getPointsInLatLng()
                         }
 
                         startLoadingRouteAnimation(false)
@@ -558,6 +572,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
     }
 
+    private suspend fun checkIfPolylineNeedRedraw(currentRoutePoints: ArrayList<LatLng>): Boolean{
+
+        val sum = oldRoutePois + currentRoutePoints
+        val difference = sum.groupBy { it }
+            .filter { it.value.size == 1 }
+            .flatMap { it.value }
+
+        return difference.isNotEmpty()
+    }
+
     fun closeRutesMenu(view: View){
         drawer_menu.closeDrawers()
     }
@@ -580,10 +604,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         drawer_menu.closeDrawers()
 
         val currentStatics = dbHelper.getCurrentStatics()
-        if (currentStatics != null) {
-            if (currentStatics.isSameRoute(ruta.id!!,ruta.idAudiovisuales)) return
+
+        CoroutineScope(Default).launch {
+            if (currentStatics != null) {
+                if (currentStatics.isSameRoute(ruta.id!!,ruta.idAudiovisuales)) return@launch
+            }
+            withContext(Main){
+                printDirectionsRoute(ruta,ruteColor = ruta.color,rutePoints = ruta.getPointsInNotRealmClass())
+            }
+
         }
-        printDirectionsRoute(ruta,ruteColor = ruta.color,rutePoints = ruta.getPointsInNotRealmClass())
+
     }
 
     private fun startLoadingRouteAnimation(start: Boolean){

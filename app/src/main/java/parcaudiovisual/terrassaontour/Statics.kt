@@ -5,8 +5,13 @@ import android.util.Log
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.random.Random
 
 open class Statics: RealmObject() {
 
@@ -92,7 +97,42 @@ open class Statics: RealmObject() {
     }
 
     fun setCurrentRoute(RuteID: String, RuteAudiovisuals: List<String>){
-        if (!isSameRoute(RuteID,RuteAudiovisuals)) visitedRouteAudiovisuals.clear()
+        CoroutineScope(Main).launch {
+            if (!isSameRoute(RuteID,RuteAudiovisuals)) visitedRouteAudiovisuals.clear()
+            currentRoute = RuteID
+
+            val flatVisitedIds = visitedRouteAudiovisuals.map { it.idAudiovisual }
+            val sum = RuteAudiovisuals + flatVisitedIds
+
+            val difference = sum.groupBy { it }
+                .filter { it.value.size == 1 }
+                .flatMap { it.value }
+
+            val sum2 = RuteAudiovisuals + difference
+
+            val addIDs = sum2.groupBy { it }
+                .filterNot { it.value.size == 1 }
+                .flatMap { it.value }.distinct()
+
+            val removeIDs = difference - addIDs
+
+            addIDs.forEach {
+                val newAud = AudiovisualFromRouteVisited()
+                newAud.idAudiovisual = it
+                visitedRouteAudiovisuals.add(newAud)
+            }
+
+            removeIDs.forEach { idToRemove ->
+                visitedRouteAudiovisuals.removeAll { it.idAudiovisual == idToRemove }
+            }
+
+            Log.i("Rutas","Seteo ruta con id: $currentRoute")
+            Log.i("Rutas","Dicha ruta tiene los siguientes audiovisuales:")
+            visitedRouteAudiovisuals.forEach {
+                Log.i("Rutas","--> ID: ${it.idAudiovisual} , Visitado: ${it.visited}")
+            }
+        }
+        /*if (!isSameRoute(RuteID,RuteAudiovisuals)) visitedRouteAudiovisuals.clear()
         currentRoute = RuteID
 
         val flatVisitedIds = visitedRouteAudiovisuals.map { it.idAudiovisual }
@@ -125,7 +165,7 @@ open class Statics: RealmObject() {
         visitedRouteAudiovisuals.forEach {
             Log.i("Rutas","--> ID: ${it.idAudiovisual} , Visitado: ${it.visited}")
         }
-
+*/
     }
 
     fun recalculateRouteStaticsIfRoutePointsChanged(RuteID: String, RuteAudiovisuals: List<String>){
@@ -175,7 +215,7 @@ open class Statics: RealmObject() {
 
     }
 
-    fun isSameRoute(RuteID: String, RuteAudiovisuals: List<String>): Boolean{
+    suspend fun isSameRoute(RuteID: String, RuteAudiovisuals: List<String>): Boolean{
         if (currentRoute == null || currentRoute != RuteID) return false
 
         val flatVisitedIds = visitedRouteAudiovisuals.map { it.idAudiovisual }
@@ -188,6 +228,7 @@ open class Statics: RealmObject() {
 
         return difference.isEmpty()
     }
+
 
     private fun checkIfAudiovisualIsInCurrentRoute(AudiovisualID: String){
         val index = visitedRouteAudiovisuals.asSequence().map { it.idAudiovisual }.indexOf(AudiovisualID)

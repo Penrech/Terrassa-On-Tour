@@ -1,6 +1,7 @@
 package parcaudiovisual.terrassaontour
 
 import android.graphics.Color
+import com.google.android.gms.maps.model.LatLng
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
@@ -21,6 +22,15 @@ open class Ruta: RealmObject() {
         val result = ArrayList<pointLocationNotRealm>()
         puntos.forEach{ pointLocation ->
             result.add(pointLocationNotRealm(pointLocation.lat!!,pointLocation.lon!!))
+        }
+
+        return result
+    }
+
+    fun getPointsInLatLng(): ArrayList<LatLng>{
+        val result = ArrayList<LatLng>()
+        puntos.forEach { pointLocation ->
+            result.add(LatLng(pointLocation.lat!!,pointLocation.lon!!))
         }
 
         return result

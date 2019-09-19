@@ -1,6 +1,7 @@
 package parcaudiovisual.terrassaontour.realm
 
 import android.util.Log
+import com.google.android.gms.maps.model.LatLng
 import io.realm.Realm
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
@@ -546,7 +547,8 @@ class DBRealmHelper {
 
         deleteRoutesFromDB()
 
-        //deleteRouteFromStaticsIfNeeded(rutesList)
+
+        deleteRouteFromStaticsIfNeeded(rutesList)
 
         if (rutesList.isEmpty()) {
 
