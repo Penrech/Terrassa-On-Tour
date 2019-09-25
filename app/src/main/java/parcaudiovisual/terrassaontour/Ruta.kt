@@ -70,7 +70,8 @@ open class Ruta: RealmObject() {
                 e.printStackTrace()
             }
             return null
-        }    }
+        }
+    }
 
 }
 open class pointLocation: RealmObject() {

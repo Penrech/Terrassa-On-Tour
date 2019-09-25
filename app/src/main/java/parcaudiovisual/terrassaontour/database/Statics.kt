@@ -1,43 +1,39 @@
-package parcaudiovisual.terrassaontour
+package parcaudiovisual.terrassaontour.database
 
 import android.os.Build
 import android.util.Log
-import io.realm.RealmList
-import io.realm.RealmObject
-import io.realm.annotations.PrimaryKey
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.random.Random
 
-open class Statics: RealmObject() {
+@Entity (tableName = "statics_table")
+class Statics(
+    @PrimaryKey var id: String = UUID.randomUUID().toString(),
+    var model: String = Build.MODEL,
+    var name: String = Build.DEVICE,
+    var product: String = Build.PRODUCT,
+    var savedOnRemoteServer: Boolean = false,
+    var dayTime: Boolean = true,
+    var lastServerUpdate: Long = 0,
+    private var visitedPoints: ArrayList<VisitHistory> = arrayListOf(),
+    private var visitedAudiovisuals: ArrayList<VisitHistory> = arrayListOf(),
+    private var visitedRoutes: ArrayList<VisitHistory> = arrayListOf(),
+    private var currentRoute: String? = null,
+    private var visitedRouteAudiovisuals: ArrayList<AudiovisualFromRouteVisited> = arrayListOf()) {
 
-    //todo añadir campo de tiempo para sync con servidor
-    @PrimaryKey var id: String = UUID.randomUUID().toString()
-    var model = Build.MODEL
-    var name = Build.DEVICE
-    var product = Build.PRODUCT
-    var savedOnRemoteServer = false
-    var dayTime = true
-    var lastServerUpdate : Long = 0
-    private var visitedPoints = RealmList<visitHistory>()
-    private var visitedAudiovisuals = RealmList<visitHistory>()
-    private var visitedRoutes = RealmList<visitHistory>()
-    private var currentRoute: String? = null
-    private var visitedRouteAudiovisuals = RealmList<AudiovisualFromRouteVisited>()
-
-    fun getVisitedPoints(): List<visitHistory> {
+    fun getVisitedPoints(): List<VisitHistory> {
         return visitedPoints
     }
 
-    fun getVisitedAudiovisuals(): List<visitHistory>{
+    fun getVisitedAudiovisuals(): List<VisitHistory>{
         return visitedAudiovisuals
     }
 
-    fun getVisitedRoutes(): List<visitHistory> {
+    fun getVisitedRoutes(): List<VisitHistory> {
         return visitedRoutes
     }
 
@@ -46,9 +42,9 @@ open class Statics: RealmObject() {
     }
 
     fun cleanPoints(list: List<String>){
-        val pointsToRemove = RealmList<visitHistory>()
+        val pointsToRemove = ArrayList<VisitHistory>()
         list.forEach { id->
-            val filter = visitedPoints.filter { it.id == id }.first()
+            val filter = visitedPoints.firstOrNull { it.id == id }
             if (filter != null) pointsToRemove.add(filter)
         }
 
@@ -56,9 +52,9 @@ open class Statics: RealmObject() {
     }
 
     fun cleanAudiovisuals(list: List<String>){
-        val audiovisualsToRemove = RealmList<visitHistory>()
+        val audiovisualsToRemove = ArrayList<VisitHistory>()
         list.forEach { id->
-            val filter = visitedAudiovisuals.filter { it.id == id }.first()
+            val filter = visitedAudiovisuals.firstOrNull { it.id == id }
             if (filter != null) audiovisualsToRemove.add(filter)
         }
 
@@ -66,9 +62,9 @@ open class Statics: RealmObject() {
     }
 
     fun cleanRoutes(list: List<String>){
-        val routesToRemove = RealmList<visitHistory>()
+        val routesToRemove = ArrayList<VisitHistory>()
         list.forEach { id->
-            val filter = visitedRoutes.filter { it.id == id }.first()
+            val filter = visitedRoutes.firstOrNull { it.id == id }
             if (filter != null) routesToRemove.add(filter)
         }
 
@@ -76,19 +72,13 @@ open class Statics: RealmObject() {
     }
 
     fun addPointVisit(pointID: String){
-        val newPoint = visitHistory()
-        newPoint.id = pointID
         val rightNow = Calendar.getInstance()
-        newPoint.date = rightNow.timeInMillis
-        visitedPoints.add(newPoint)
+        visitedPoints.add(VisitHistory(pointID,rightNow.timeInMillis))
     }
 
     fun addAudiovisualVisit(AudiovisualID: String){
-        val newAud = visitHistory()
-        newAud.id = AudiovisualID
         val rightNow = Calendar.getInstance()
-        newAud.date = rightNow.timeInMillis
-        visitedAudiovisuals.add(newAud)
+        visitedAudiovisuals.add(VisitHistory(AudiovisualID,rightNow.timeInMillis))
 
         if (currentRoute != null){
             checkIfAudiovisualIsInCurrentRoute(AudiovisualID)
@@ -117,9 +107,7 @@ open class Statics: RealmObject() {
             val removeIDs = difference - addIDs
 
             addIDs.forEach {
-                val newAud = AudiovisualFromRouteVisited()
-                newAud.idAudiovisual = it
-                visitedRouteAudiovisuals.add(newAud)
+                visitedRouteAudiovisuals.add(AudiovisualFromRouteVisited(it))
             }
 
             removeIDs.forEach { idToRemove ->
@@ -153,9 +141,7 @@ open class Statics: RealmObject() {
         val removeIDs = difference - addIDs
 
         addIDs.forEach {
-            val newAud = AudiovisualFromRouteVisited()
-            newAud.idAudiovisual = it
-            visitedRouteAudiovisuals.add(newAud)
+            visitedRouteAudiovisuals.add(AudiovisualFromRouteVisited(it))
         }
 
         removeIDs.forEach { idToRemove ->
@@ -178,7 +164,6 @@ open class Statics: RealmObject() {
         currentRoute = null
         visitedRouteAudiovisuals.clear()
 
-
     }
 
     suspend fun isSameRoute(RuteID: String, RuteAudiovisuals: List<String>): Boolean{
@@ -195,11 +180,10 @@ open class Statics: RealmObject() {
         return difference.isEmpty()
     }
 
-
     private fun checkIfAudiovisualIsInCurrentRoute(AudiovisualID: String){
         val index = visitedRouteAudiovisuals.asSequence().map { it.idAudiovisual }.indexOf(AudiovisualID)
         if (index != -1){
-            visitedRouteAudiovisuals[index]?.visited = true
+            visitedRouteAudiovisuals[index].visited = true
         }
     }
 
@@ -212,38 +196,22 @@ open class Statics: RealmObject() {
             }
         }
 
-        val newRute = visitHistory()
-        newRute.id = currentRoute
         val rightNow = Calendar.getInstance()
-        newRute.date = rightNow.timeInMillis
-        visitedRoutes.add(newRute)
 
-        visitedRouteAudiovisuals.forEach {
-            it.visited = false
+        currentRoute?.let {
+            visitedRoutes.add(VisitHistory(it,rightNow.timeInMillis))
+
+            visitedRouteAudiovisuals.forEach {audiovisualFromRoute ->
+                audiovisualFromRoute.visited = false
+            }
         }
+
 
         Log.i("Rutas","La ruta $currentRoute SI ha sido completada")
     }
 
 
-}
-open class AudiovisualFromRouteVisited: RealmObject(){
-    var idAudiovisual: String? = null
-    var visited: Boolean = false
-}
-open class visitHistory: RealmObject(){
-    var id: String? = null
-    var date: Long? = null
-}
-class InsertStaticsResponse {
 
-    var appStateError = true
-    var appActive = true
-    var message: String? = null
-    var isDayTime = true
-    var lastUpdate: Long? = null
-
-    var audiovisualsToDelete = ArrayList<String>()
-    var pointsToDelete = arrayListOf<String>()
-    var rutesToDelete = arrayListOf<String>()
+    class VisitHistory(var id: String, var date: Long)
+    class AudiovisualFromRouteVisited(var idAudiovisual: String, var visited: Boolean = false)
 }
