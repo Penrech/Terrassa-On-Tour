@@ -1,7 +1,8 @@
 package parcaudiovisual.terrassaontour.database
 
-import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.room.*
+import com.google.android.gms.maps.model.LatLng
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -11,8 +12,14 @@ interface StaticsDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun initStatics(statics: Statics)
 
+    @Query("SELECT id FROM statics_table LIMIT 1")
+    fun getStaticsID(): String?
+
     @Query("SELECT visitedPoints FROM statics_table LIMIT 1")
     fun getVisitedPoints(): ArrayList<Statics.VisitHistory>
+
+    @Query("SELECT COUNT(*) FROM statics_table")
+    fun areTherePreviousStaticInstances(): Int
 
     @Query("SELECT visitedAudiovisuals FROM statics_table LIMIT 1")
     fun getVisitedAudiovisuals(): ArrayList<Statics.VisitHistory>
@@ -23,8 +30,17 @@ interface StaticsDao {
     @Query("SELECT currentRoute FROM statics_table LIMIT 1")
     fun getCurrentRoute(): String?
 
+    @Query("SELECT dayTime FROM statics_table LIMIT 1")
+    fun isDayTime():Boolean?
+
+    @Query("SELECT lastPositionRegistered FROM statics_table LIMIT 1")
+    fun getLastPosition(): LatLng?
+
     @Query("UPDATE statics_table SET currentRoute = NULL")
     fun deleteCurrentRoute()
+
+    @Query("UPDATE statics_table SET currentRoute = :newRute")
+    fun setNewCurrentRoute(newRute: String)
 
     @Query("SELECT visitedRouteAudiovisuals FROM statics_table LIMIT 1")
     fun getCurrentRouteVisitedAudiovisuals(): ArrayList<Statics.AudiovisualFromRouteVisited>
@@ -40,6 +56,39 @@ interface StaticsDao {
 
     @Query("UPDATE statics_table SET visitedRouteAudiovisuals = :currentRouteVisitedAudiovisuals")
     fun updateCurrentRouteVisiteAudiovisuals(currentRouteVisitedAudiovisuals: ArrayList<Statics.AudiovisualFromRouteVisited>)
+
+    @Query("UPDATE statics_table SET dayTime = :newDayTime")
+    fun updateDayTime(newDayTime: Boolean)
+
+    @Query("UPDATE statics_table SET lastServerUpdate = :newServerUpdateTime")
+    fun updateLastServerUpdate(newServerUpdateTime: Long)
+
+    @Query("UPDATE statics_table SET lastPositionRegistered = :lastNewPosition")
+    fun updateLastPosition(lastNewPosition: LatLng)
+
+    @Query("UPDATE statics_table SET savedOnRemoteServer = :savedOnServerState")
+    fun updateRemoveServerSync(savedOnServerState: Boolean)
+
+    @Query("SELECT dayTime FROM statics_table LIMIT 1")
+    fun getDayTimeChanges(): LiveData<Boolean>
+
+    @Query("SELECT lastServerUpdate FROM statics_table LIMIT 1")
+    fun getServerDataUpdateChanges(): LiveData<Long>
+
+    @Query("SELECT appActive FROM statics_table LIMIT 1")
+    fun getServerAppStateUpdateChanges(): LiveData<Boolean>
+
+    @Query("SELECT appStateMessage FROM statics_table LIMIT 1")
+    fun getAppOffMessage(): String?
+
+    @Query("SELECT savedOnRemoteServer FROM statics_table LIMIT 1")
+    fun getIfStaticsAreSavedOnServer(): Boolean
+
+    @Query("SELECT * FROM statics_table LIMIT 1")
+    fun getTemporaryCopyOfStaticsToSend(): Statics?
+
+    @Query("SELECT lastServerUpdate FROM statics_table LIMIT 1")
+    fun getLastUpdatedTime(): Long?
 
     @Transaction
     fun cleanPoints(pointsList: List<String>){
@@ -85,6 +134,11 @@ interface StaticsDao {
         val currentAudiovisuals = getVisitedAudiovisuals()
         currentAudiovisuals.add(Statics.VisitHistory(audiovisualID,rightNow.timeInMillis))
         updateVisitedAudiovisuals(currentAudiovisuals)
+
+        getCurrentRoute()?.let {
+            checkIfAudiovisualIsInCurrentRoute(audiovisualID)
+            checkIfRouteIsCompleted()
+        }
     }
 
     @Transaction
@@ -147,5 +201,59 @@ interface StaticsDao {
         val currentRouteVisiteAudiovisuals = getCurrentRouteVisitedAudiovisuals()
         currentRouteVisiteAudiovisuals.clear()
         updateCurrentRouteVisiteAudiovisuals(currentRouteVisiteAudiovisuals)
+    }
+
+    @Transaction
+    fun setCurrentRoute(ruteID: String, ruteAudivisuals: List<String>){
+        val currentVisitedRouteAudiovisuals = getCurrentRouteVisitedAudiovisuals()
+
+        if (!isSameRoute(ruteID,ruteAudivisuals)) currentVisitedRouteAudiovisuals.clear()
+
+        val flatVisitedIds = currentVisitedRouteAudiovisuals.map { it.idAudiovisual }
+        val sum = ruteAudivisuals + flatVisitedIds
+
+        val difference = sum.groupBy { it }
+            .filter { it.value.size == 1 }
+            .flatMap { it.value }
+
+        val sum2 = ruteAudivisuals + difference
+
+        val addIDs = sum2.groupBy { it }
+            .filterNot { it.value.size == 1 }
+            .flatMap { it.value }.distinct()
+
+        val removeIDs = difference - addIDs
+
+        addIDs.forEach {
+            currentVisitedRouteAudiovisuals.add(Statics.AudiovisualFromRouteVisited(it))
+        }
+
+        removeIDs.forEach { idToRemove ->
+            currentVisitedRouteAudiovisuals.removeAll { it.idAudiovisual == idToRemove }
+        }
+
+        setNewCurrentRoute(ruteID)
+        updateCurrentRouteVisiteAudiovisuals(currentVisitedRouteAudiovisuals)
+    }
+
+    @Transaction
+    fun updateStaticsAfterServerUpdate(data: Statics.InsertStaticsResponse){
+        isDayTime()?.let {
+            if (it != data.isDayTime) updateDayTime(data.isDayTime)
+        }
+
+        if (data.lastUpdate != null && getLastUpdatedTime() != null && data.lastUpdate != getLastUpdatedTime()){
+            updateLastServerUpdate(data.lastUpdate!!)
+        }
+        cleanAudiovisuals(data.audiovisualsToDelete)
+        cleanPoints(data.pointsToDelete)
+        cleanRoutes(data.rutesToDelete)
+    }
+
+    @Transaction
+    fun InitStaticsOnAppStart(){
+        if (areTherePreviousStaticInstances() == 0) {
+            initStatics(Statics())
+        }
     }
 }

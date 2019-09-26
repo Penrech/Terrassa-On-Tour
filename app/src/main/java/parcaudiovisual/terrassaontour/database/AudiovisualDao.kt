@@ -1,6 +1,5 @@
 package parcaudiovisual.terrassaontour.database
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
 
 @Dao
