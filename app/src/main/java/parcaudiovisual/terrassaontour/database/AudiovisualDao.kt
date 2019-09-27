@@ -14,6 +14,9 @@ interface AudiovisualDao {
     @Query("SELECT * FROM audiovisual_table WHERE id = :audID")
     fun selectAudByID(audID: String): Audiovisual?
 
+    @Query("SELECT * FROM audiovisual_table WHERE id in (:audsToSelect)")
+    fun selectAudiovisualsByID(audsToSelect: ArrayList<String>): List<Audiovisual>
+
     @Query("DELETE FROM audiovisual_table")
     fun deleteAllAudiovisuals()
 

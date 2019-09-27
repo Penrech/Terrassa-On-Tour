@@ -38,6 +38,14 @@ class AudiovisualRepository(application: Application) {
         return audiovisual.await()
     }
 
+    suspend fun selectAudiovisualsById(audiovisualsArray: ArrayList<String>): List<Audiovisual>{
+        val audiovisualArray = CoroutineScope(IO).async {
+            audiovisualDao.selectAudiovisualsByID(audiovisualsArray)
+        }
+
+        return  audiovisualArray.await()
+    }
+
     suspend fun getAudiovisualFromServerDB(): Boolean {
         val result = CoroutineScope(IO).async {
             serverServices.getAudiovisuals()

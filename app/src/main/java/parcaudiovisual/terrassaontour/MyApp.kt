@@ -35,13 +35,6 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
 
     private var currentActivity: Activity? = null
 
-    private lateinit var dbHelper: DBRealmHelper
-
-    private var staticsSended = false
-    private var appActive = true
-
-    private var staticsColdLoaded = false
-
     var activitiesOpen = ArrayList<String>()
 
     private val isNetworkAvailable: Boolean
@@ -57,24 +50,15 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
     override fun onCreate() {
         super.onCreate()
 
-        dbHelper = DBRealmHelper()
-        dbHelper.appStateInterface = this
-        dbHelper.staticsUpdateInterface = this
-
-        setUpRealm()
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         registerActivityLifecycleCallbacks(this)
     }
 
-    private fun setUpRealm(){
-        Realm.init(applicationContext)
-        val config = RealmConfiguration.Builder()
-        config.name("tot_db")
-        config.deleteRealmIfMigrationNeeded()
-        config.compactOnLaunch()
-        Realm.setDefaultConfiguration(config.build())
+    private fun setUpRoom(){
+
     }
+
 
     fun startStatics(){
         val currentStatics = dbHelper.initStatics()
@@ -250,16 +234,6 @@ class MyApp: Application(), LifecycleObserver, Application.ActivityLifecycleCall
         if (success) staticsSended = false
     }
 
-   /* private fun manageAllDataLoading() {
-        if (currentActivity?.localClassName == "LoadingActivity") {
-            elementsLoaded++
-            if (elementsLoaded == 3) {
-                val intent = Intent(DBRealmHelper.BROADCAST_FIRST_DATA_LOAD)
-                LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
-                elementsLoaded = 0
-            }
-        }
-    }*/
    private fun manageAllDataLoading(poiSuccess: Boolean,routeSucces: Boolean, audSuccess: Boolean) {
        if (currentActivity?.localClassName == "LoadingActivity") {
            val intent = Intent(DBRealmHelper.BROADCAST_FIRST_DATA_LOAD)

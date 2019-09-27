@@ -1,6 +1,7 @@
 package parcaudiovisual.terrassaontour.database
 
 import android.app.Application
+import androidx.lifecycle.LiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -13,14 +14,20 @@ class StaticsRepository(application: Application) {
 
     private var staticsDao: StaticsDao
     private var serverServices: ServerServices
+    private var dayTimeChange: LiveData<Boolean>
+    private var dataIsUpdated: LiveData<Long>
+    private var appStateChange: LiveData<Boolean>
 
     init {
         val database = TOTDatabase.getInstance(application)
         staticsDao = database.staticsDao()
+        dayTimeChange = staticsDao.getDayTimeChanges()
+        dataIsUpdated = staticsDao.getServerDataUpdateChanges()
+        appStateChange = staticsDao.getServerAppStateUpdateChanges()
         serverServices = ServerServices.getInstance()
     }
 
-    fun InitStaticsOnAppStart() {
+    fun initStaticsOnAppStart() {
         CoroutineScope(IO).launch {
             staticsDao.InitStaticsOnAppStart()
         }
@@ -49,6 +56,18 @@ class StaticsRepository(application: Application) {
             createDataFormToSendToServer(id)
         }
 
+    }
+
+    fun getDayTimeUpdateChanges(): LiveData<Boolean>{
+        return dayTimeChange
+    }
+
+    fun getDataUpdateChanges(): LiveData<Long>{
+        return dataIsUpdated
+    }
+
+    fun getAppStateUpdateChanges(): LiveData<Boolean>{
+        return appStateChange
     }
 
     suspend fun getCurrentRoute(): String?{
